@@ -283,6 +283,21 @@ fig model =
                     |> Card.view
                 )
               )
+            , Slide.config []
+              (Slide.customContent
+                (
+                Card.config
+                    [ Card.light
+                    , Card.attrs [ ]
+                    , Card.align Text.alignSmCenter
+                    ]
+                    |> Card.headerH4 []
+                        [ img [ src "assets/home_habitat_single.png" ] []
+                        , p [] [text " Habitat distribution"]
+                        ]
+                    |> Card.view
+                )
+              )
             ]
         |> Carousel.view model.carouselState
     ]
