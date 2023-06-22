@@ -83,41 +83,111 @@ Columns:
 **90AA catalog:**&emsp;[GMSC10.90AA.habitat.tsv.xz](https://gmgc.embl.de/download.cgi)
 
 ### Quality assessment
-TSV table relating the high-quality sequences of 100AA / 90AA catalog.
+TSV table relating the quality assessment of 100AA / 90AA catalog.
 
 Columns:
 
 - `smORF accession`
+- `RNAcode`
+- `AntiFam`
+- `metaProteome`
+- `(meta)Riboseq`
+- `Terminal checking`
+- `metaTranscriptome`
 
 **100AA catalog:**&emsp;[GMSC10.100AA.quality.tsv.xz](https://gmgc.embl.de/download.cgi)
 
 **90AA catalog:**&emsp;[GMSC10.90AA.quality.tsv.xz](https://gmgc.embl.de/download.cgi)
 
 ### Conserved domains annotation
-TSV table relating the Conserved domains annotation of 100AA / 90AA catalog.
+TSV table relating the Conserved domains annotation of 90AA catalog.
 
 Columns:
 
 - `smORF accession`
 - `identifier in CDD database (separated by comma)`
 
-**100AA catalog:**&emsp;[GMSC10.100AA.cdd.tsv.xz](https://gmgc.embl.de/download.cgi)
-
-**90AA catalog:**&emsp;[GMSC10.90AA.cdd.tsv.xz](https://gmgc.embl.de/download.cgi)
+**90AA catalog CDD annotation:**&emsp;[GMSC10.90AA.cdd.tsv.xz](https://gmgc.embl.de/download.cgi)
 
 ### Cellular localization prediction
-TSV table relating the transmembrane or secreted sequences of 100AA / 90AA catalog.
+TSV table relating the TMHMM prediction of 90AA catalog.
 
 Columns:
 
 - `smORF accession`
+- `The length of the protein sequence`
+- `The expected number of amino acids intransmembrane`
+- `The expected number of amino acids in transmembrane helices in the first 60 amino acids of the protein`
+- `The number of predicted transmembrane helices by N-best`
+- `The topology predicted by N-best`
 
-**100AA catalog:**&emsp;[GMSC10.100AA.transmemrane-secreted.tsv.xz](https://gmgc.embl.de/download.cgi)
+**90AA catalog TMHMM prediction:**&emsp;[GMSC10.90AA.TMHMM.tsv.xz](https://gmgc.embl.de/download.cgi)
 
-**90AA catalog:**&emsp;[GMSC10.90AA.transmemrane-secreted.tsv.xz](https://gmgc.embl.de/download.cgi)
+TSV table relating the SignalP prediction of 90AA catalog.
+
+Columns:
+
+- `smORF accession`
+- `Cmax`
+- `pos`
+- `Ymax`
+- `pos`
+- `Smax`
+- `pos`
+- `Smean`
+- `D`
+- `? signal pepetide`
+- `Dmaxcut`
+- `Networks-used`
+
+**90AA catalog SignalP Gram+ prediction:**&emsp;[GMSC10.90AA.SignalP.gram+.tsv.xz](https://gmgc.embl.de/download.cgi)
+
+**90AA catalog SignalP Gram- prediction:**&emsp;[GMSC10.90AA.SignalP.gram-.tsv.xz](https://gmgc.embl.de/download.cgi)
 
 ### Metadata
 TSV table relating the metadata of GMSC.
 
-**Metadata:**&emsp;[GMSC10.metadata.tsv.xz](https://gmgc.embl.de/download.cgi)
+Columns:
+
+- `smORF accession`
+- `samples (separated by comma)`
+
+**100AA catalog original sample:**&emsp;[GMSC10.100AA.sample.tsv.xz](https://gmgc.embl.de/download.cgi)
+
+**90AA catalog original sample:**&emsp;[GMSC10.90AA.sample.tsv.xz](https://gmgc.embl.de/download.cgi)
+
+TSV table relating to metadata of samples used in GMSC.
+
+Columns:
+
+- `sample_accession`
+- `ena_ers_sample_id`
+- `database`
+- `access_status`
+- `study`
+- `study_accession`
+- `publications`
+- `collection_date`
+- `aliases`
+- `microontology`
+- `environment_biome`
+- `environment_feature`
+- `environment_material`
+- `geographic_location`
+- `latitude`
+- `longitude`
+- `tax_id`
+- `tax_scientific_name`
+- `host_common_name`
+- `host_scientific_name`
+- `host_tax_id`
+- `general_envo_name`
+- `higher_environment`
+- `gender`
+- `age_years`
+- `subject_disease_status`
+- `antibiotic`
+- `notes`
+
+**Metadata:**&emsp;[GMSC10.metadata.tsv](https://gmgc.embl.de/download.cgi)
 """]
