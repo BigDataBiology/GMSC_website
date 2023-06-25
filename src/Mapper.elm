@@ -45,7 +45,7 @@ type alias SequenceResult =
     }
 
 type alias SearchResult =
-    { results : Maybe (Dict.Dict String (Dict.Dict String QueryResult))
+    { results : Maybe (Dict.Dict String QueryResult)
     , search_id : String
     , status : String
    }
@@ -59,7 +59,7 @@ decodeSearchResult =
     let
         bSearchResultOK r i s = SearchResultOk { results = r, search_id = i, status = s }
     in D.map3 bSearchResultOK
-        (D.maybe (D.field "results" (D.dict decodeQueryResult)))
+        (D.maybe (D.field "results" decodeQueryResult))
         (D.field "search_id" D.string)
         (D.field "status" D.string)
 
@@ -80,7 +80,7 @@ decodeSequenceResult =
         (D.field "taxonomy" D.string)
 
 decodeHitsResult : D.Decoder HitsResult
-decodeHitsResult = 
+decodeHitsResult =
     D.map3 HitsResult
         (D.field "evalue" D.float)
         (D.field "id" D.string)
@@ -159,17 +159,22 @@ viewSearch s  =
             [Table.table
                     { options = [ Table.striped, Table.hover ]
                     , thead =  Table.simpleThead
-                        [ Table.th [] [ Html.text "100AA accession" ]
+                        [ Table.th [] [ Html.text "Query sequence" ]
                         , Table.th [] [ Html.text "Protein sequence" ]
                         , Table.th [] [ Html.text "Habitat" ]
                         , Table.th [] [ Html.text "Taxonomy" ]
                         ]
                     , tbody = Table.tbody []
-                    (List.map (\e ->
-                                Table.tr []
-                                [ Table.td [] [p[][text e]]
-                                ]
-                                )<|(Dict.keys r))
+                    (Dict.toList r
+                        |> List.map (\(k,v) ->
+                            Table.tr []
+                            [ Table.td [] [Html.text k]
+                            , Table.td [] [Html.text v.aa]
+                            , Table.td [] [Html.text v.habitat]
+                            , Table.td [] [Html.text v.tax]
+                            ]
+                            )
+                        )
                     }
             ]
           Nothing ->
