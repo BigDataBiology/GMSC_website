@@ -1,4 +1,4 @@
-module Browse exposing (Model(..), Msg(..), initialModel, update, viewModel)
+module Browse exposing (Model, Msg(..), initialModel, update, viewModel)
 
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
@@ -38,9 +38,11 @@ type alias SelectModel =
     , taxonomySearch : Selectshared.Model Selectitem.Taxonomy
     }
 
-type Model 
-    = Select SelectModel
-    | FilterModel Filter.Model
+type alias Model =
+    { selectpost : SelectModel
+    , filterpost : Filter.Model
+    , ask: Bool
+    }
 
 type Msg 
     = Search
@@ -51,36 +53,34 @@ type Msg
 
 initialModel : Model
 initialModel =
-    Select 
-        { hq = True
-        , habitatSearch = Selectshared.initialModel 
+    { selectpost = { hq = True
+                   , habitatSearch = Selectshared.initialModel 
                                { id = "exampleEmptySearch"
                                , available = Selectitem.habitat
                                , itemToLabel = Selectitem.habitattoLabel
                                , selected = [ ]
                                , selectConfig = selectConfigHabitatSearch
                                }
-        , taxonomySearch = Selectshared.initialModel 
+                   , taxonomySearch = Selectshared.initialModel 
                                { id = "exampleEmptySearch"
                                , available = Selectitem.taxonomy
                                , itemToLabel = Selectitem.taxtoLabel
                                , selected = [ ]
                                , selectConfig = selectConfigTaxonomySearch
                                }
-        }
+                   }
+    , filterpost = Filter.Loading
+    , ask = False
+    }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg)
 update msg model =
     let
         ifQuery f = 
-          case model of
-            Select qm ->
                 let
-                    (qmpost, c) = f qm
-                in (Select qmpost, c)
-            FilterModel m ->
-                (model,Cmd.none)
+                    (qmpost, c) = f model.selectpost
+                in ({model| selectpost = qmpost}, c)
     in case msg of
         NoOp ->
             ( model, Cmd.none )
@@ -89,47 +89,34 @@ update msg model =
             ifQuery <| \qmodel ->
               let
                 ( subModel, subCmd ) =
-                    Selectshared.update
-                        sub
-                        qmodel.habitatSearch
+                    Selectshared.update sub qmodel.habitatSearch
               in
-                ( { qmodel | habitatSearch = subModel }
+                ({ qmodel | habitatSearch = subModel }
                 , Cmd.map HabitatSearchMsg subCmd
-            )
-
+                )
         TaxonomySearchMsg sub ->
             ifQuery <| \qmodel ->
               let
                 ( subModel, subCmd ) =
-                    Selectshared.update
-                        sub
-                        qmodel.taxonomySearch
+                    Selectshared.update sub qmodel.taxonomySearch
               in
-                ( { qmodel | taxonomySearch = subModel }
+                ({ qmodel | taxonomySearch = subModel }
                 , Cmd.map TaxonomySearchMsg subCmd
-            )
+                )
               
         Search ->
-          case model of
-            Select hm ->
-                let (qhabitat,qtaxonomy) = ( (String.join "," <| List.sort (Set.toList ( Set.fromList ( List.map hm.habitatSearch.itemToLabel hm.habitatSearch.selected ))))
-                                           , (String.join "," <| List.map hm.taxonomySearch.itemToLabel hm.taxonomySearch.selected))
+                let (qhabitat,qtaxonomy) = ( (String.join "," <| List.sort (Set.toList ( Set.fromList ( List.map model.selectpost.habitatSearch.itemToLabel model.selectpost.habitatSearch.selected ))))
+                                           , (String.join "," <| List.map model.selectpost.taxonomySearch.itemToLabel model.selectpost.taxonomySearch.selected))
                 in
                   let
                     (sm, cmd) = Filter.initialState qhabitat qtaxonomy
-                  in ( FilterModel sm, Cmd.map FilterMsg cmd )
-            FilterModel m ->
-                (model,Cmd.none)
+                  in ({ model|filterpost=sm,ask=True }, Cmd.map FilterMsg cmd)
 
-        FilterMsg m -> case model of
-          FilterModel sm ->
+        FilterMsg m -> 
             let
-                (nqm, cmd) = Filter.update m sm
+                (nqm, cmd) = Filter.update m model.filterpost
             in
-                ( FilterModel nqm, Cmd.map FilterMsg cmd )
-          Select am ->
-            (model,Cmd.none)
-
+                ({ model|filterpost=nqm }, Cmd.map FilterMsg cmd)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -137,21 +124,32 @@ subscriptions model =
 
 viewModel : Model -> Html Msg
 viewModel model =
-    Html.div []
-        [ viewSearch model
-        , viewResult model
-        ]
+    case model.filterpost of
+    Filter.Loading ->
+        if model.ask == True then
+            div [] 
+                [ viewSearch model.selectpost
+                , Html.hr [] []
+                , Filter.viewModel model.filterpost
+                    |> Html.map FilterMsg
+                ]
+        else
+            div [] 
+                [ viewSearch model.selectpost
+                ]
+    Filter.Results r ->
+        div [] 
+            [ viewSearch model.selectpost
+            , Html.hr [] []
+            , Filter.viewModel model.filterpost
+                |> Html.map FilterMsg
+            ]
+    _ ->
+        div []
+            [ viewSearch model.selectpost ]
 
-viewSearch : Model -> Html Msg
-viewSearch model =
-  case model of
-    Select qm ->
-      search qm
-    FilterModel m ->
-      Html.text ""
-
-search: SelectModel -> Html Msg
-search model = div []
+viewSearch: SelectModel -> Html Msg
+viewSearch model = div []
         [ h5 [] [text "Browse by habitats and taxonomy"]
         , Selectshared.view
             model.habitatSearch
@@ -163,14 +161,6 @@ search model = div []
             |> Html.map TaxonomySearchMsg
         , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
         ]
-
-viewResult : Model -> Html Msg
-viewResult model = case model of
-    FilterModel m ->
-        Filter.viewModel m
-            |> Html.map FilterMsg
-    Select m -> 
-        Html.text ""
 
 selectConfigHabitatSearch =
     Selects.newConfig

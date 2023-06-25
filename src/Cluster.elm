@@ -124,6 +124,7 @@ viewModel model =
                 [ h1 [] [text v.seqid]
                 , viewCluster v
                 , title
+                , Html.hr [] []
                 , Members.viewModel model.memberpost
                     |> Html.map MembersMsg]
             else
@@ -137,6 +138,7 @@ viewModel model =
                 [ h1 [] [text v.seqid]
                 , viewCluster v
                 , title
+                , Html.hr [] []
                 , Members.viewModel model.memberpost
                     |> Html.map MembersMsg]
         (_,_) ->

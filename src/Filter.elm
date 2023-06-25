@@ -1,4 +1,4 @@
-module Filter exposing (Model(..), Msg(..), initialState, update, viewModel)
+module Filter exposing (APIResult(..), Model(..), Msg(..), initialState, update, viewModel)
 
 import Html exposing (..)
 import Html.Events exposing (..)
