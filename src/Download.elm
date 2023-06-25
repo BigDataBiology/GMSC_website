@@ -176,18 +176,11 @@ Columns:
 - `geographic_location`
 - `latitude`
 - `longitude`
-- `tax_id`
-- `tax_scientific_name`
 - `host_common_name`
 - `host_scientific_name`
 - `host_tax_id`
 - `general_envo_name`
 - `higher_environment`
-- `gender`
-- `age_years`
-- `subject_disease_status`
-- `antibiotic`
-- `notes`
 
 **Metadata:**&emsp;[GMSC10.metadata.tsv](https://gmsc-api.big-data-biology.org/files/GMSC10.metadata.tsv)
 """]
