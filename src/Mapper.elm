@@ -1,4 +1,4 @@
-module Mapper exposing (Model(..), Msg(..), initialState, update, viewModel)
+module Mapper exposing (Model(..), Msg(..), initialState, lookupState, update, viewModel)
 
 import Html exposing (..)
 import Html.Events exposing (..)
@@ -110,6 +110,10 @@ initialState seq =
     }
     )
 
+
+lookupState : String -> (Model, Cmd Msg)
+lookupState seq_id =
+    update (Getresults seq_id) Loading
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =

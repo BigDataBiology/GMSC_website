@@ -147,6 +147,13 @@ update msg model = case msg of
             in ( { model | page = Mapper mm } , Cmd.map MapperMsg cmd )
         _ -> ( model, Cmd.none )
 
+    HomeMsg Home.LookupSearch -> case model.page of
+        Home hm ->
+            let
+                (mm, cmd) = Mapper.lookupState hm.lookupIDContent
+            in ( { model | page = Mapper mm } , Cmd.map MapperMsg cmd )
+        _ -> ( model, Cmd.none )
+
     GoToHome ->
         ({ model | page = Home Home.initialModel },Cmd.none)
 

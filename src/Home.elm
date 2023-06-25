@@ -30,6 +30,7 @@ type alias Model =
     { optype : OperationType
     , idcontent : String
     , seqcontent: String
+    , lookupIDContent : String
     , carouselState : Carousel.State
     }
 
@@ -39,12 +40,14 @@ type Msg
     | SetIdentifierExample
     | SetIdentifier String
     | SetSequence String
+    | SetLookupId String
     | SetSeqExample
     | ClearId
     | ClearSeq
     | CarouselMsg Carousel.Msg
     | SubmitIdentifier
     | SubmitSequence
+    | LookupSearch
 
 -- SUBSCRIPTIONS
 
@@ -63,6 +66,7 @@ initialModel =
         { optype = Proteins
         , idcontent = ""
         , seqcontent = ""
+        , lookupIDContent = ""
         , carouselState = Carousel.initialStateWithOptions myOptions
         }
 
@@ -89,6 +93,9 @@ update msg qmodel =
         SetSequence s ->
             ( { qmodel | seqcontent = s }, Cmd.none )
 
+        SetLookupId s ->
+            ( { qmodel | lookupIDContent = s }, Cmd.none )
+
         SetSeqExample ->
             let
               nc =
@@ -109,6 +116,7 @@ update msg qmodel =
 
         SubmitIdentifier -> (qmodel, Cmd.none)
         SubmitSequence -> (qmodel, Cmd.none)
+        LookupSearch -> (qmodel, Cmd.none)
 
 viewModel : Model -> Html Msg
 viewModel model =
@@ -205,6 +213,26 @@ viewSearch model =
                     ]
                 ]
             ]
+      , Form.row []
+            [ Form.col [ Col.sm10 ]
+                [ Form.group []
+                    [ label [ id "lookup"] [ text "Lookup a search result" ]
+                    , Input.text
+                            [ Input.value model.lookupIDContent
+                            , Input.attrs
+                                [ placeholder "1-xxxx" ]
+                            , Input.onInput SetLookupId
+                            ]
+                    , Button.button
+                            [ Button.info
+                            , Button.attrs [ class "float-right"]
+                            , Button.onClick LookupSearch
+                            ]
+                            [ text "Lookup" ]
+                    ]
+                ]
+            ]
+
       , Form.row []
             [ Form.col [ Col.sm10 ]
                 [ h6 [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
