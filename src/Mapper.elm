@@ -186,7 +186,7 @@ viewSearch s  =
                 [ Html.p []
                     [Html.text "Search results are still not available (it may take 10-15 minutes). "
                     ,Html.text "Current status is "
-                    ,Html.strong [] [Html.text s.status]
+                    ,Html.strong [] [Html.text (if s.status == "Ok" then "Submitted" else s.status)]
                     ,Html.text "."
                     ]
                 , Html.p []
