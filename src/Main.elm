@@ -290,7 +290,7 @@ notFoundView =
 
 header : Html Msg
 header =
-    div [id "topbar"]
+    Html.nav [id "topbar"]
         [Grid.simpleRow
             [ Grid.col [] [ Html.a [href "/home", onClick GoToHome] [Html.text "Home"]] 
             , Grid.col [] [ Html.a [href "/browse", onClick GoToBrowse] [Html.text "Browse"]] 

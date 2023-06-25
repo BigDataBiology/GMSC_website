@@ -1,10 +1,10 @@
 /*header*/
-div#topbar {
+nav#topbar {
     border-bottom: solid 2px #c4cdcf;
     margin-bottom: 1em;
     background-color:#F6F6F6;
   }
-div#topbar a {
+nav#topbar a {
     display: block;
     color: #126E82;
     text-align: center;
@@ -13,11 +13,9 @@ div#topbar a {
     position:relative;
     width:50%;
   }
-div#topbar a:hover {
+nav#topbar a:hover {
     background-color: #c4cdcf;
     color: #126E82;
-    position:relative;
-    width:50%;
   }
 
 /*footer*/
@@ -375,4 +373,3 @@ p#selected {
   .elm-select:focus-within .elm-select-input-underline:after {
     width: 50%;
   }
-@import 'https://badge.dimensions.ai/badge.css';
