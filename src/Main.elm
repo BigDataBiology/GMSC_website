@@ -128,7 +128,7 @@ initCurrentPage ( model, existingCmds ) =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
     HomeMsg Home.SubmitIdentifier -> case model.page of
-        Home (Home.Query hm) ->
+        Home hm ->
             if String.startsWith "GMSC10.100AA" hm.idcontent
               then
                 let
@@ -141,7 +141,7 @@ update msg model = case msg of
         _ -> ( model, Cmd.none )
 
     HomeMsg Home.SubmitSequence -> case model.page of
-        Home (Home.Query hm) ->
+        Home hm ->
             let
                 (mm, cmd) = Mapper.initialState hm.seqcontent
             in ( { model | page = Mapper mm } , Cmd.map MapperMsg cmd )

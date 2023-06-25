@@ -1,4 +1,4 @@
-module Home exposing (Model(..), Msg(..), initialModel, update, viewModel)
+module Home exposing (Model, Msg(..), initialModel, update, viewModel)
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
 import Html.Attributes exposing (..)
@@ -26,16 +26,13 @@ import Bootstrap.Card.Block as Block
 
 type OperationType = Contigs | Proteins
 
-type alias QueryModel =
+type alias Model =
     { optype : OperationType
     , idcontent : String
     , seqcontent: String
     , carouselState : Carousel.State
     }
 
-
-type Model =
-        Query QueryModel
 
 type Msg
     = SelectOp OperationType
@@ -53,9 +50,7 @@ type Msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model of
-        Query qm ->
-            Carousel.subscriptions qm.carouselState CarouselMsg
+            Carousel.subscriptions model.carouselState CarouselMsg
 
 myOptions =
     { defaultStateOptions
@@ -65,7 +60,6 @@ myOptions =
 
 initialModel :  Model
 initialModel =
-    Query
         { optype = Proteins
         , idcontent = ""
         , seqcontent = ""
@@ -75,17 +69,9 @@ initialModel =
 -- UPDATE
 
 update : Msg -> Model -> ( Model, Cmd Msg)
-update msg model =
-    let
-        ifQuery f =
-          case model of
-            Query qm ->
-                let
-                    (qmpost, c) = f qm
-                in (Query qmpost, c)
-    in case msg of
+update msg qmodel =
+    case msg of
         SelectOp p ->
-          ifQuery <| \qmodel ->
                 -- If the example input is selected, switch it
                 if qmodel.optype == Contigs && qmodel.seqcontent == contigExample && p == Proteins then
                     ( { qmodel | optype = Proteins, seqcontent = "" }, Cmd.none )
@@ -95,19 +81,15 @@ update msg model =
                     ( { qmodel | optype = p, seqcontent = ""}, Cmd.none )
 
         SetIdentifierExample ->
-          ifQuery <| \qmodel ->
             ( { qmodel | idcontent = identifierExample }, Cmd.none )
 
         SetIdentifier id ->
-          ifQuery <| \qmodel ->
             ( { qmodel | idcontent = id }, Cmd.none )
 
         SetSequence s ->
-          ifQuery <| \qmodel ->
             ( { qmodel | seqcontent = s }, Cmd.none )
 
         SetSeqExample ->
-          ifQuery <| \qmodel ->
             let
               nc =
                 case qmodel.optype of
@@ -117,19 +99,16 @@ update msg model =
               ( { qmodel | seqcontent = nc }, Cmd.none )
 
         ClearId ->
-          ifQuery <| \qmodel ->
             ( { qmodel | idcontent = "" }, Cmd.none )
 
         ClearSeq ->
-          ifQuery <| \qmodel ->
             ( { qmodel | seqcontent = "" }, Cmd.none )
 
         CarouselMsg subMsg ->
-          ifQuery <| \qmodel ->
             ({ qmodel | carouselState = Carousel.update subMsg qmodel.carouselState }, Cmd.none)
 
-        SubmitIdentifier -> (model, Cmd.none)
-        SubmitSequence -> (model, Cmd.none)
+        SubmitIdentifier -> (qmodel, Cmd.none)
+        SubmitSequence -> (qmodel, Cmd.none)
 
 viewModel : Model -> Html Msg
 viewModel model =
@@ -138,18 +117,6 @@ viewModel model =
         , viewSearch model
         , viewFig model
         ]
-
-viewSearch : Model -> Html Msg
-viewSearch model =
-  case model of
-    Query qm ->
-      search qm
-
-viewFig : Model -> Html Msg
-viewFig model =
-  case model of
-    Query qm ->
-      fig qm
 
 -- main text
 
@@ -172,8 +139,8 @@ The smORFs were clustered at 90% amino acid identity resulting in ~288 million 9
   - cellular localization prediction
 """ ]
 
-search : QueryModel -> Html Msg
-search model =
+viewSearch : Model -> Html Msg
+viewSearch model =
   let
     buttonStyle who active =
                 [ if who == active then Button.info else Button.outlineInfo, Button.onClick (SelectOp who) ]
@@ -246,8 +213,8 @@ search model =
             ]
         ]
 
-fig: QueryModel -> Html Msg
-fig model =
+viewFig: Model -> Html Msg
+viewFig model =
   div [class "fig"]
     [ Carousel.config CarouselMsg []
         |> Carousel.withControls
