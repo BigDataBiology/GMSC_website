@@ -72,7 +72,7 @@ viewModel model =
         RemoteData.NotAsked ->
             text ""
         RemoteData.Loading ->
-            h3 [] [ text "Loading Post..." ]
+            div [] [ text "Loading Post..." ]
         RemoteData.Success v ->
             div []
                     [ h1 [] [text v.seqid]

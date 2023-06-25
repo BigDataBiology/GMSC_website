@@ -82,6 +82,7 @@ table
     position:relative;
     left:110px;
 }
+
 th
 {
 	border:1px solid #ffffff;
@@ -227,7 +228,7 @@ td p#detail{
     word-break: normal;
 }
 div#member table
-{   
+{   max-width:100%;
     position:relative;
     left:0px
 }
@@ -236,10 +237,10 @@ h4#cluster{
     text-align:left;
     position:relative;
     margin-top: 2em;
-    left:110px;
+    left:35px;
 }
 div#cluster button{
-    left:120px;
+    left:40px;
     position:relative;
 }
 

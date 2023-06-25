@@ -1,4 +1,4 @@
-module Cluster exposing (Model(..), Msg(..), initialState, update, viewModel)
+module Cluster exposing (Model, Msg(..), initialState, update, viewModel)
 
 import Html
 import Html exposing (..)
@@ -22,17 +22,24 @@ import Json.Decode as D
 import View exposing (View)
 import Members
 
+type alias Cluster =
+    { aa: String
+    , habitat: String
+    , nuc: String
+    , seqid: String
+    , tax: String
+    }
 
-type Model =
+type ClusterPost = 
     Loading
     | LoadError String
-    | Loaded { aa: String
-             , habitat: String
-             , nuc: String
-             , seqid: String
-             , tax: String
-             }
-    | MembersModel Members.Model
+    | Loaded Cluster
+
+type alias Model =
+    { clusterpost : ClusterPost
+    , memberpost : Members.Model
+    , ask: Bool
+    }
 
 type APIResult =
     APIError String
@@ -62,7 +69,10 @@ decodeAPIResult =
 
 initialState : String -> (Model, Cmd Msg)
 initialState seq_id =
-    ( Loading
+    ( { clusterpost = Loading
+    , memberpost = Members.Loading 
+    , ask = False
+    }
     , Http.get
     { url = ("https://gmsc-api.big-data-biology.org/v1/seq-info/" ++ seq_id)
     , expect = Http.expectJson ResultsData decodeAPIResult
@@ -71,113 +81,67 @@ initialState seq_id =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let
-        ifQuery f =
-          case model of
-            Loaded v ->
-                let
-                    (qmpost, c) = f v
-                in (Loaded qmpost, c)   
-            Loading -> 
-                (Loading,Cmd.none) 
-            LoadError _ -> 
-                (LoadError "",Cmd.none) 
-            MembersModel m ->
-                (model,Cmd.none)
-    in case msg of
+    case msg of
         ResultsData r -> case r of
-            Ok (APIResultOK v) -> ( Loaded v, Cmd.none )
-            Ok (APIError e) -> ( LoadError e, Cmd.none )
+            Ok (APIResultOK v) -> ( { model | clusterpost = Loaded v }, Cmd.none )
+            Ok (APIError e) -> ( { model | clusterpost = LoadError e}, Cmd.none )
             Err err -> case err of
-                Http.BadUrl s -> (LoadError ("Bad URL: "++ s) , Cmd.none)
-                Http.Timeout  -> (LoadError ("Timeout") , Cmd.none)
-                Http.NetworkError -> (LoadError ("Network error!") , Cmd.none)
-                Http.BadStatus s -> (LoadError (("Bad status: " ++ String.fromInt s)) , Cmd.none)
-                Http.BadBody s -> (LoadError (("Bad body: " ++ s)) , Cmd.none)
+                Http.BadUrl s -> ({ model | clusterpost = LoadError ("Bad URL: "++ s)}, Cmd.none)
+                Http.Timeout  -> ({ model | clusterpost = LoadError ("Timeout")} , Cmd.none)
+                Http.NetworkError -> ({ model | clusterpost = LoadError ("Network error!") }, Cmd.none)
+                Http.BadStatus s -> ({ model | clusterpost = LoadError (("Bad status: " ++ String.fromInt s)) } , Cmd.none)
+                Http.BadBody s -> ({ model | clusterpost = LoadError (("Bad body: " ++ s)) }  , Cmd.none)
+
         Showmember -> 
-            case model of
+            case model.clusterpost of
               Loaded hm->
                 let
                   (sm, cmd) = Members.initialState hm.seqid
-                in ( MembersModel sm, Cmd.map MembersMsg cmd )
-              Loading -> 
-                (Loading,Cmd.none) 
-              LoadError _ -> 
-                (LoadError "",Cmd.none) 
-              MembersModel m ->
+                in ( { model | memberpost = sm,ask=True}, Cmd.map MembersMsg cmd )
+              _ -> 
                 (model,Cmd.none)
-        MembersMsg m -> case model of
-          MembersModel tm ->
-            let
-                (nqm, cmd) = Members.update m tm
-            in
-                ( MembersModel nqm, Cmd.map MembersMsg cmd )
-          Loaded hm->
-                (model,Cmd.none)
-          Loading -> 
-                (Loading,Cmd.none) 
-          LoadError _ -> 
-                (LoadError "",Cmd.none) 
 
+        MembersMsg m -> 
+            let
+                (nqm, cmd) = Members.update m model.memberpost
+            in
+                ( { model | memberpost = nqm}, Cmd.map MembersMsg cmd )
 
 viewModel : Model -> Html Msg
 viewModel model =
-    case model of
-        Loading ->
-                div []
-                    [ text "Loading..."
-                    ]
-        LoadError e ->
-                div []
-                    [ text "Error "
-                    , text e
-                    ]
-        Loaded v ->
+    case (model.clusterpost,model.memberpost) of
+        (Loading,_) ->
+            div []
+                [ text "Loading..."]
+        (LoadError e,_) ->
+            div []
+                [ text "Error "
+                , text e
+                ]
+        (Loaded v, Members.Loading) ->
+            if model.ask == True then
                 div [] 
-                  [ h1 [] [text v.seqid]
-                  , Table.table 
-                        { options = [ Table.striped, Table.small,Table.hover]
-                        , thead =  Table.simpleThead []
-                        , tbody = Table.tbody []
-                            [ Table.tr []
-                                [ Table.td [] [p [id "title"] [text "Consensus protein sequence"]  ]
-                                , Table.td [] [p [id "detail"] [text v.aa] ]
-                                ]
-                            , Table.tr []
-                                [ Table.td [] [ p [id "title"] [text "Consensus nucleotide sequence"] ]
-                                , Table.td [] [ p [id "detail"] [text v.nuc] ]
-                                ]
-                            , Table.tr []
-                                [ Table.td [] [ p [id "title"] [text "Taxonomic assignment"] ]
-                                , Table.td [] [ p [id "detail"] [text v.tax] ]
-                                ]
-                            , Table.tr []
-                                [ Table.td [] [ p [id "title"] [text "Habitat"]  ]
-                                , Table.td [] [ p [id "detail"] [text v.habitat]  ]
-                                ]
-                            , Table.tr []
-                                [ Table.td [] [ p [id "title"] [text "Conserved domain"]  ]
-                                , Table.td [] [ p [id "detail"] [text "-"]  ]
-                                ]
-                            , Table.tr []
-                                [ Table.td [] [ p [id "title"] [text "Cellular localization"]  ]
-                                , Table.td [] [ p [id "detail"] [text "Transmembrane or secreted"]  ]
-                                ]
-                            , Table.tr []
-                                [ Table.td [] [ p [id "title"] [text "Number of 100AA smORFs:"]  ]
-                                , Table.td [] [ p [id "detail"] [text "1"]  ]
-                                ]
-                            , Table.tr []
-                                [ Table.td [] [ p [id "title"] [text "Quality"]  ]
-                                , Table.td [] [ p [id "detail"] [text "High quality"]  ]
-                                ]
-                            ]
-                        }
-                  , title
-                  , viewMembers model]
-                  -- , page_select
-        MembersModel m ->
-            div [] [viewMembers model]
+                [ h1 [] [text v.seqid]
+                , viewCluster v
+                , title
+                , Members.viewModel model.memberpost
+                    |> Html.map MembersMsg]
+            else
+                div [] 
+                    [ h1 [] [text v.seqid]
+                    , viewCluster v
+                    , title
+                    ]
+        (Loaded v, Members.Results r) ->
+            div [] 
+                [ h1 [] [text v.seqid]
+                , viewCluster v
+                , title
+                , Members.viewModel model.memberpost
+                    |> Html.map MembersMsg]
+        (_,_) ->
+            div []
+                [ text "Loading..."]
                   
 
 -- main text
@@ -186,16 +150,45 @@ title = div [ id "cluster" ]
                 [ h4 [id "cluster"] 
                        [ text  "This 90AA cluster contains the following 100AA smORFs:"]
                 , Button.button [ Button.info, Button.onClick (Showmember)] [ text "Show" ]
-                -- , Button.button [ Button.light] [ text "Download .csv" ]
                 ]
-viewMembers : Model -> Html Msg
-viewMembers model = case model of
-    MembersModel m ->
-        Members.viewModel m
-            |> Html.map MembersMsg
-    Loaded m -> 
-        Html.text ""
-    Loading -> 
-        Html.text ""
-    LoadError _ -> 
-        Html.text ""
+
+viewCluster : Cluster -> Html Msg
+viewCluster v = 
+   Table.table 
+        { options = [ Table.striped, Table.small,Table.hover]
+        , thead =  Table.simpleThead []
+        , tbody = Table.tbody []
+            [ Table.tr []
+                [ Table.td [] [p [id "title"] [text "Consensus protein sequence"]  ]
+                , Table.td [] [p [id "detail"] [text v.aa] ]
+                ]
+            , Table.tr []
+                [ Table.td [] [ p [id "title"] [text "Consensus nucleotide sequence"] ]
+                , Table.td [] [ p [id "detail"] [text v.nuc] ]
+                ]
+            , Table.tr []
+                [ Table.td [] [ p [id "title"] [text "Taxonomic assignment"] ]
+                , Table.td [] [ p [id "detail"] [text v.tax] ]
+                ]
+            , Table.tr []
+                [ Table.td [] [ p [id "title"] [text "Habitat"]  ]
+                , Table.td [] [ p [id "detail"] [text v.habitat]  ]
+                ]
+            , Table.tr []
+                [ Table.td [] [ p [id "title"] [text "Conserved domain"]  ]
+                , Table.td [] [ p [id "detail"] [text "-"]  ]
+                ]
+            , Table.tr []
+                [ Table.td [] [ p [id "title"] [text "Cellular localization"]  ]
+                , Table.td [] [ p [id "detail"] [text "-"]  ]
+                ]
+            , Table.tr []
+                [ Table.td [] [ p [id "title"] [text "Number of 100AA smORFs:"]  ]
+                , Table.td [] [ p [id "detail"] [text "-"]  ]
+                ]
+            , Table.tr []
+                [ Table.td [] [ p [id "title"] [text "Quality"]  ]
+                , Table.td [] [ p [id "detail"] [text "-"]  ]
+                ]
+            ]
+        }
