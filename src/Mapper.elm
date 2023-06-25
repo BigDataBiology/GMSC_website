@@ -44,12 +44,6 @@ type alias SequenceResult =
     , tax: String
     }
 
-type APIResult =
-        APIResultOK { search_id : String
-                    , status : String
-                    }
-        | APIError String
-
 type alias SearchResult =
     { results : Maybe (Dict.Dict String (Dict.Dict String QueryResult))
     , search_id : String
