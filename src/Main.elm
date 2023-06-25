@@ -11,6 +11,7 @@ import Url.Parser as Parser exposing (Parser, (</>), custom, fragment, map, oneO
 import Dict
 import Markdown
 import View exposing (View)
+import Route exposing (Route)
 
 import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
@@ -37,9 +38,11 @@ import Download
 import Help
 import About
 
+
 type alias Model =
   { key : Nav.Key
   , page : Page
+  , route : Route
   }
 
 type Page =
@@ -51,6 +54,7 @@ type Page =
     | Download 
     | Help
     | About
+    | NotFoundP
 
 type Msg
     = HomeMsg Home.Msg
@@ -76,11 +80,49 @@ subscriptions model =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
-    ( { key = key
-      , page = Home Home.initialModel
-      }
-      ,Cmd.none
+    let model =
+          { key = key
+          , page = Home Home.initialModel
+          , route = Route.HomeR
+          }
+    in 
+    initCurrentPage ( model, Cmd.none )
+
+initCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+initCurrentPage ( model, existingCmds ) =
+    let
+        ( currentPage, mappedPageCmds ) =
+            case model.route of
+                Route.NotFound ->
+                    ( NotFoundP, Cmd.none )
+
+                Route.HomeR ->
+                    ( Home Home.initialModel, Cmd.none )
+
+                Route.BrowseR ->
+                    ( Browse Browse.initialModel, Cmd.none )
+
+                Route.DownloadR ->
+                    ( Download, Cmd.none )
+
+                Route.HelpR ->
+                    ( Help, Cmd.none )
+
+                Route.AboutR ->
+                    ( About, Cmd.none )
+
+                Route.SequenceR seq_id ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            Sequence.initialState seq_id model.key
+                    in
+                    ( Sequence pageModel, Cmd.map SequenceMsg pageCmds )
+           
+    in
+    ( { model | page = currentPage }
+    , Cmd.batch [ existingCmds, mappedPageCmds ]
     )
+
 
 -- UPDATE
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -90,7 +132,7 @@ update msg model = case msg of
             if String.startsWith "GMSC10.100AA" hm.idcontent
               then
                 let
-                  (sm, cmd) = Sequence.initialState hm.idcontent
+                  (sm, cmd) = Sequence.initialState hm.idcontent model.key
                 in ( { model | page = Sequence sm } , Cmd.map SequenceMsg cmd )
             else  
                 let
@@ -172,7 +214,12 @@ update msg model = case msg of
           )
 
     UrlChanged url ->
-      changeRouteTo (fromUrl url) model
+      let
+        newRoute =
+            Route.parseUrl url
+      in
+        ( { model | route = newRoute }, Cmd.none )
+            |> initCurrentPage
 
 main =
   Browser.application
@@ -185,7 +232,7 @@ main =
     }
 
 view : Model -> Browser.Document Msg
-view model = { title = "GMSC:Home"
+view model = { title = "GMSC"
         , body =
             [ CDN.stylesheet
             , CDN.fontAwesome
@@ -230,53 +277,13 @@ viewModel model = case model.page of
         Help.viewModel 
     About ->
         About.viewModel
+    NotFoundP ->
+        notFoundView
 
-parser : Parser (Page -> a) a
-parser =
-    oneOf
-        [ Parser.map (Home Home.initialModel) Parser.top
-        , Parser.map (Browse Browse.initialModel) (Parser.s "browse")
-        , Parser.map Download (Parser.s "downloads")
-        , Parser.map Help (Parser.s "help")
-        , Parser.map About (Parser.s "about")
-        ]
+notFoundView : Html msg
+notFoundView =
+    h3 [] [ text "Oops! The page you requested was not found!" ]
 
-fromUrl : Url -> Maybe Page
-fromUrl url =
-    { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
-        |> Parser.parse parser
-
-changeRouteTo : Maybe Page -> Model -> ( Model, Cmd Msg )
-changeRouteTo page model =
-  case page of
-    Just (Home home) ->
-         ({ model | page = Home Home.initialModel },Cmd.none)
-            
-    Just (Browse browse) ->
-        ({ model | page = Browse Browse.initialModel },Cmd.none)
-
-    Just Download ->
-        ({ model | page = Download },Cmd.none)
-        
-    Just Help ->
-        ({ model | page = Help },Cmd.none)
-
-    Just About ->
-        ({ model | page = About },Cmd.none)
-
-    Just (Sequence sequence) ->
-        {-({ model | page = Sequence (Sequence.initialState a) },Cmd.none) -} 
-        (model,Cmd.none)
-    
-    Just (Cluster cluster) ->
-        {-({ model | page = Cluster (Cluster.initialState a) },Cmd.none)-}
-        (model,Cmd.none)
-
-    Just (Mapper mapper) ->
-        {-({ model | page = Mapper (Mapper.initialState a) },Cmd.none)-} 
-        (model,Cmd.none) 
-    Nothing ->
-        (model,Cmd.none)
 
 -- header
 

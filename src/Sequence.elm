@@ -1,10 +1,11 @@
-module Sequence exposing (Model(..), Msg(..), initialState, update, viewModel)
+module Sequence exposing (Model, Msg(..), initialState, update, viewModel)
 
 import Html
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes as HtmlAttr
 import Html.Attributes exposing (..)
+import Browser.Navigation as Nav
 import Browser
 import Dict
 import Markdown
@@ -17,80 +18,63 @@ import Bootstrap.Grid.Row as Row
 import Bootstrap.Button as Button
 import Bootstrap.Table as Table
 import Json.Decode as D
+import RemoteData exposing (WebData)
 
 import View exposing (View)
+import Route exposing (Route)
 
-type Model =
-    Loading
-    | LoadError String
-    | Loaded { aa: String
-             , habitat: String
-             , nuc: String
-             , seqid: String
-             , tax: String
-             }
+type alias Post = 
+    { aa: String
+    , habitat: String
+    , nuc: String
+    , seqid: String
+    , tax: String
+    }
 
-type APIResult =
-    APIError String
-    | APIResultOK { aa: String
-                  , habitat: String
-                  , nuc: String
-                  , seqid: String
-                  , tax: String
-                  }
+type alias Model =
+    { navKey : Nav.Key
+    , post : WebData Post
+    }
 
-type Msg
-    = ResultsData ( Result Http.Error APIResult )
+postDecoder : D.Decoder Post
+postDecoder =
+    D.map5 Post
+           (D.field "aminoacid" D.string)
+           (D.field "habitat" D.string)
+           (D.field "nucleotide" D.string)
+           (D.field "seq_id" D.string)
+           (D.field "taxonomy" D.string)
 
-
-decodeAPIResult : D.Decoder APIResult
-decodeAPIResult =
-    let
-        bAPIResultOK a h n s t = APIResultOK { aa = a, habitat = h, nuc = n, seqid = s, tax=t }
-    in D.map5 bAPIResultOK
-        (D.field "aminoacid" D.string)
-        (D.field "habitat" D.string)
-        (D.field "nucleotide" D.string)
-        (D.field "seq_id" D.string)
-        (D.field "taxonomy" D.string)
-
-initialState : String -> (Model, Cmd Msg)
-initialState seq_id =
-    ( Loading
+initialState : String -> Nav.Key -> (Model, Cmd Msg)
+initialState seq_id navkey =
+    ( { navKey = navkey
+      , post = RemoteData.Loading
+      }
     , Http.get
     { url = ("https://gmsc-api.big-data-biology.org/v1/seq-info/" ++ seq_id)
-    , expect = Http.expectJson ResultsData decodeAPIResult
+       , expect =  postDecoder
+                |> Http.expectJson (RemoteData.fromResult >> PostReceived)
     }
     )
+
+type Msg
+    = PostReceived (WebData Post)
 
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
-        ResultsData r -> case r of
-            Ok (APIResultOK v) -> ( Loaded v, Cmd.none )
-            Ok (APIError e) -> ( LoadError e, Cmd.none )
-            Err err -> case err of
-                Http.BadUrl s -> (LoadError ("Bad URL: "++ s) , Cmd.none)
-                Http.Timeout  -> (LoadError ("Timeout") , Cmd.none)
-                Http.NetworkError -> (LoadError ("Network error!") , Cmd.none)
-                Http.BadStatus s -> (LoadError (("Bad status: " ++ String.fromInt s)) , Cmd.none)
-                Http.BadBody s -> (LoadError (("Bad body: " ++ s)) , Cmd.none)
-
+        PostReceived post ->
+            ( { model | post = post }, Cmd.none )
 
 viewModel : Model-> Html.Html Msg
 viewModel model =
-    case model of
-        Loading ->
-                div []
-                    [ text "Loading..."
-                    ]
-        LoadError e ->
-                div []
-                    [ text "Error "
-                    , text e
-                    ]
-        Loaded v ->
-                div []
+    case model.post of
+        RemoteData.NotAsked ->
+            text ""
+        RemoteData.Loading ->
+            h3 [] [ text "Loading Post..." ]
+        RemoteData.Success v ->
+            div []
                     [ h1 [] [text v.seqid]
                     , Table.table { options = [ Table.striped, Table.small,Table.hover]
                                   , thead = Table.simpleThead []
@@ -130,3 +114,34 @@ viewModel model =
                                      ]
                                   }
                     ]
+        RemoteData.Failure httpError ->
+            viewFetchError (buildErrorMessage httpError)
+
+buildErrorMessage : Http.Error -> String
+buildErrorMessage httpError =
+    case httpError of
+        Http.BadUrl message ->
+            message
+
+        Http.Timeout ->
+            "Server is taking too long to respond. Please try again later."
+
+        Http.NetworkError ->
+            "Unable to reach server."
+
+        Http.BadStatus statusCode ->
+            "Request failed with status code: " ++ String.fromInt statusCode
+
+        Http.BadBody message ->
+            message
+            
+viewFetchError : String -> Html Msg
+viewFetchError errorMessage =
+    let
+        errorHeading =
+            "Couldn't fetch post at this time."
+    in
+    div []
+        [ h3 [] [ text errorHeading ]
+        , text ("Error: " ++ errorMessage)
+        ]
