@@ -83,7 +83,7 @@ init _ url key =
     let model =
           { key = key
           , page = Home Home.initialModel
-          , route = Route.HomeR
+          , route = Route.parseUrl url
           }
     in 
     initCurrentPage ( model, Cmd.none )
@@ -133,11 +133,19 @@ update msg model = case msg of
               then
                 let
                   (sm, cmd) = Sequence.initialState hm.idcontent model.key
-                in ( { model | page = Sequence sm } , Cmd.map SequenceMsg cmd )
-            else  
+                in ( { model | page = Sequence sm }
+                   , Cmd.batch
+                        [ Nav.pushUrl model.key ("/sequence/" ++ hm.idcontent)
+                        , Cmd.map SequenceMsg cmd
+                        ])
+            else
                 let
                   (sm, cmd) = Cluster.initialState hm.idcontent
-                in ( { model | page = Cluster sm } , Cmd.map ClusterMsg cmd )
+                in ( { model | page = Cluster sm }
+                   , Cmd.batch
+                        [ Nav.pushUrl model.key ("/sequence/" ++ hm.idcontent)
+                        , Cmd.map ClusterMsg cmd
+                        ])
         _ -> ( model, Cmd.none )
 
     HomeMsg Home.SubmitSequence -> case model.page of
