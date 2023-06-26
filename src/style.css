@@ -216,6 +216,13 @@ td p#title{
     position:relative;
     left:5px
 }
+td p#identifier{
+  color:#2d2c2c;
+  font-family:arial;
+  max-width: 1000px;
+  position:relative;
+  left:5px;
+}
 td p#detail{
     color:#2d2c2c;
     font-family:arial;

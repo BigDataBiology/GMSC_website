@@ -297,7 +297,7 @@ viewFig model =
         |> Carousel.view model.carouselState
     ]
 identifierExample : String
-identifierExample = "GMSC10.100AA.284_000_000"
+identifierExample = "GMSC10.90AA.284_000_000"
 
 contigExample : String
 contigExample = """>scaffold1
