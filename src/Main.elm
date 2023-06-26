@@ -124,6 +124,20 @@ initCurrentPage ( model, existingCmds ) =
                             Cluster.initialState seq_id model.key
                     in
                     ( Cluster pageModel, Cmd.map ClusterMsg pageCmds )
+
+                Route.MapperR ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            Mapper.initialState "" model.key
+                    in
+                    ( Mapper pageModel, Cmd.map MapperMsg pageCmds )
+
+                Route.MapperResultR search_id->
+                    let
+                        ( pageModel, pageCmds ) =
+                            Mapper.lookupState search_id model.key
+                    in
+                    ( Mapper pageModel, Cmd.map MapperMsg pageCmds )
            
     in
     ( { model | page = currentPage }
@@ -158,15 +172,23 @@ update msg model = case msg of
     HomeMsg Home.SubmitSequence -> case model.page of
         Home hm ->
             let
-                (mm, cmd) = Mapper.initialState hm.seqcontent
-            in ( { model | page = Mapper mm } , Cmd.map MapperMsg cmd )
+                (mm, cmd) = Mapper.initialState hm.seqcontent model.key
+            in ( { model | page = Mapper mm } 
+               , Cmd.batch
+                    [ Nav.pushUrl model.key ("/mapper")
+                    , Cmd.map MapperMsg cmd
+                    ])
         _ -> ( model, Cmd.none )
 
     HomeMsg Home.LookupSearch -> case model.page of
         Home hm ->
             let
-                (mm, cmd) = Mapper.lookupState hm.lookupIDContent
-            in ( { model | page = Mapper mm } , Cmd.map MapperMsg cmd )
+                (mm, cmd) = Mapper.lookupState hm.lookupIDContent model.key
+            in ( { model | page = Mapper mm } 
+               , Cmd.batch
+                    [ Nav.pushUrl model.key ("/mapper/" ++ hm.lookupIDContent)
+                    , Cmd.map MapperMsg cmd
+                    ])
         _ -> ( model, Cmd.none )
 
     GoToHome ->

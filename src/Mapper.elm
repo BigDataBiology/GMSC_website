@@ -1,9 +1,10 @@
-module Mapper exposing (Model(..), Msg(..), initialState, lookupState, update, viewModel)
+module Mapper exposing (Model, Msg(..), initialState, lookupState, update, viewModel)
 
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes as HtmlAttr
 import Html.Attributes exposing (..)
+import Browser.Navigation as Nav
 import Browser
 import Dict
 import Markdown
@@ -20,6 +21,7 @@ import Json.Decode as D
 import Delay
 
 import View exposing (View)
+import Route exposing (Route)
 
 type alias QueryResult =
   { seqid : String
@@ -86,21 +88,26 @@ decodeHitsResult =
         (D.field "id" D.string)
         (D.field "identity" D.float)
 
-
-type Model =
+type MapperPost = 
     Loading
     | LoadError String
     | SearchError String
     | Search SearchResult
 
+type alias Model =
+    { mapperpost :MapperPost
+    , navKey : Nav.Key
+    }
 
 type Msg
     = SearchData (Result Http.Error SearchResultOrError)
     | Getresults String
 
-initialState : String -> (Model, Cmd Msg)
-initialState seq =
-    ( Loading
+initialState : String -> Nav.Key -> (Model, Cmd Msg)
+initialState seq navkey =
+    ( { mapperpost = Loading
+    , navKey = navkey
+    }
     , Http.post
     { url = "https://gmsc-api.big-data-biology.org/internal/seq-search/"
     , body = Http.multipartBody
@@ -111,29 +118,29 @@ initialState seq =
     )
 
 
-lookupState : String -> (Model, Cmd Msg)
-lookupState seq_id =
-    update (Getresults seq_id) Loading
+lookupState : String -> Nav.Key -> (Model, Cmd Msg)
+lookupState seq_id navkey =
+    update (Getresults seq_id) {mapperpost = Loading, navKey = navkey}
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SearchData sd -> case sd of
             Ok (SearchResultOk v) ->
-                (Search v,
+                ({model | mapperpost = Search v},
                     if v.status == "Done"
                     then Cmd.none
                     else Delay.after 5000 (Getresults v.search_id))
-            Ok (SearchResultError e) -> (SearchError e, Cmd.none)
+            Ok (SearchResultError e) -> ({model | mapperpost = SearchError e}, Cmd.none)
             Err err -> case err of
-                Http.BadUrl s -> (LoadError ("Bad URL: "++ s) , Cmd.none)
-                Http.Timeout  -> (LoadError ("Timeout") , Cmd.none)
-                Http.NetworkError -> (LoadError ("Network error!") , Cmd.none)
-                Http.BadStatus s -> (LoadError (("Bad status: " ++ String.fromInt s)) , Cmd.none)
-                Http.BadBody s -> (LoadError (("Bad body: " ++ s)) , Cmd.none)
+                Http.BadUrl s -> ({model | mapperpost = LoadError ("Bad URL: "++ s)}, Cmd.none)
+                Http.Timeout  -> ({model | mapperpost = LoadError ("Timeout")}, Cmd.none)
+                Http.NetworkError -> ({model | mapperpost = LoadError ("Network error!")}, Cmd.none)
+                Http.BadStatus s -> ({model | mapperpost = LoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
+                Http.BadBody s -> ({model | mapperpost = LoadError (("Bad body: " ++ s))}, Cmd.none)
 
         Getresults id ->
-                ( Loading
+                ( {model | mapperpost = Loading}
                 , Http.get { url = ("https://gmsc-api.big-data-biology.org/internal/seq-search/" ++ id)
                                    , expect = Http.expectJson SearchData decodeSearchResult
                            }
@@ -141,7 +148,7 @@ update msg model =
 
 viewModel : Model-> Html Msg
 viewModel model =
-    case model of
+    case model.mapperpost of
         Loading ->
                 div []
                     [ text "Loading..."
@@ -160,7 +167,8 @@ viewSearch s  =
         case s.results of
           Just r ->
             div []
-            [Table.table
+              [  text s.search_id
+              ,  Table.table
                     { options = [ Table.striped, Table.hover ]
                     , thead =  Table.simpleThead
                         [ Table.th [] [ Html.text "Query sequence" ]
@@ -180,20 +188,22 @@ viewSearch s  =
                             )
                         )
                     }
-            ]
+              ]
           Nothing ->
             div [] [text s.search_id]
 
-        else
+    else
             Html.div []
                 [ Html.p []
-                    [Html.text "Search results are still not available (it may take 10-15 minutes). "
+                    [text s.search_id
+                    ,Html.text "Search results are still not available (it may take 10-15 minutes). "
                     ,Html.text "Current status is "
                     ,Html.strong [] [Html.text (if s.status == "Ok" then "Submitted" else s.status)]
                     ,Html.text "."
                     ]
                 , Html.p []
-                    [Html.text "The page will refresh automatically every 5 seconds..." ]
+                    [text s.search_id
+                    ,Html.text "The page will refresh automatically every 5 seconds..." ]
                 ]
 
 viewSearchError : String -> Html Msg
