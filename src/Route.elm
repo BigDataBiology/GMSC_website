@@ -8,7 +8,7 @@ type Route
     = NotFound
     | HomeR
     | SequenceR String
-    --| ClusterR
+    | ClusterR String
     --| MapperR 
     | BrowseR 
     | DownloadR 
@@ -34,6 +34,7 @@ matchRoute =
         , Parser.map HelpR (Parser.s "help")
         , Parser.map AboutR (Parser.s "about")
         , Parser.map SequenceR (Parser.s "sequence" </> Parser.string)
+        , Parser.map ClusterR (Parser.s "cluster" </> Parser.string)
         ]
 
 pushUrl : Route -> Nav.Key -> Cmd msg
@@ -64,3 +65,6 @@ routeToString route =
 
         SequenceR seq_id ->
             "/sequence/" ++ seq_id
+        
+        ClusterR seq_id ->
+            "/cluster/" ++ seq_id

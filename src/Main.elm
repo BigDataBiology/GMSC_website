@@ -117,6 +117,13 @@ initCurrentPage ( model, existingCmds ) =
                             Sequence.initialState seq_id model.key
                     in
                     ( Sequence pageModel, Cmd.map SequenceMsg pageCmds )
+
+                Route.ClusterR seq_id ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            Cluster.initialState seq_id model.key
+                    in
+                    ( Cluster pageModel, Cmd.map ClusterMsg pageCmds )
            
     in
     ( { model | page = currentPage }
@@ -140,10 +147,10 @@ update msg model = case msg of
                         ])
             else
                 let
-                  (sm, cmd) = Cluster.initialState hm.idcontent
+                  (sm, cmd) = Cluster.initialState hm.idcontent model.key
                 in ( { model | page = Cluster sm }
                    , Cmd.batch
-                        [ Nav.pushUrl model.key ("/sequence/" ++ hm.idcontent)
+                        [ Nav.pushUrl model.key ("/cluster/" ++ hm.idcontent)
                         , Cmd.map ClusterMsg cmd
                         ])
         _ -> ( model, Cmd.none )

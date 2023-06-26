@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes as HtmlAttr
 import Html.Attributes exposing (..)
+import Browser.Navigation as Nav
 import Browser
 import Dict
 import Markdown
@@ -20,6 +21,7 @@ import Bootstrap.Dropdown as Dropdown
 import Json.Decode as D
 
 import View exposing (View)
+import Route exposing (Route)
 import Members
 
 type alias Cluster =
@@ -39,6 +41,7 @@ type alias Model =
     { clusterpost : ClusterPost
     , memberpost : Members.Model
     , ask: Bool
+    , navKey : Nav.Key
     }
 
 type APIResult =
@@ -67,11 +70,12 @@ decodeAPIResult =
         (D.field "taxonomy" D.string)
 
 
-initialState : String -> (Model, Cmd Msg)
-initialState seq_id =
+initialState : String -> Nav.Key -> (Model, Cmd Msg)
+initialState seq_id navkey =
     ( { clusterpost = Loading
     , memberpost = Members.Loading 
     , ask = False
+    , navKey = navkey
     }
     , Http.get
     { url = ("https://gmsc-api.big-data-biology.org/v1/seq-info/" ++ seq_id)
