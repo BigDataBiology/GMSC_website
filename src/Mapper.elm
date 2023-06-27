@@ -167,44 +167,70 @@ viewSearch s  =
     if s.status == "Done" then
         case s.results of
           Just r ->
-            div []
-              [  text s.search_id
-              ,  Table.table
+            div [id "member"]
+                [ h2 [] [text ("Search id: " ++ s.search_id)]
+                , h3 [] [text "Annotation of query sequences"]
+                , Table.table
                     { options = [ Table.striped, Table.hover ]
                     , thead =  Table.simpleThead
                         [ Table.th [] [ Html.text "Query sequence" ]
                         , Table.th [] [ Html.text "Protein sequence" ]
                         , Table.th [] [ Html.text "Habitat" ]
                         , Table.th [] [ Html.text "Taxonomy" ]
+                        , Table.th [] [ Html.text "Quality" ]
                         ]
                     , tbody = Table.tbody []
-                    (Dict.toList r
+                      (Dict.toList r
                         |> List.map (\(k,v) ->
                             Table.tr []
-                            [ Table.td [] [Html.text k]
-                            , Table.td [] [Html.text v.aa]
-                            , Table.td [] [Html.text v.habitat]
-                            , Table.td [] [Html.text v.tax]
+                            [ Table.td [] [ p [id "detail"] [ text k ] ]
+                            , Table.td [] [ p [id "detail"] [ text v.aa ] ]
+                            , Table.td [] [ p [id "detail"] [ text v.habitat ] ]
+                            , Table.td [] [ p [id "detail"] [ text v.tax ] ]
+                            , if v.quality == "high quality"  then
+                                 Table.td [] [ p [id "detail"] [ text "pass all quality tests & show experimental evidences" ] ]
+                              else 
+                                 Table.td [] [ p [id "detail"] [ text "not pass all quality tests or not show experimental evidences" ] ]
                             ]
                             )
-                        )
+                      )                  
                     }
-              ]
+                , h3 [] [text "Hits in GMSC"]
+                , Table.table
+                    { options = [ Table.striped, Table.hover ]
+                    , thead =  Table.simpleThead
+                        [ Table.th [] [ Html.text "Query sequence" ]
+                        , Table.th [] [ Html.text "GMSC Hits" ]
+                        ]
+                    , tbody = Table.tbody []
+                      (Dict.toList r
+                        |> List.map (\(k,v) ->
+                            Table.tr []
+                            [ Table.td [] [ p [id "identifier"] [ text k ] ]
+                            , Table.td [] [ p [id "mapper"] [ text 
+                                                                (String.join " , " (v.hits 
+                                                                    |> List.map (\hit -> hit.id ++ " ( e-value: " ++ (String.fromFloat hit.e) ++ ", identity:" ++ (String.fromFloat hit.identity) ++" )\n"))
+                                                                )
+                                                            ]
+                                           ]
+                            ]
+                            )
+                      )                  
+                    }
+                ]
+                       
           Nothing ->
-            div [] [text s.search_id]
+            div [] [h3 [] [text ("Search id: " ++ s.search_id)]]
 
     else
-            Html.div []
-                [ Html.p []
-                    [text s.search_id
-                    ,Html.text "Search results are still not available (it may take 10-15 minutes). "
-                    ,Html.text "Current status is "
-                    ,Html.strong [] [Html.text (if s.status == "Ok" then "Submitted" else s.status)]
-                    ,Html.text "."
-                    ]
-                , Html.p []
-                    [text s.search_id
-                    ,Html.text "The page will refresh automatically every 5 seconds..." ]
+            div []
+                [ p [] [ text "Search results are still not available (it may take 10-15 minutes)."]
+                , p [] [ text ("You can wait at this page or you can lookup your search later at the home page by your current search id: " ++ s.search_id)]
+                , p [] [ text "Current status is "
+                       , Html.strong [] [ text (if s.status == "Ok" then "Submitted" else s.status) ]
+                       , text "."
+                       ]
+                , p [] [ text "The page will refresh automatically every 5 seconds..." ]
                 ]
 
 viewSearchError : String -> Html Msg

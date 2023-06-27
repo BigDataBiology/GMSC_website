@@ -72,7 +72,7 @@ viewModel model =
         RemoteData.NotAsked ->
             text ""
         RemoteData.Loading ->
-            div [] [ text "Loading Post..." ]
+            div [] [ text "Loading ..." ]
         RemoteData.Success v ->
             div []
                     [ h1 [] [text v.seqid]
@@ -98,14 +98,6 @@ viewModel model =
                                       , Table.tr []
                                           [ Table.td [] [ p [id "title"] [text "Protein cluster"]  ]
                                           , Table.td [] [a [ href "https://guide.elm-lang.org" ] [ text "-" ]]
-                                          ]
-                                      , Table.tr []
-                                          [ Table.td [] [ p [id "title"] [text "Conserved domain"]  ]
-                                          , Table.td [] [ p [id "detail"] [text "-"]  ]
-                                          ]
-                                      , Table.tr []
-                                          [ Table.td [] [ p [id "title"] [text "Cellular localization"]  ]
-                                          , Table.td [] [ p [id "detail"] [text "-"]  ]
                                           ]
                                       , Table.tr []
                                           [ Table.td [] [ p [id "title"] [text "Quality"]  ]

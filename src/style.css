@@ -206,6 +206,16 @@ span#help img {
     left:400px;
 }
 
+/* Mapper Page*/
+td p#mapper{
+  color:#2d2c2c;
+  font-family:arial;
+  max-width: 1000px;
+  position:relative;
+  left:5px;
+  word-wrap: break-word;
+  word-break: normal;
+}
 /*Cluster and Sequence page*/
 /*cluster and sequence page table style*/
 td p#title{

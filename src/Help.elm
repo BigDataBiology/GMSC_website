@@ -46,16 +46,40 @@ A total of 4.5 billion smORFs were used to build the catalogue. After 100%-ident
 ##### Search from identifier
 smORFs in the catalog are identified with the scheme `GMSC10.100AA.XXX_XXX_XXX` or `GMSC10.90AA.XXX_XXX_XXX`. The initial `GMSC10` indicates the version of the catalog (Global Microbial smORFs Catalog 1.0). The `100AA` or `90AA` indicates the amino acid identity of the catalog. The `XXX_XXX_XXX` is a unique numerical identifier (starting at zero). Numbers were assigned in order of increasing number of copies. So that the greater the number, the greater number of copies of that peptide were present in the raw data. 
 
+On the 100AA Sequence page, the below information will be displayed for each sequence.
+
+- Protein sequence
+- Nucleotide sequence
+- Taxonomic assignment
+- Habitat
+- Protein cluster
+- Quality
+
+On the 90AA Cluster page, the below information will be displayed for each cluster. And the 100AA members of the cluster will be displayed by pressing the `show` button. 
+
+- Consensus protein sequence
+- Consensus nucleotide sequence
+- Taxonomic assignment
+- Habitat
+- Conserved domain
+- Cellular localization
+- Number of 100AA smORFs
+- Quality
+
 ##### Find homologues by sequence (GMSC-mapper)
 
-GMSC-mapper is provided as a search tool to query sequences. Users can provide a genome or gene sequence and it will return a set of smORFs with complete annotations that match the 90AA smORFs in GMSC.
+GMSC-mapper is provided as a search tool to query sequences. Users can provide contigs or protein sequences and it will return a set of smORFs with complete annotations that match the 90AA smORFs in GMSC.
+
+The searching will take ~15 min. A search id will be provided for each query task. Search ID are of the form `#-xxxx` where `#` is just an index counting up and `xxxx` is a random string. 
+
+Users can wait results at the Mapper page or look up results by the search id from the Home page later.
 
 GMSC-mapper can also be downloaded and run locally, please see details in [Github page](https://github.com/BigDataBiology/GMSC-mapper)
 
 ![GMSC-mapper](assets/help_tool.png)
 
 ## Browse
-Users can browse by habitats and taxonomy. Both habitat and taxonomy are substring matches (e.g., passing marine will match freshwater,marine,human gut). Multiple habitats can be selected.
+Users can browse by habitats and taxonomy. (e.g., passing marine will match freshwater,marine,human gut). Multiple habitats can be selected.
 
 The results are 90AA smORFs families span in selected habitats and taxonomy.
 

@@ -189,7 +189,7 @@ viewCluster v =
                 , Table.td [] [ p [id "detail"] [text "-"]  ]
                 ]
             , Table.tr []
-                [ Table.td [] [ p [id "title"] [text "Number of 100AA smORFs:"]  ]
+                [ Table.td [] [ p [id "title"] [text "Number of 100AA smORFs"]  ]
                 , Table.td [] [ p [id "detail"] [text "-"]  ]
                 ]
             , Table.tr []
