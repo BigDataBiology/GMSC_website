@@ -55,8 +55,8 @@ initialModel : Model
 initialModel =
     { selectpost = { hq = True
                    , habitatSearch = Selectshared.initialModel 
-                               { id = "exampleEmptySearch"
-                               , available = Selectitem.habitat
+                               { id = "exampleMulti"
+                               , available = Selectitem.habitats
                                , itemToLabel = Selectitem.habitattoLabel
                                , selected = [ ]
                                , selectConfig = selectConfigHabitatSearch
@@ -162,18 +162,6 @@ viewSearch model = div []
         , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
         ]
 
-selectConfigHabitatSearch =
-    Selects.newConfig
-        { onSelect = Selectshared.OnSelect
-        , toLabel = .label
-        , filter = Shared.filter 1 .label
-        , toMsg = Selectshared.SelectMsg
-        }
-        -- |> Selects.withCutoff 12
-        |> Selects.withEmptySearch True
-        |> Selects.withNotFound "No matches"
-        |> Selects.withPrompt "Select habitats"
-
 selectConfigTaxonomySearch =
     Selects.newConfig
         { onSelect = Selectshared.OnSingleSelect
@@ -185,3 +173,20 @@ selectConfigTaxonomySearch =
         |> Selects.withEmptySearch True
         |> Selects.withNotFound "No matches"
         |> Selects.withPrompt "Select taxonomy"
+
+selectConfigHabitat =
+    Selects.newConfig
+        { onSelect = Selectshared.OnSelect
+        , toLabel = Selectitem.habitattoLabel
+        , filter = Shared.filter 1 Selectitem.habitattoLabel
+        , toMsg = Selectshared.SelectMsg
+        }
+
+selectConfigHabitatSearch =
+    selectConfigHabitat
+        |> Selects.withMultiSelection True
+        |> Selects.withOnRemoveItem Selectshared.OnRemoveItem
+        -- |> Selects.withCutoff 12
+        |> Selects.withEmptySearch True
+        |> Selects.withNotFound "No matches"
+        |> Selects.withPrompt "Select habitats"

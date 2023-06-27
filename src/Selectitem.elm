@@ -1,111 +1,330 @@
 module Selectitem exposing (..)
 
 
-type alias Habitat =
-    { id : String
-    , label : String
-    }
+type Habitat
+    = Activated_sludge
+    | Air
+    | Algae_associated
+    | Annelidae_associated
+    | Anthropogenic
+    | Bat_gut
+    | Bear_gut
+    | Beatle_gut
+    | Bee_gut
+    | Bird_gut
+    | Bird_skin
+    | Built_environment
+    | Cat_gut
+    | Cattle_associated
+    | Cattle_gut
+    | Cattle_rumen
+    | Chicken_gut
+    | Coral_associated
+    | Coyote_gut
+    | Crustacean_associated
+    | Crustacean_gut
+    | Deer_gut
+    | Dog_associated
+    | Dog_gut
+    | Dolphin_gut
+    | Extreme_ph
+    | Fermented_food
+    | Fish_gut
+    | Fisher_gut
+    | Food
+    | Goat_gut
+    | Goat_rumen
+    | Groundwater
+    | Guinea_pig_gut
+    | Horse_gut
+    | Hot_spring_associated
+    | Human_associated
+    | Human_digestive_tract
+    | Human_gut
+    | Human_mouth
+    | Human_respiratory_tract
+    | Human_saliva
+    | Human_skin
+    | Human_urogenital_tract
+    | Ice_associated
+    | Insect_associated
+    | Insect_gut
+    | Lake_associated
+    | Marine
+    | Mine
+    | Mock_community
+    | Mollusc_associated
+    | Mouse_gut
+    | Mussel_associated
+    | Pig_gut
+    | Planarian_associated
+    | Plant_associated
+    | Pond_associated
+    | Primate_gut
+    | Rabbit_gut
+    | Rat_gut
+    | River_associated
+    | Rodent_gut
+    | Sediment
+    | Ship_worm_associated
+    | Soil
+    | Sponge_associated
+    | Termite_gut
+    | Thermal_vent_associated
+    | Tunicate_associated
+    | Turtle_gut
+    | Wasp_gut
+    | Wastewater
+    | Water_associated
+    | Whale_gut
+
+
+habitats : List Habitat
+habitats =
+    [ Activated_sludge
+    , Air
+    , Algae_associated
+    , Annelidae_associated
+    , Anthropogenic
+    , Bat_gut
+    , Bear_gut
+    , Beatle_gut
+    , Bee_gut
+    , Bird_gut
+    , Bird_skin
+    , Built_environment
+    , Cat_gut
+    , Cattle_associated
+    , Cattle_gut
+    , Cattle_rumen
+    , Chicken_gut
+    , Coral_associated
+    , Coyote_gut
+    , Crustacean_associated
+    , Crustacean_gut
+    , Deer_gut
+    , Dog_associated
+    , Dog_gut
+    , Dolphin_gut
+    , Extreme_ph
+    , Fermented_food
+    , Fish_gut
+    , Fisher_gut
+    , Food
+    , Goat_gut
+    , Goat_rumen
+    , Groundwater
+    , Guinea_pig_gut
+    , Horse_gut
+    , Hot_spring_associated
+    , Human_associated
+    , Human_digestive_tract
+    , Human_gut
+    , Human_mouth
+    , Human_respiratory_tract
+    , Human_saliva
+    , Human_skin
+    , Human_urogenital_tract
+    , Ice_associated
+    , Insect_associated
+    , Insect_gut
+    , Lake_associated
+    , Marine
+    , Mine
+    , Mock_community
+    , Mollusc_associated
+    , Mouse_gut
+    , Mussel_associated
+    , Pig_gut
+    , Planarian_associated
+    , Plant_associated
+    , Pond_associated
+    , Primate_gut
+    , Rabbit_gut
+    , Rat_gut
+    , River_associated
+    , Rodent_gut
+    , Sediment
+    , Ship_worm_associated
+    , Soil
+    , Sponge_associated
+    , Termite_gut
+    , Thermal_vent_associated
+    , Tunicate_associated
+    , Turtle_gut
+    , Wasp_gut
+    , Wastewater
+    , Water_associated
+    , Whale_gut
+    ]
+
+
+habitattoLabel : Habitat -> String
+habitattoLabel h =
+    case h of
+        Activated_sludge ->
+            "activated sludge"
+        Air ->
+            "air"
+        Algae_associated ->
+            "algae associated"
+        Annelidae_associated ->
+            "annelidae associated"
+        Anthropogenic ->
+            "anthropogenic"
+        Bat_gut ->
+            "bat gut"
+        Bear_gut ->
+            "bear gut"
+        Beatle_gut ->
+            "beatle gut"
+        Bee_gut ->
+            "bee gut"
+        Bird_gut ->
+            "bird gut"
+        Bird_skin ->
+            "bird skin"
+        Built_environment ->
+            "built environment"
+        Cat_gut ->
+            "cat gut"
+        Cattle_associated ->
+            "cattle associated"
+        Cattle_gut ->
+            "cattle gut"
+        Cattle_rumen ->
+            "cattle rumen"
+        Chicken_gut ->
+            "chicken gut"
+        Coral_associated ->
+            "coral associated"
+        Coyote_gut ->
+            "coyote gut"
+        Crustacean_associated ->
+            "crustacean associated"
+        Crustacean_gut ->
+            "crustacean gut"
+        Deer_gut ->
+            "deer gut"
+        Dog_associated ->
+            "dog associated"
+        Dog_gut ->
+            "dog gut"
+        Dolphin_gut ->
+            "dolphin gut"
+        Extreme_ph ->
+            "extreme pH"
+        Fermented_food ->
+            "fermented food"
+        Fish_gut ->
+            "fish gut"
+        Fisher_gut ->
+            "fisher gut"
+        Food ->
+            "food"
+        Goat_gut ->
+            "goat gut"
+        Goat_rumen ->
+            "goat rumen"
+        Groundwater ->
+            "groundwater"
+        Guinea_pig_gut ->
+            "guinea pig gut"
+        Horse_gut ->
+            "horse gut"
+        Hot_spring_associated ->
+            "hot spring associated"
+        Human_associated ->
+            "human associated"
+        Human_digestive_tract ->
+            "human digestive tract"
+        Human_gut ->
+            "human gut"
+        Human_mouth ->
+            "human mouth"
+        Human_respiratory_tract ->
+            "human respiratory tract"
+        Human_saliva ->
+            "human saliva"
+        Human_skin ->
+            "human skin"
+        Human_urogenital_tract ->
+            "human urogenital tract"
+        Ice_associated ->
+            "ice associated"
+        Insect_associated ->
+            "insect associated"
+        Insect_gut ->
+            "insect gut"
+        Lake_associated ->
+            "lake associated"
+        Marine ->
+            "marine"
+        Mine ->
+            "mine"
+        Mock_community ->
+            "mock community"
+        Mollusc_associated ->
+            "mollusc associated"
+        Mouse_gut ->
+            "mouse gut"
+        Mussel_associated ->
+            "mussel associated"
+        Pig_gut ->
+            "pig gut"
+        Planarian_associated ->
+            "planarian associated"
+        Plant_associated ->
+            "plant associated"
+        Pond_associated ->
+            "pond associated"
+        Primate_gut ->
+            "primate gut"
+        Rabbit_gut ->
+            "rabbit gut"
+        Rat_gut ->
+            "rat gut"
+        River_associated ->
+            "river associated"
+        Rodent_gut ->
+            "rodent gut"
+        Sediment ->
+            "sediment"
+        Ship_worm_associated ->
+            "ship worm associated"
+        Soil ->
+            "soil"
+        Sponge_associated ->
+            "sponge associated"
+        Termite_gut ->
+            "termite gut"
+        Thermal_vent_associated ->
+            "thermal vent associated"
+        Tunicate_associated ->
+            "tunicate associated"
+        Turtle_gut ->
+            "turtle gut"
+        Wasp_gut ->
+            "wasp gut"
+        Wastewater ->
+            "wastewater"
+        Water_associated ->
+            "water associated"
+        Whale_gut ->
+            "whale gut"
 
 type alias Taxonomy =
     { id : String
     , label : String
     }
 
-habitattoLabel : Habitat -> String
-habitattoLabel =
-    .label
-
-taxtoLabel : Taxonomy -> String
-taxtoLabel =
-    .label
-
-habitat : List Habitat
-habitat =
-    List.map (\( id, name ) -> Habitat id name) habitatsDB
-
 taxonomy : List Taxonomy
 taxonomy =
     List.map (\( id, name ) -> Taxonomy id name) taxonomyDB
 
-habitatsDB : List (String, String)
-habitatsDB =
-    [ ("0","activated sludge")
-    ,("1","air")
-    ,("2","algae associated")
-    ,("3","annelidae associated")
-    ,("4","anthropogenic")
-    ,("5","bat gut")
-    ,("6","bear gut")
-    ,("7","beatle gut")
-    ,("8","bee gut")
-    ,("9","bird gut")
-    ,("10","bird skin")
-    ,("11","built environment")
-    ,("12","cat gut")
-    ,("13","cattle associated")
-    ,("14","cattle gut")
-    ,("15","cattle rumen")
-    ,("16","chicken gut")
-    ,("17","coral associated")
-    ,("18","coyote gut")
-    ,("19","crustacean associated")
-    ,("20","crustacean gut")
-    ,("21","deer gut")
-    ,("22","dog associated")
-    ,("23","dog gut")
-    ,("24","dolphin gut")
-    ,("25","extreme pH")
-    ,("26","fermented food")
-    ,("27","fish gut")
-    ,("28","fisher gut")
-    ,("29","food")
-    ,("30","goat gut")
-    ,("31","goat rumen")
-    ,("32","groundwater")
-    ,("33","guinea pig gut")
-    ,("34","horse gut")
-    ,("35","hot spring associated")
-    ,("36","human associated")
-    ,("37","human digestive tract")
-    ,("38","human gut")
-    ,("39","human mouth")
-    ,("40","human respiratory tract")
-    ,("41","human saliva")
-    ,("42","human skin")
-    ,("43","human urogenital tract")
-    ,("44","ice associated")
-    ,("45","insect associated")
-    ,("46","insect gut")
-    ,("47","lake associated")
-    ,("48","marine")
-    ,("49","mine")
-    ,("50","mock community")
-    ,("51","mollusc associated")
-    ,("52","mouse gut")
-    ,("53","mussel associated")
-    ,("54","pig gut")
-    ,("55","planarian associated")
-    ,("56","plant associated")
-    ,("57","pond associated")
-    ,("58","primate gut")
-    ,("59","rabbit gut")
-    ,("60","rat gut")
-    ,("61","river associated")
-    ,("62","rodent gut")
-    ,("63","sediment")
-    ,("64","ship worm associated")
-    ,("65","soil")
-    ,("66","sponge associated")
-    ,("67","termite gut")
-    ,("68","thermal vent associated")
-    ,("69","tunicate associated")
-    ,("70","turtle gut")
-    ,("71","wasp gut")
-    ,("72","wastewater")
-    ,("73","water associated")
-    ,("74","whale gut")
-    
-    ]
+taxtoLabel : Taxonomy -> String
+taxtoLabel =
+    .label
 
 taxonomyDB : List (String, String)
 taxonomyDB =

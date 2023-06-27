@@ -44,6 +44,7 @@ type Msg item
     | OnSelect (Maybe item)
     | OnSingleSelect (Maybe item)
     | SelectMsg (Selects.Msg item)
+    | OnRemoveItem item
 
 update : Msg item -> Model item -> ( Model item, Cmd (Msg item) )
 update msg model =
@@ -74,6 +75,14 @@ update msg model =
             in
             ( { model | selectState = updated }, cmd )
 
+        OnRemoveItem colorToRemove ->
+            let
+                selected =
+                    List.filter (\curColor -> curColor /= colorToRemove)
+                        model.selected
+            in
+            ( { model | selected = selected }, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -102,5 +111,5 @@ view model prompt =
         , p []
             [ select
             ]
-        , currentSelection
+        -- , currentSelection
         ]

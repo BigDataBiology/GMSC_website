@@ -299,14 +299,14 @@ p#selected {
   .elm-select-multi-input-item {
     display: flex;
     border-width: 1px;
-    background-color: #E3E5E8;
-    border-radius: 4px;
-    margin-right: 4px;
-    padding: 2px 8px;
+    background-color: #6fbecc;
+    border-radius: 10px;
+    padding: 1.5px 8px;
   }
   
   .elm-select-multi-input-item-text {
     text-overflow: ellipsis;
+    color: #ffffff;
   }
   
   .elm-select-multi-input-item-remove {
