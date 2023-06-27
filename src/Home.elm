@@ -28,6 +28,7 @@ type OperationType = Contigs | Proteins
 
 type alias Model =
     { optype : OperationType
+    , is_contigs : String
     , idcontent : String
     , seqcontent: String
     , lookupIDContent : String
@@ -64,6 +65,7 @@ myOptions =
 initialModel :  Model
 initialModel =
         { optype = Proteins
+        , is_contigs = "False"
         , idcontent = ""
         , seqcontent = ""
         , lookupIDContent = ""
@@ -80,7 +82,7 @@ update msg qmodel =
                 if qmodel.optype == Contigs && qmodel.seqcontent == contigExample && p == Proteins then
                     ( { qmodel | optype = Proteins, seqcontent = "" }, Cmd.none )
                 else if qmodel.optype == Proteins && qmodel.seqcontent == proteinExample && p == Contigs then
-                    ( { qmodel | optype = Contigs, seqcontent = "" }, Cmd.none )
+                    ( { qmodel | optype = Contigs, is_contigs = "True", seqcontent = "" }, Cmd.none )
                 else
                     ( { qmodel | optype = p, seqcontent = ""}, Cmd.none )
 

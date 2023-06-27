@@ -128,9 +128,9 @@ initCurrentPage ( model, existingCmds ) =
                 Route.MapperR ->
                     let
                         ( pageModel, pageCmds ) =
-                            Mapper.initialState "" model.key
+                            Mapper.initialState "" "False" model.key
                     in
-                    ( Mapper pageModel, Cmd.map MapperMsg pageCmds )
+                    ( Mapper pageModel, Cmd.none )
 
                 Route.MapperResultR search_id->
                     let
@@ -172,7 +172,7 @@ update msg model = case msg of
     HomeMsg Home.SubmitSequence -> case model.page of
         Home hm ->
             let
-                (mm, cmd) = Mapper.initialState hm.seqcontent model.key
+                (mm, cmd) = Mapper.initialState hm.seqcontent hm.is_contigs model.key
             in ( { model | page = Mapper mm } 
                , Cmd.batch
                     [ Nav.pushUrl model.key ("/mapper")

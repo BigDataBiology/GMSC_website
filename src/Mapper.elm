@@ -103,8 +103,8 @@ type Msg
     = SearchData (Result Http.Error SearchResultOrError)
     | Getresults String
 
-initialState : String -> Nav.Key -> (Model, Cmd Msg)
-initialState seq navkey =
+initialState : String -> String -> Nav.Key -> (Model, Cmd Msg)
+initialState seq is_contigs navkey =
     ( { mapperpost = Loading
     , navKey = navkey
     }
@@ -112,6 +112,7 @@ initialState seq navkey =
     { url = "https://gmsc-api.big-data-biology.org/internal/seq-search/"
     , body = Http.multipartBody
                 [ Http.stringPart "sequence_faa" seq
+                , Http.stringPart "is_contigs" is_contigs
                 ]
     , expect = Http.expectJson SearchData decodeSearchResult
     }
