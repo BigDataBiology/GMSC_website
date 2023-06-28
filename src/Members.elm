@@ -115,7 +115,7 @@ viewResults r  = case r of
                                     case ( e.nuc, e.tax ) of 
                                         (Just n, Just t) ->
                                             Table.tr []
-                                            [  Table.td [] [ p [id "identifier"] [text e.seqid] ]
+                                            [  Table.td [] [ p [id "identifier"] [Html.a [href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
                                             ,  Table.td [] [ p [id "detail"] [text a ] ]
                                             ,  Table.td [] [ p [id "detail"] [text n ] ]
                                             ,  Table.td [] [ p [id "detail"] [text h ] ]

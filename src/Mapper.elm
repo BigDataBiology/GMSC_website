@@ -213,21 +213,29 @@ viewSearch s  =
                     , thead =  Table.simpleThead
                         [ Table.th [] [ Html.text "Query sequence" ]
                         , Table.th [] [ Html.text "GMSC Hits" ]
+                        , Table.th [] [ Html.text "E-value" ]
+                        , Table.th [] [ Html.text "Identity (%)" ]
                         ]
                     , tbody = Table.tbody []
                       (Dict.toList r
                         |> List.map (\(k,v) ->
-                            Table.tr []
-                            [ Table.td [] [ p [id "identifier"] [ text k ] ]
-                            , Table.td [] [ p [id "mapper"] [ text 
-                                                                (String.join " , " (v.hits 
-                                                                    |> List.map (\hit -> hit.id ++ " ( e-value: " ++ (String.fromFloat hit.e) ++ ", identity:" ++ (String.fromFloat hit.identity) ++" )\n"))
-                                                                )
-                                                            ]
-                                           ]
+                        Table.tr []
+                            [  Table.td [] [ p [id "identifier"] [text k] ]
+                            ,  Table.td [] (v.hits 
+                                               |> List.map (\hit -> p [id "detail"] [ Html.a [href ("/cluster/" ++ hit.id)] [ text hit.id ] ] 
+                                                           )
+                                           )
+                            ,  Table.td [] (v.hits 
+                                               |> List.map (\hit -> p [id "detail"] [ text (String.fromFloat hit.e) ] 
+                                                           )
+                                           )
+                            ,  Table.td [] (v.hits 
+                                               |> List.map (\hit -> p [id "detail"] [ text (String.fromFloat hit.identity) ] 
+                                                           )
+                                           )
                             ]
-                            )
-                      )                  
+                        )
+                      )
                     }
                 ]
                        
