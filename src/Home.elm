@@ -17,6 +17,7 @@ import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Form.Textarea as Textarea
 import Bootstrap.Carousel as Carousel
+import Bootstrap.Popover as Popover
 import Bootstrap.Carousel.Slide as Slide
 import Bootstrap.Carousel as Carousel exposing (defaultStateOptions)
 import Bootstrap.Card as Card
@@ -33,6 +34,7 @@ type alias Model =
     , seqcontent: String
     , lookupIDContent : String
     , carouselState : Carousel.State
+    , popoverState : Popover.State
     }
 
 
@@ -46,6 +48,7 @@ type Msg
     | ClearId
     | ClearSeq
     | CarouselMsg Carousel.Msg
+    | PopoverMsg Popover.State
     | SubmitIdentifier
     | SubmitSequence
     | LookupSearch
@@ -70,6 +73,7 @@ initialModel =
         , seqcontent = ""
         , lookupIDContent = ""
         , carouselState = Carousel.initialStateWithOptions myOptions
+        , popoverState = Popover.initialState
         }
 
 -- UPDATE
@@ -115,6 +119,9 @@ update msg qmodel =
 
         CarouselMsg subMsg ->
             ({ qmodel | carouselState = Carousel.update subMsg qmodel.carouselState }, Cmd.none)
+
+        PopoverMsg state ->
+            ( { qmodel | popoverState = state }, Cmd.none )
 
         SubmitIdentifier -> (qmodel, Cmd.none)
         SubmitSequence -> (qmodel, Cmd.none)
@@ -218,7 +225,22 @@ viewSearch model =
       , Form.row []
             [ Form.col [ Col.sm10 ]
                 [ Form.group []
-                    [ label [ id "lookup"] [ text "Lookup a search result" ]
+                    [ label [ id "browse"] [ text "Lookup a sequence search result " 
+                                           , Popover.config
+                                               ( Button.button
+                                                   [ Button.small
+                                                   , Button.info
+                                                   , Button.attrs <|
+                                                       Popover.onHover model.popoverState PopoverMsg
+                                                   ]
+                                                   [ span [class "fa fa-question-circle"]
+                                                   []
+                                                   ]
+                                               )
+                                               |> Popover.right
+                                               |> Popover.content []
+                                                      [ text "Please type your search ID that automatically generated after submitting to lookup the sequence search results." ]
+                                               |> Popover.view model.popoverState]
                     , Input.text
                             [ Input.value model.lookupIDContent
                             , Input.attrs

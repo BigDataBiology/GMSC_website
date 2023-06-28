@@ -25,6 +25,7 @@ import Bootstrap.Dropdown as Dropdown
 import Bootstrap.Card as Card
 import Bootstrap.Text as Text
 import Bootstrap.Card.Block as Block
+import Bootstrap.Popover as Popover
 
 import Filter
 import Selects
@@ -42,6 +43,8 @@ type alias Model =
     { selectpost : SelectModel
     , filterpost : Filter.Model
     , ask: Bool
+    , popoverState1 : Popover.State
+    , popoverState2 : Popover.State
     }
 
 type Msg 
@@ -50,6 +53,8 @@ type Msg
     | HabitatSearchMsg (Selectshared.Msg Selectitem.Habitat)
     | TaxonomySearchMsg (Selectshared.Msg Selectitem.Taxonomy)
     | NoOp
+    | PopoverMsg1 Popover.State
+    | PopoverMsg2 Popover.State
 
 initialModel : Model
 initialModel =
@@ -71,6 +76,8 @@ initialModel =
                    }
     , filterpost = Filter.Loading
     , ask = False
+    , popoverState1 = Popover.initialState
+    , popoverState2 = Popover.initialState
     }
 
 
@@ -84,6 +91,12 @@ update msg model =
     in case msg of
         NoOp ->
             ( model, Cmd.none )
+        
+        PopoverMsg1 state ->
+            ( { model | popoverState1 = state }, Cmd.none )
+
+        PopoverMsg2 state ->
+            ( { model | popoverState2 = state }, Cmd.none )
 
         HabitatSearchMsg sub ->
             ifQuery <| \qmodel ->
@@ -128,36 +141,64 @@ viewModel model =
     Filter.Loading ->
         if model.ask == True then
             div [] 
-                [ viewSearch model.selectpost
+                [ viewSearch model
                 , Html.hr [] []
                 , Filter.viewModel model.filterpost
                     |> Html.map FilterMsg
                 ]
         else
             div [] 
-                [ viewSearch model.selectpost
+                [ viewSearch model
                 ]
     Filter.Results r ->
         div [] 
-            [ viewSearch model.selectpost
+            [ viewSearch model
             , Html.hr [] []
             , Filter.viewModel model.filterpost
                 |> Html.map FilterMsg
             ]
     _ ->
         div []
-            [ viewSearch model.selectpost ]
+            [ viewSearch model ]
 
-viewSearch: SelectModel -> Html Msg
+viewSearch: Model -> Html Msg
 viewSearch model = div []
-        [ h5 [] [text "Browse by habitats and taxonomy"]
+        [ h5 [] [ text "Browse by habitats and taxonomy "
+                , Popover.config
+                    ( Button.button
+                    [ Button.small
+                    , Button.outlineInfo
+                    , Button.attrs <|
+                        Popover.onHover model.popoverState1 PopoverMsg1
+                    ]
+                    [ span [class "fa fa-question-circle"][]]
+                    )
+                        |> Popover.right
+                        |> Popover.content [] [ text "Only browse high quality 90AA small protein families which can pass all computational quality tests and show experimental evidances." ]
+                        |> Popover.view model.popoverState1
+                ] 
+        , div [] [ p [] [ label [id "browse"] [ text "Browse by habitats " 
+                                              , Popover.config
+                                               ( Button.button
+                                                   [ Button.small
+                                                   , Button.outlineInfo
+                                                   , Button.attrs <|
+                                                       Popover.onHover model.popoverState2 PopoverMsg2
+                                                   ]
+                                                   [ span [class "fa fa-question-circle"]
+                                                   []
+                                                   ]
+                                               )
+                                               |> Popover.right
+                                               |> Popover.content []
+                                                      [ text "Habitats with the suffix 'associated' represent a wider range of environments that cannot be traced further to more specific habitats. For example, 'human associated' represents human related habitats other than those listed in 'gut', 'south', etc." ]
+                                               |> Popover.view model.popoverState2] ] ]
         , Selectshared.view
-            model.habitatSearch
-            "Browse by habitats"
+            model.selectpost.habitatSearch
             |> Html.map HabitatSearchMsg
+        , div [] [ p [] [ label [id "browse"] [ text "Browse by taxonomy" ] ] ]
         , Selectshared.view
-            model.taxonomySearch
-            "Browse by taxonomy"
+            model.selectpost.taxonomySearch
             |> Html.map TaxonomySearchMsg
         , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
         ]

@@ -85,9 +85,9 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
-
-view : Model item -> String -> Html (Msg item)
-view model prompt =
+        
+view : Model item -> Html (Msg item)
+view model =
     let
         currentSelection = 
             if (List.length (model.selected)) > 0 then
@@ -106,9 +106,6 @@ view model prompt =
     in
     div []
         [ p []
-            [ label [id "browse"] [ text prompt ]
-            ]
-        , p []
             [ select
             ]
         -- , currentSelection
