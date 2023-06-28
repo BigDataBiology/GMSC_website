@@ -88,8 +88,9 @@ decodeHitsResult =
         (D.field "id" D.string)
         (D.field "identity" D.float)
 
-type MapperPost = 
-    Loading
+type MapperPost =
+    InitialQuery
+    | Loading
     | LoadError String
     | SearchError String
     | Search SearchResult
@@ -105,7 +106,7 @@ type Msg
 
 initialState : String -> String -> Nav.Key -> (Model, Cmd Msg)
 initialState seq is_contigs navkey =
-    ( { mapperpost = Loading
+    ( { mapperpost = InitialQuery
     , navKey = navkey
     }
     , Http.post
@@ -128,10 +129,17 @@ update msg model =
     case msg of
         SearchData sd -> case sd of
             Ok (SearchResultOk v) ->
-                ({model | mapperpost = Search v},
-                    if v.status == "Done"
-                    then Cmd.none
-                    else Delay.after 5000 (Getresults v.search_id))
+                let
+                    reload = Delay.after 5000 (Getresults v.search_id)
+                    cmds = case v.status of
+                        "Done" -> Cmd.none
+                        _ -> if model.mapperpost == InitialQuery
+                            then Cmd.batch
+                                    [ Nav.pushUrl model.navKey ("/mapper/" ++ v.search_id)
+                                    , reload
+                                    ]
+                            else reload
+                in ({model | mapperpost = Search v}, cmds)
             Ok (SearchResultError e) -> ({model | mapperpost = SearchError e}, Cmd.none)
             Err err -> case err of
                 Http.BadUrl s -> ({model | mapperpost = LoadError ("Bad URL: "++ s)}, Cmd.none)
@@ -150,6 +158,10 @@ update msg model =
 viewModel : Model-> Html Msg
 viewModel model =
     case model.mapperpost of
+        InitialQuery ->
+                div []
+                    [ text "Submitting query..."
+                    ]
         Loading ->
                 div []
                     [ text "Loading..."
