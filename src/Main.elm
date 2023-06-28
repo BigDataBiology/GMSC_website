@@ -282,7 +282,7 @@ view model = { title = "GMSC"
             , CDN.fontAwesome
             , Html.node "link"
                 [ HtmlAttr.rel "stylesheet"
-                , HtmlAttr.href "style.css"
+                , HtmlAttr.href "/style.css"
                 ]
                 []
             , Grid.containerFluid []
