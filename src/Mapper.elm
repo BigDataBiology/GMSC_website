@@ -184,10 +184,8 @@ update msg model =
                     let allresults = String.join "\n" ( Dict.toList r
                                                         |> List.map (\(k,v) ->
                                                            let
-                                                                hits = String.join "\n" (v.hits |> List.map (\hit -> hit.id ))
-                                                                evalue = String.join "\n" (v.hits  |> List.map (\hit -> String.fromFloat hit.e))
-                                                                identity = String.join "\n" (v.hits  |> List.map (\hit -> String.fromFloat hit.identity ))
-                                                           in ( k ++ "\t" ++ hits ++ "\t" ++ evalue ++ "\t" ++ identity)
+                                                                hits = String.join "\n\t" (v.hits |> List.map (\hit -> hit.id ++ "\t" ++ (String.fromFloat hit.e ++ "\t" ++ (String.fromFloat hit.identity) )))
+                                                           in ( k ++ "\t" ++ hits)
                                                         )
                                                       )
                     in ( model, Download.string "hits.tsv" "text/plain" allresults)
