@@ -51,6 +51,7 @@ type alias SearchResult =
     , search_id : String
     , status : String
    }
+   
 type SearchResultOrError =
     SearchResultOk SearchResult
     | SearchResultError String

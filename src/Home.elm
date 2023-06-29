@@ -23,6 +23,7 @@ import Bootstrap.Carousel as Carousel exposing (defaultStateOptions)
 import Bootstrap.Card as Card
 import Bootstrap.Text as Text
 import Bootstrap.Card.Block as Block
+import Bootstrap.Alert as Alert
 
 
 type OperationType = Contigs | Proteins
@@ -218,10 +219,11 @@ viewSearch model =
         , Form.form []
             [ Form.row []
                 [ Form.col [ Col.sm10 ]
-                    [ h6 [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
-                            , a [href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]
-                            ] 
-                    , h6 [] [ text "To lookup the sequence search results, please type your search ID that automatically generated when submitting."]
+                    [ Alert.simpleInfo [] [ p [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
+                                                 , a [href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]
+                                                 ]
+                                          , p [] [text "The searching will take a few minutes. To lookup the sequence search results, please type your search ID below that automatically generated when submitting."]
+                                          ] 
                     ]
                 ]
             
@@ -303,7 +305,7 @@ viewFig model =
         |> Carousel.view model.carouselState
     ]
 identifierExample : String
-identifierExample = "GMSC10.90AA.284_000_000"
+identifierExample = "GMSC10.90AA.283_000_000"
 
 contigExample : String
 contigExample = """>scaffold1

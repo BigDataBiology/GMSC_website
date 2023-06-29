@@ -122,21 +122,23 @@ viewResults r  = case r of
                                             ,  Table.td [] [ p [id "detail"] [text t ] ]
                                             ]
                                         (_, _) ->
-                                            Table.tr []
+                                            Table.tr [] []
+                                            {-Table.tr []
                                             [ Table.td [] [ p [id "identifier"] [text e.seqid] ]
                                             ,  Table.td [] [ p [id "detail"] [text "-"] ]
                                             ,  Table.td [] [ p [id "detail"] [text "-"] ]
                                             ,  Table.td [] [ p [id "detail"] [text "-"] ]
                                             ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                            ]
+                                            ]-}
                                   (_, _) ->
-                                    Table.tr []
+                                    Table.tr [] []
+                                    {-Table.tr []
                                       [  Table.td [] [ p [id "identifier"] [text e.seqid] ]
                                       ,  Table.td [] [ p [id "detail"] [text "-"] ]
                                       ,  Table.td [] [ p [id "detail"] [text "-"] ]
                                       ,  Table.td [] [ p [id "detail"] [text "-"] ]
                                       ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                      ]
+                                      ]-}
                                     ) <|ok.cluster)
                     }
         ]
