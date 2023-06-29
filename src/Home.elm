@@ -161,106 +161,88 @@ viewSearch model =
   let
     buttonStyle who active =
                 [ if who == active then Button.info else Button.outlineInfo, Button.onClick (SelectOp who) ]
-  in div [class "search"]
-        [ Form.row []
-            [ Form.col [ Col.sm10 ]
-                [ h4 [] [ text "Search from identifier or find homologues by sequence (GMSC-mapper)"]
+    in div [class "search"] 
+        [ Form.form []
+            [ Form.row []
+                [ Form.col [ Col.sm10 ] 
+                    [ h4 [] [ text "Search from identifier or find homologues by sequence (GMSC-mapper)" ] ]
                 ]
-            ]
-        , Form.row []
-            [ Form.col [ Col.sm10 ]
-                [ Form.group []
-                    [ Form.label [id "browse"] [ text "Search from Identifier" ]
-                    , Input.text
+            , Form.row []
+                [ Form.col [ Col.sm10 ]
+                    [ Form.group []
+                        [ Form.label [id "browse"] [ text "Search from Identifier" ]
+                        , Input.text
                             [ Input.value model.idcontent
                             , Input.attrs
                                 [ placeholder "GMSC10.100AA.XXX_XXX_XXX   or   GMSC10.90AA.XXX_XXX_XXX" ]
                             , Input.onInput SetIdentifier
                             ]
-                    , Button.button [ Button.outlineSecondary, Button.attrs [ class "float-right"], Button.onClick SetIdentifierExample] [ text "Example" ]
-                    , Button.button[ Button.light, Button.attrs [ class "float-right"], Button.onClick ClearId] [ text "Clear" ]
-                    , Button.button
-                            [ Button.info
-                            , Button.attrs [ class "float-right"]
-                            , Button.onClick SubmitIdentifier
-                            ]
-                            [ text "Submit" ]
-                    ]
-                ]
-            ]
-        , Form.row []
-            [ Form.col [ Col.sm10 ]
-                [ ButtonGroup.buttonGroup [ ButtonGroup.small ]
-                    [ ButtonGroup.button (buttonStyle Proteins model.optype) [ text "Search from proteins" ]
-                    , ButtonGroup.button (buttonStyle Contigs model.optype) [ text "Search from contigs" ]
-                    ]
-                ]
-            ]
-       , Form.row []
-            [ Form.col [ Col.sm10 ]
-                [ Form.group []
-                    [ label [ id "browse"] [ text "Input an amino acid / nucleotide sequence in FASTA format"]
-                    , Textarea.textarea
-                        [ Textarea.id "myarea"
-                        , Textarea.value model.seqcontent
-                        , Textarea.onInput SetSequence
-                        , Textarea.rows 3
-                        , Textarea.attrs [
-                            placeholder <| if model.optype == Contigs then
-                                     ">contigID\n AATACTACATGTCA..."
-                                  else
-                                     ">proteinID\n MTIISR..."]
+                        , Button.button [ Button.info, Button.attrs [ class "float-right"], Button.onClick SubmitIdentifier ] [ text "Submit" ] 
+                        , Button.button[ Button.light, Button.attrs [ class "float-right"], Button.onClick ClearId ] [ text "Clear" ]
+                        , Button.button [ Button.outlineSecondary, Button.attrs [ class "float-right"], Button.onClick SetIdentifierExample ] [ text "Example" ] 
                         ]
-                    , Button.button[ Button.outlineSecondary,Button.attrs [ class "float-right"], Button.onClick SetSeqExample] [ text "Example" ]
-                    , Button.button[ Button.light,Button.attrs [ class "float-right"], Button.onClick ClearSeq] [ text "Clear" ]
-                    , Button.button
-                            [ Button.info
-                            , Button.attrs [ class "float-right"]
-                            , Button.onClick SubmitSequence
-                            ] 
-                            [ text "Submit" ]
+                    ]
+                ]
+            , Form.row []
+                [ Form.col [ Col.sm10 ]
+                    [ ButtonGroup.buttonGroup [ ButtonGroup.small ]
+                        [ ButtonGroup.button (buttonStyle Proteins model.optype) [ text "Search from proteins" ]
+                        , ButtonGroup.button (buttonStyle Contigs model.optype) [ text "Search from contigs" ]
+                        ]
                     ]
                 ]
             ]
-      , Form.row []
-            [ Form.col [ Col.sm10 ]
-                [ Form.group []
-                    [ label [ id "browse"] [ text "Lookup a sequence search result " 
-                                           , Popover.config
-                                               ( Button.button
-                                                   [ Button.small
-                                                   , Button.info
-                                                   , Button.attrs <|
-                                                       Popover.onHover model.popoverState PopoverMsg
-                                                   ]
-                                                   [ span [class "fa fa-question-circle"]
-                                                   []
-                                                   ]
-                                               )
-                                               |> Popover.right
-                                               |> Popover.content []
-                                                      [ text "Please type your search ID that automatically generated after submitting to lookup the sequence search results." ]
-                                               |> Popover.view model.popoverState]
-                    , Input.text
+        , Form.form []
+            [ Form.row []
+                [ Form.col [ Col.sm10 ]
+                    [ Form.group []
+                        [ label [ id "browse"] [ text "Input an amino acid / nucleotide sequence in FASTA format"]
+                        , Textarea.textarea
+                            [ Textarea.id "myarea"
+                            , Textarea.value model.seqcontent
+                            , Textarea.onInput SetSequence
+                            , Textarea.rows 3
+                            , Textarea.attrs [
+                                placeholder <| if model.optype == Contigs then
+                                    ">contigID\n AATACTACATGTCA..."
+                                else
+                                    ">proteinID\n MTIISR..."]
+                            ]
+                        , Button.button [ Button.info, Button.attrs [ class "float-right"], Button.onClick SubmitSequence] [ text "Submit" ]
+                        , Button.button [ Button.light,Button.attrs [ class "float-right"], Button.onClick ClearSeq] [ text "Clear" ]
+                        , Button.button [ Button.outlineSecondary,Button.attrs [ class "float-right"], Button.onClick SetSeqExample] [ text "Example" ]
+                        ]
+                    ]
+                ]
+            ]
+        , Form.form []
+            [ Form.row []
+                [ Form.col [ Col.sm10 ]
+                    [ h6 [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
+                            , a [href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]
+                            ] 
+                    , h6 [] [ text "To lookup the sequence search results, please type your search ID that automatically generated when submitting."]
+                    ]
+                ]
+            
+            , Form.row []
+                [ Form.col [ Col.sm10 ]
+                    [ Form.group []
+                        [ Form.label [id "browse"] [ text "Lookup a sequence search result" ]
+                        , Input.text
                             [ Input.value model.lookupIDContent
                             , Input.attrs
                                 [ placeholder "1-xxxx" ]
                             , Input.onInput SetLookupId
                             ]
-                    , Button.button
+                        , Button.button
                             [ Button.info
                             , Button.attrs [ class "float-right"]
                             , Button.onClick LookupSearch
                             ]
                             [ text "Lookup" ]
+                        ]
                     ]
-                ]
-            ]
-
-      , Form.row []
-            [ Form.col [ Col.sm10 ]
-                [ h6 [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
-                        , a [href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]]
                 ]
             ]
         ]
