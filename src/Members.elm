@@ -18,7 +18,7 @@ import Bootstrap.Grid.Row as Row
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Json.Decode as D
-
+import File.Download as Download
 import Http
 
 type alias SequenceResultFull =
@@ -50,7 +50,7 @@ type APIResult =
 
 type Msg
     = ResultsData (Result Http.Error APIResult)
-
+    | DownloadResults
 
 decodeAPIResult : D.Decoder APIResult
 decodeAPIResult =
@@ -81,6 +81,27 @@ update msg model =
                 Http.BadStatus s -> (LoadError (("Bad status: " ++ String.fromInt s)) , Cmd.none)
                 Http.BadBody s -> (LoadError (("Bad body: " ++ s)) , Cmd.none)
 
+        DownloadResults -> case model of
+            Results r -> case r of
+                APIResultOK v -> 
+                    let allresults = String.join "\n" 
+                            (v.cluster 
+                                |> (List.map 
+                                        (\seq -> 
+                                            case (seq.aa, seq.habitat) of
+                                                (Just a, Just h) ->
+                                                    case ( seq.nuc, seq.tax ) of 
+                                                        (Just n, Just t) ->
+                                                            (seq.seqid ++ "\t" ++ a ++ "\t" ++ n ++ "\t" ++ h ++ "\t" ++ t)
+                                                        (_,_) -> ""
+                                                (_,_) -> ""
+                                        )
+                                    )
+                            )
+                    in ( model, Download.string "cluster.members.tsv" "text/plain" allresults)
+                _ -> ( model, Cmd.none )
+            _ -> ( model, Cmd.none )
+
 viewModel : Model-> Html Msg
 viewModel model =
     case model of
@@ -99,7 +120,8 @@ viewModel model =
 viewResults r  = case r of
     APIResultOK ok -> 
         div [id "member"]
-            [  Table.table
+              [ Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download members" ]
+              , Table.table
                     { options = [ Table.striped, Table.hover ]
                     , thead =  Table.simpleThead
                         [ Table.th [] [ Html.text "100AA accession" ]

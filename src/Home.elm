@@ -219,16 +219,6 @@ viewSearch model =
         , Form.form []
             [ Form.row []
                 [ Form.col [ Col.sm10 ]
-                    [ Alert.simpleInfo [] [ p [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
-                                                 , a [href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]
-                                                 ]
-                                          , p [] [text "The searching will take a few minutes. To lookup the sequence search results, please type your search ID below that automatically generated when submitting."]
-                                          ] 
-                    ]
-                ]
-            
-            , Form.row []
-                [ Form.col [ Col.sm10 ]
                     [ Form.group []
                         [ Form.label [id "browse"] [ text "Lookup a sequence search result" ]
                         , Input.text
@@ -244,6 +234,15 @@ viewSearch model =
                             ]
                             [ text "Lookup" ]
                         ]
+                    ]
+                ]
+            , Form.row []
+                [ Form.col [ Col.sm10 ]
+                    [ Alert.simpleInfo [] [ p [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
+                                                 , a [href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]
+                                                 ]
+                                          , p [] [text "The searching will take a few minutes. To lookup the sequence search results, please type your search ID above that automatically generated when submitting."]
+                                          ] 
                     ]
                 ]
             ]

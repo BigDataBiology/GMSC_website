@@ -19,6 +19,7 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Json.Decode as D
 import Delay
+import File.Download as Download
 
 import View exposing (View)
 import Route exposing (Route)
@@ -104,6 +105,8 @@ type alias Model =
 type Msg
     = SearchData (Result Http.Error SearchResultOrError)
     | Getresults String
+    | DownloadResults
+    | DownloadHits
 
 initialState : String -> String -> Nav.Key -> (Model, Cmd Msg)
 initialState seq is_contigs navkey =
@@ -155,6 +158,39 @@ update msg model =
                                    , expect = Http.expectJson SearchData decodeSearchResult
                            }
                 )
+        DownloadResults -> case model.mapperpost of
+            Search s -> case s.results of
+                Just r ->
+                    let allresults = String.join "\n" ( Dict.toList r
+                                                        |> List.map (\(k,v) ->
+                                                           let
+                                                                quality = if v.quality == "high quality"  then
+                                                                             "pass all quality tests & show experimental evidences"
+                                                                          else 
+                                                                             "not pass all quality tests or not show experimental evidences"
+                                                           in ( k ++ "\t" ++ v.aa ++ "\t" ++ v.habitat ++ "\t" ++ v.tax ++ "\t" ++ quality)
+                                                        )
+                                                      )
+                        
+                    in ( model, Download.string "annotations.tsv" "text/plain" allresults)
+                Nothing -> ( model, Cmd.none )
+            _ -> ( model, Cmd.none )
+
+        DownloadHits -> case model.mapperpost of
+            Search s -> case s.results of
+                Just r ->
+                    let allresults = String.join "\n" ( Dict.toList r
+                                                        |> List.map (\(k,v) ->
+                                                           let
+                                                                hits = String.join "\n" (v.hits |> List.map (\hit -> hit.id ))
+                                                                evalue = String.join "\n" (v.hits  |> List.map (\hit -> String.fromFloat hit.e))
+                                                                identity = String.join "\n" (v.hits  |> List.map (\hit -> String.fromFloat hit.identity ))
+                                                           in ( k ++ "\t" ++ hits ++ "\t" ++ evalue ++ "\t" ++ identity)
+                                                        )
+                                                      )
+                    in ( model, Download.string "hits.tsv" "text/plain" allresults)
+                Nothing -> ( model, Cmd.none )
+            _ -> ( model, Cmd.none )
 
 viewModel : Model-> Html Msg
 viewModel model =
@@ -183,6 +219,7 @@ viewSearch s  =
             div [id "member"]
                 [ h2 [] [text ("Search id: " ++ s.search_id)]
                 , h3 [] [text "Annotation of query sequences"]
+                , Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download annotaions" ]
                 , Table.table
                     { options = [ Table.striped, Table.hover ]
                     , thead =  Table.simpleThead
@@ -209,6 +246,7 @@ viewSearch s  =
                       )                  
                     }
                 , h3 [] [text "Hits in GMSC"]
+                , Button.button [ Button.info, Button.onClick DownloadHits, Button.attrs [ class "float-right"]] [ Html.text "Download hits" ]
                 , Table.table
                     { options = [ Table.striped, Table.hover ]
                     , thead =  Table.simpleThead
