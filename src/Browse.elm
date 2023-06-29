@@ -56,9 +56,12 @@ type Msg
     | PopoverMsg1 Popover.State
     | PopoverMsg2 Popover.State
 
-initialModel : Model
+initialModel : (Model, Cmd Msg)
 initialModel =
-    { selectpost = { hq = True
+    let
+        (sm, cmd) = Filter.initialState "" ""
+    in
+        ({ selectpost = { hq = True
                    , habitatSearch = Selectshared.initialModel 
                                { id = "exampleMulti"
                                , available = Selectitem.habitats
@@ -74,11 +77,13 @@ initialModel =
                                , selectConfig = selectConfigTaxonomySearch
                                }
                    }
-    , filterpost = Filter.Loading
-    , ask = False
-    , popoverState1 = Popover.initialState
-    , popoverState2 = Popover.initialState
-    }
+        , filterpost = sm
+        , ask = False
+        , popoverState1 = Popover.initialState
+        , popoverState2 = Popover.initialState
+        }
+        , Cmd.map FilterMsg cmd
+        )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg)

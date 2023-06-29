@@ -100,7 +100,11 @@ initCurrentPage ( model, existingCmds ) =
                     ( Home Home.initialModel, Cmd.none )
 
                 Route.BrowseR ->
-                    ( Browse Browse.initialModel, Cmd.none )
+                    let
+                        ( pageModel, pageCmds ) =
+                            Browse.initialModel
+                    in
+                    ( Browse pageModel, Cmd.map BrowseMsg pageCmds )
 
                 Route.DownloadR ->
                     ( Download, Cmd.none )
@@ -207,7 +211,8 @@ update msg model = case msg of
         ({ model | page = Home Home.initialModel },Cmd.none)
 
     GoToBrowse ->
-        ({ model | page = Browse Browse.initialModel },Cmd.none)
+        let (mm, cmd) = Browse.initialModel
+        in ({ model | page = Browse mm},Cmd.map BrowseMsg cmd)
     
     GoToDownload ->
         ({ model | page = Download },Cmd.none)
