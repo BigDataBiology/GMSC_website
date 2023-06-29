@@ -154,41 +154,50 @@ update msg model = case msg of
               then
                 let
                   (sm, cmd) = Sequence.initialState hm.idcontent model.key
-                in ( { model | page = Sequence sm }
-                   , Cmd.batch
+                in  ( { model | page = Sequence sm }
+                    , Cmd.batch
                         [ Nav.pushUrl model.key ("/sequence/" ++ hm.idcontent)
                         , Cmd.map SequenceMsg cmd
-                        ])
-            else
+                        ]
+                    )
+            else if String.startsWith "GMSC10.90AA" hm.idcontent then
                 let
                   (sm, cmd) = Cluster.initialState hm.idcontent model.key
-                in ( { model | page = Cluster sm }
-                   , Cmd.batch
+                in  ( { model | page = Cluster sm }
+                    , Cmd.batch
                         [ Nav.pushUrl model.key ("/cluster/" ++ hm.idcontent)
                         , Cmd.map ClusterMsg cmd
-                        ])
+                        ]
+                    )
+            else
+                ( model, Cmd.none )
         _ -> ( model, Cmd.none )
 
     HomeMsg Home.SubmitSequence -> case model.page of
         Home hm ->
             let
                 (mm, cmd) = Mapper.initialState hm.seqcontent hm.is_contigs model.key
-            in ( { model | page = Mapper mm } 
-               , Cmd.batch
+            in  ( { model | page = Mapper mm } 
+                , Cmd.batch
                     [ Nav.pushUrl model.key ("/mapper")
                     , Cmd.map MapperMsg cmd
-                    ])
+                    ]
+                )
         _ -> ( model, Cmd.none )
 
     HomeMsg Home.LookupSearch -> case model.page of
         Home hm ->
-            let
-                (mm, cmd) = Mapper.lookupState hm.lookupIDContent model.key
-            in ( { model | page = Mapper mm } 
-               , Cmd.batch
-                    [ Nav.pushUrl model.key ("/mapper/" ++ hm.lookupIDContent)
-                    , Cmd.map MapperMsg cmd
-                    ])
+            if (String.any Char.isDigit hm.lookupIDContent) && (String.contains (String.fromChar '-') hm.lookupIDContent) then
+                let
+                    (mm, cmd) = Mapper.lookupState hm.lookupIDContent model.key
+                in  ( { model | page = Mapper mm } 
+                    , Cmd.batch
+                        [ Nav.pushUrl model.key ("/mapper/" ++ hm.lookupIDContent)
+                        , Cmd.map MapperMsg cmd
+                        ]
+                    )
+            else
+                ( model, Cmd.none )
         _ -> ( model, Cmd.none )
 
     GoToHome ->

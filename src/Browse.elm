@@ -121,15 +121,18 @@ update msg model =
                 let (qhabitat,qtaxonomy) = ( (String.join "," <| List.sort (Set.toList ( Set.fromList ( List.map model.selectpost.habitatSearch.itemToLabel model.selectpost.habitatSearch.selected ))))
                                            , (String.join "," <| List.map model.selectpost.taxonomySearch.itemToLabel model.selectpost.taxonomySearch.selected))
                 in
-                  let
-                    (sm, cmd) = Filter.initialState qhabitat qtaxonomy
-                  in ({ model|filterpost=sm,ask=True }, Cmd.map FilterMsg cmd)
+                  if qhabitat == "" && qtaxonomy == "" then
+                    (model, Cmd.none)
+                  else
+                    let
+                      (sm, cmd) = Filter.initialState qhabitat qtaxonomy
+                    in ({ model| filterpost = sm, ask=True }, Cmd.map FilterMsg cmd)
 
         FilterMsg m -> 
             let
                 (nqm, cmd) = Filter.update m model.filterpost
             in
-                ({ model|filterpost=nqm }, Cmd.map FilterMsg cmd)
+                ({ model| filterpost = nqm }, Cmd.map FilterMsg cmd)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
