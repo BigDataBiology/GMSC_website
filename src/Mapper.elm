@@ -17,6 +17,7 @@ import Bootstrap.Grid.Col as Col
 import Bootstrap.Grid.Row as Row
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Bootstrap.Alert as Alert
 import Json.Decode as D
 import Delay
 import File.Download as Download
@@ -158,6 +159,7 @@ update msg model =
                                    , expect = Http.expectJson SearchData decodeSearchResult
                            }
                 )
+
         DownloadResults -> case model.mapperpost of
             Search s -> case s.results of
                 Just r ->
@@ -282,15 +284,16 @@ viewSearch s  =
             div [] [h3 [] [text ("Search id: " ++ s.search_id)]]
 
     else
-            div []
-                [ p [] [ text "Search results are still not available (it may take 10-15 minutes)."]
-                , p [] [ text ("You can wait at this page or you can lookup your search later at the home page by your current search id: " ++ s.search_id)]
-                , p [] [ text "Current status is "
-                       , Html.strong [] [ text (if s.status == "Ok" then "Submitted" else s.status) ]
-                       , text "."
-                       ]
-                , p [] [ text "The page will refresh automatically every 5 seconds..." ]
-                ]
+        Alert.simpleInfo [] 
+            [ p [] [ text "Search results are still not available (it may take 10-15 minutes)."]
+            , p [] [ text ("You can wait at this page or you can lookup your search later at the home page by your current search id: " ++ s.search_id)]
+            , p [] [ text "Current status is "
+                   , Html.strong [] [ text (if s.status == "Ok" then "Submitted" else s.status) ]
+                   , text "."
+                   ]
+            , p [] [ text "The page will refresh automatically every 5 seconds..." ]
+            ]
+                
 
 viewSearchError : String -> Html Msg
 viewSearchError err =

@@ -175,14 +175,17 @@ update msg model = case msg of
 
     HomeMsg Home.SubmitSequence -> case model.page of
         Home hm ->
-            let
-                (mm, cmd) = Mapper.initialState hm.seqcontent hm.is_contigs model.key
-            in  ( { model | page = Mapper mm } 
-                , Cmd.batch
-                    [ Nav.pushUrl model.key ("/mapper")
-                    , Cmd.map MapperMsg cmd
-                    ]
-                )
+            if hm.seqcontent /= "" then
+                let
+                    (mm, cmd) = Mapper.initialState hm.seqcontent hm.is_contigs model.key
+                in  ( { model | page = Mapper mm } 
+                    , Cmd.batch
+                        [ Nav.pushUrl model.key ("/mapper")
+                        , Cmd.map MapperMsg cmd
+                        ]
+                    )
+            else
+                ( model, Cmd.none )
         _ -> ( model, Cmd.none )
 
     HomeMsg Home.LookupSearch -> case model.page of
