@@ -218,7 +218,9 @@ viewResults r b times = case r of
         case b of 
             APIResultOK bok ->
                 div [id "member"]
-                    [ Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download results" ]
+                    [ if List.length bok.results /= 0 then
+                        Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download results" ]
+                      else div [] [text ""]
                     , if List.isEmpty ok then
                             text "No small proteins in the selected habitats and/or taxonomy. Please try another selection."
                       else Table.table
@@ -242,6 +244,15 @@ viewResults r b times = case r of
                                               ) ok
                                     )
                             }
+                    , if List.length bok.results > 100 then
+                        if List.length bok.results > (100*times) then
+                            div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (100*times) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
+                        else
+                            div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
+                      else if List.length bok.results /= 0 then
+                                div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
+                           else 
+                                div [] [ text "" ]
                     , if times > 1 then
                         let other = (List.drop (100*(times-2)) bok.results)
                         in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other)] [ Html.text "<" ]
