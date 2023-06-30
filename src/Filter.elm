@@ -53,12 +53,6 @@ type ShowPost
     | SLoadError String
     | MultiResults MultiResult
 
-{-
-type Model =
-    Loading
-    | LoadError String
-    | Results APIResult
--}
 decodeSequenceResult : D.Decoder SequenceResultFull
 decodeSequenceResult = 
     D.map5 SequenceResultFull
@@ -245,7 +239,8 @@ viewResults r b times = case r of
                                                     ,  Table.td [] [ p [id "detail"] [text e.habitat ] ]
                                                     ,  Table.td [] [ p [id "detail"] [text e.tax ] ]
                                                     ]
-                                            ) ok)
+                                              ) ok
+                                    )
                             }
                     , if times > 1 then
                         let other = (List.drop (100*(times-2)) bok.results)

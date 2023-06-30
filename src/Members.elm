@@ -1,4 +1,4 @@
-module Members exposing (APIResult(..), Model(..), Msg(..), initialState, update, viewModel)
+module Members exposing (MemberPost(..), ShowPost (..), APIResult(..), MultiResult(..), Model, Msg(..), initialState, update, viewModel)
 
 import Html exposing (..)
 import Html.Events exposing (..)
@@ -19,7 +19,9 @@ import Bootstrap.Grid.Col as Col
 import Bootstrap.Grid.Row as Row
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Bootstrap.Utilities.Spacing as Spacing
 import Json.Decode as D
+import Json.Encode as Encode
 import File.Download as Download
 import Http
 
@@ -32,10 +34,28 @@ type SequenceResult =
         , tax: String  }
     | SequenceResultShallow { seqid: String }
 
-type Model =
-    Loading
-    | LoadError String
+type alias MultiResultItem =
+    { aa: String
+    , habitat: String
+    , nuc: String
+    , seqid: String
+    , tax: String  }
+
+type alias Model =
+    { memberpost : MemberPost
+    , showpost : ShowPost
+    , times : Int
+    }
+
+type MemberPost
+    = MLoading
+    | MLoadError String
     | Results APIResult
+
+type ShowPost
+    = SLoading
+    | SLoadError String
+    | MultiResults MultiResult
 
 decodeSequenceResult : D.Decoder SequenceResult
 decodeSequenceResult =
@@ -50,6 +70,14 @@ decodeSequenceResult =
             (D.field "seq_id" D.string)
         ]
 
+decodeMultItemResult : D.Decoder MultiResultItem
+decodeMultItemResult = 
+    D.map5 MultiResultItem
+           (D.field "aminoacid" D.string)
+           (D.field "habitat" D.string)
+           (D.field "nucleotide" D.string)
+           (D.field "seq_id" D.string)
+           (D.field "taxonomy" D.string)
 
 type APIResult =
         APIResultOK { cluster : List SequenceResult
@@ -57,9 +85,16 @@ type APIResult =
                     }
         | APIError String
 
+type MultiResult =
+        MultiResultOK (List MultiResultItem)
+        | MultiError String
+
 type Msg
     = ResultsData (Result Http.Error APIResult)
     | DownloadResults
+    | MultiData (Result Http.Error MultiResult)
+    | Shownext (List SequenceResult)
+    | Showlast (List SequenceResult)
 
 decodeAPIResult : D.Decoder APIResult
 decodeAPIResult =
@@ -69,9 +104,25 @@ decodeAPIResult =
         (D.field "cluster" (D.list decodeSequenceResult))
         (D.field "status" D.string)
 
+decodeMultiResult : D.Decoder MultiResult
+decodeMultiResult =
+    let
+        bMultiResultOK r = MultiResultOK r
+    in D.map bMultiResultOK
+        (D.list decodeMultItemResult)
+
+multi : List String -> Encode.Value
+multi ids =
+    Encode.object
+        [  ("seq_ids", Encode.list Encode.string ids)
+        ]
+
 initialState : String -> (Model, Cmd Msg)
 initialState seq_id = 
-    ( Loading
+    ( { memberpost = MLoading
+      , showpost = SLoading
+      , times = 1
+      }
     , Http.get
     { url = ("https://gmsc-api.big-data-biology.org/v1/cluster-info/" ++ seq_id)
     , expect = Http.expectJson ResultsData decodeAPIResult
@@ -82,83 +133,140 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ResultsData r -> case r of
-            Ok v -> ( Results v, Cmd.none )
+            Ok v -> 
+                case v of 
+                   APIResultOK ok ->
+                        let ids = ((List.take 100 ok.cluster) |> List.map(\seq -> 
+                                                                            case seq of 
+                                                                                SequenceResultFull full -> full.seqid
+                                                                                SequenceResultShallow shallow -> shallow.seqid))
+                        in  ( {model | memberpost = Results v, showpost = SLoading}
+                            , Http.post
+                              { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
+                              , body = Http.jsonBody (multi ids)
+                              , expect = Http.expectJson MultiData decodeMultiResult
+                              }
+                            )
+                   _ -> ( {model | memberpost = Results v}, Cmd.none)
             Err err -> case err of
-                Http.BadUrl s -> (LoadError ("Bad URL: "++ s) , Cmd.none)
-                Http.Timeout  -> (LoadError ("Timeout") , Cmd.none)
-                Http.NetworkError -> (LoadError ("Network error!") , Cmd.none)
-                Http.BadStatus s -> (LoadError (("Bad status: " ++ String.fromInt s)) , Cmd.none)
-                Http.BadBody s -> (LoadError (("Bad body: " ++ s)) , Cmd.none)
-
-        DownloadResults -> case model of
-            Results (APIResultOK v) ->
-                let allresults =
-                        v.cluster
-                        |> List.map (\seq -> case seq of
-                                        SequenceResultShallow _ -> ""
-                                        SequenceResultFull f -> String.join "\t" [f.seqid, f.aa, f.nuc, f.habitat, f.tax])
-                        |> String.join "\n"
-                in ( model, Download.string "cluster.members.tsv" "text/plain" allresults)
+                Http.BadUrl s -> ({model | memberpost = MLoadError ("Bad URL: "++ s)}, Cmd.none)
+                Http.Timeout  -> ({model | memberpost = MLoadError ("Timeout")}, Cmd.none)
+                Http.NetworkError -> ({model | memberpost = MLoadError ("Network error!")}, Cmd.none)
+                Http.BadStatus s -> ({model | memberpost = MLoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
+                Http.BadBody s -> ({model | memberpost = MLoadError (("Bad body: " ++ s))}, Cmd.none)
+                
+        DownloadResults -> case model.showpost of
+            MultiResults r -> case r of
+                MultiResultOK v -> 
+                    let allresults = v |> List.map (\seq -> String.join "\t" [seq.seqid, seq.aa, seq.nuc, seq.habitat, seq.tax])
+                                            |> String.join "\n"
+                    in ( model, Download.string "cluster.members.tsv" "text/plain" allresults)
+                _ -> ( model, Cmd.none )
             _ -> ( model, Cmd.none )
+
+        MultiData r -> case r of
+            Ok m -> ( {model | showpost = MultiResults m}, Cmd.none )
+            Err err -> case err of
+                Http.BadUrl s -> ({model | showpost = SLoadError ("Bad URL: "++ s)}, Cmd.none)
+                Http.Timeout  -> ({model | showpost = SLoadError ("Timeout")}, Cmd.none)
+                Http.NetworkError -> ({model | showpost = SLoadError ("Network error!")}, Cmd.none)
+                Http.BadStatus s -> ({model | showpost = SLoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
+                Http.BadBody s -> ({model | showpost = SLoadError (("Bad body: " ++ s))}, Cmd.none)
+        
+        Showlast l -> let ids = ((List.take 100 l)|> List.map(\seq -> 
+                                                                case seq of 
+                                                                    SequenceResultFull full -> full.seqid
+                                                                    SequenceResultShallow shallow -> shallow.seqid))
+                      in  ( {model | showpost = SLoading, times = (model.times-1)}
+                          , Http.post
+                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
+                          , body = Http.jsonBody (multi ids)
+                          , expect = Http.expectJson MultiData decodeMultiResult
+                          }
+                          )
+        
+        Shownext o -> let ids = ((List.take 100 o)|> List.map(\seq -> 
+                                                                case seq of 
+                                                                    SequenceResultFull full -> full.seqid
+                                                                    SequenceResultShallow shallow -> shallow.seqid))
+                      in  ( {model | showpost = SLoading, times = (model.times+1)}
+                          , Http.post
+                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
+                          , body = Http.jsonBody (multi ids)
+                          , expect = Http.expectJson MultiData decodeMultiResult
+                          }
+                          )
 
 viewModel : Model-> Html Msg
 viewModel model =
-    case model of
-        Loading ->
+    case model.showpost of
+        SLoading ->
                 div []
                     [ text "Loading..."
                     ]
-        LoadError e ->
+        SLoadError e ->
                 div []
                     [ text "Error "
                     , text e
                     ]
-        Results (APIError err) ->
-                div []
+        MultiResults r -> 
+            case model.memberpost of 
+                Results m ->
+                    viewResults r m model.times
+                _ -> div []
+                    [ text "Loading..."
+                    ]
+
+viewResults r m times = case r of
+    MultiResultOK ok ->
+        case m of 
+            APIResultOK mok ->
+                Html.div []
+                    [ viewSummary mok
+                    , Html.div [id "member"]
+                        [ Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download members" ]
+                        , Table.table
+                            { options = [ Table.striped, Table.hover ]
+                            , thead =  Table.simpleThead
+                                [ Table.th [] [ Html.text "100AA accession" ]
+                                , Table.th [] [ Html.text "Protein sequence" ]
+                                , Table.th [] [ Html.text "Nucleotide sequence" ]
+                                , Table.th [] [ Html.text "Habitat" ]
+                                , Table.th [] [ Html.text "Taxonomy" ]
+                                ]
+                            , tbody = Table.tbody []
+                                    ( List.map (\e ->
+                                                    Table.tr []
+                                                    [  Table.td [] [ p [id "identifier"] [Html.a [href ("/cluster/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                                    ,  Table.td [] [ p [id "detail"] [text e.aa ] ]
+                                                    ,  Table.td [] [ p [id "detail"] [text e.nuc ] ]
+                                                    ,  Table.td [] [ p [id "detail"] [text e.habitat ] ]
+                                                    ,  Table.td [] [ p [id "detail"] [text e.tax ] ]
+                                                    ]
+                                               ) ok
+                                    )
+                            }
+                        , if times > 1 then
+                            let other = (List.drop (100*(times-2)) mok.cluster)
+                            in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other)] [ Html.text "<" ]
+                          else div [] [text ""]
+                        , if List.length mok.cluster >(100*times) then
+                            let other = (List.drop (100*times) mok.cluster)
+                            in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
+                          else div [] [text ""]
+                        ]
+                    ]
+            APIError berr -> div []
                     [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
                     , Html.blockquote []
-                        [ Html.p [] [ Html.text err ] ]
+                        [ Html.p [] [ Html.text berr ] ]
                     ]
-        Results (APIResultOK ok) -> viewResults ok
-
-
-viewResults ok  =
-    Html.div []
-        [viewSummary ok
-        ,Html.div [id "member"]
-          [ Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download members" ]
-          , Table.table
-                { options = [ Table.striped, Table.hover ]
-                , thead =  Table.simpleThead
-                    [ Table.th [] [ Html.text "100AA accession" ]
-                    , Table.th [] [ Html.text "Protein sequence" ]
-                    , Table.th [] [ Html.text "Nucleotide sequence" ]
-                    , Table.th [] [ Html.text "Habitat" ]
-                    , Table.th [] [ Html.text "Taxonomy" ]
-                    ]
-                , tbody = Table.tbody []
-                        <| (ok.cluster
-                            |>  List.map (\e -> case e of
-                                SequenceResultShallow s ->
-                                    Table.tr []
-                                        [  Table.td [] [ p [id "identifier"] [Html.a [href ("/sequence/" ++ s.seqid)] [Html.text s.seqid] ] ]
-                                        ,  Table.td [] [ p [id "detail"] [text ""] ]
-                                        ,  Table.td [] [ p [id "detail"] [text ""] ]
-                                        ,  Table.td [] [ p [id "detail"] [text ""] ]
-                                        ,  Table.td [] [ p [id "detail"] [text ""] ]
-                                        ]
-                                SequenceResultFull f ->
-                                    Table.tr []
-                                        [  Table.td [] [ p [id "identifier"] [Html.a [href ("/sequence/" ++ f.seqid)] [Html.text f.seqid] ] ]
-                                        ,  Table.td [] [ p [id "detail"] [text f.aa ] ]
-                                        ,  Table.td [] [ p [id "detail"] [text f.nuc ] ]
-                                        ,  Table.td [] [ p [id "detail"] [text f.habitat ] ]
-                                        ,  Table.td [] [ p [id "detail"] [text f.tax ] ]
-                                        ]
-                                )
-                            )
-                }
-    ]]
+    MultiError err ->
+        div []
+            [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
+            , Html.blockquote []
+                [ Html.p [] [ Html.text err ] ]
+            ]
 
 
 anyShallow : List SequenceResult -> Bool

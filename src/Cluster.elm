@@ -73,7 +73,10 @@ decodeAPIResult =
 initialState : String -> Nav.Key -> (Model, Cmd Msg)
 initialState seq_id navkey =
     ( { clusterpost = Loading
-    , memberpost = Members.Loading 
+    , memberpost = { memberpost = Members.MLoading
+                   , showpost = Members.SLoading
+                   , times = 1
+                   }
     , ask = False
     , navKey = navkey
     }
@@ -113,7 +116,7 @@ update msg model =
 
 viewModel : Model -> Html Msg
 viewModel model =
-    case (model.clusterpost,model.memberpost) of
+    case (model.clusterpost,model.memberpost.showpost) of
         (Loading,_) ->
             div []
                 [ text "Loading..."]
@@ -122,7 +125,7 @@ viewModel model =
                 [ text "Error "
                 , text e
                 ]
-        (Loaded v, Members.Loading) ->
+        (Loaded v, Members.SLoading) ->
             if model.ask == True then
                 div [] 
                 [ h1 [] [text v.seqid]
@@ -137,7 +140,7 @@ viewModel model =
                     , viewCluster v
                     , title
                     ]
-        (Loaded v, Members.Results r) ->
+        (Loaded v, Members.MultiResults r) ->
             div [] 
                 [ h1 [] [text v.seqid]
                 , viewCluster v
