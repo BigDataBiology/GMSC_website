@@ -87,6 +87,8 @@ type Msg
     | MultiData (Result Http.Error MultiResult)
     | Shownext (List SequenceResultFull)
     | Showlast (List SequenceResultFull)
+    | Showfinal (List SequenceResultFull) Int
+    | Showbegin (List SequenceResultFull) Int
 
 
 decodeAPIResult : D.Decoder APIResult
@@ -192,6 +194,24 @@ update msg model =
                           }
                           )
 
+        Showfinal o all -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
+                      in  ( {model | showpost = SLoading, times = all}
+                          , Http.post
+                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
+                          , body = Http.jsonBody (multi ids)
+                          , expect = Http.expectJson MultiData decodeMultiResult
+                          }
+                          )
+
+        Showbegin o all -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
+                      in  ( {model | showpost = SLoading, times = all}
+                          , Http.post
+                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
+                          , body = Http.jsonBody (multi ids)
+                          , expect = Http.expectJson MultiData decodeMultiResult
+                          }
+                          )        
+
 viewModel : Model-> Html Msg
 viewModel model =
     case model.showpost of
@@ -253,14 +273,25 @@ viewResults r b times = case r of
                                 div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
                            else 
                                 div [] [ text "" ]
+                    , if List.length bok.results > 100 then
+                            Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin bok.results 1)] [ Html.text "<<" ]
+                          else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text "<<" ]
                     , if times > 1 then
                         let other = (List.drop (100*(times-2)) bok.results)
                         in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other)] [ Html.text "<" ]
-                      else div [] [text ""]
+                      else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text "<" ]
                     , if List.length bok.results >(100*times) then
                         let other = (List.drop (100*times) bok.results)
                         in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
-                      else div [] [text ""]
+                      else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
+                    , if List.length bok.results > 100 then
+                            let 
+                                (other,all) = if modBy 100 (List.length bok.results) /= 0 then
+                                                  ((List.drop (100* (List.length bok.results//100)) bok.results),((List.length bok.results//100) + 1))
+                                              else
+                                                  ((List.drop (100* ((List.length bok.results//100)-1)) bok.results), (List.length bok.results//100))
+                            in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showfinal other all)] [ Html.text ">>" ]
+                          else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">>" ]
                     ]
             APIError berr -> div []
                     [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
