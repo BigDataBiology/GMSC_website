@@ -2,7 +2,6 @@ module Members exposing (APIResult(..), Model(..), Msg(..), initialState, update
 
 import Html exposing (..)
 import Html.Events exposing (..)
-import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
 
 import Html.Attributes as HtmlAttr
@@ -21,29 +20,36 @@ import Json.Decode as D
 import File.Download as Download
 import Http
 
-type alias SequenceResultFull =
-    { aa: Maybe String
-    , habitat: Maybe String
-    , nuc: Maybe String
-    , seqid: String
-    , tax: Maybe String  }
+type SequenceResult =
+    SequenceResultFull
+        { seqid: String
+        , aa: String
+        , habitat: String
+        , nuc: String
+        , tax: String  }
+    | SequenceResultShallow { seqid: String }
 
 type Model =
     Loading
     | LoadError String
     | Results APIResult
 
-decodeSequenceResult : D.Decoder SequenceResultFull
-decodeSequenceResult = 
-    D.map5 SequenceResultFull
-           (D.maybe (D.field "aminoacid" D.string))
-           (D.maybe (D.field "habitat" D.string))
-           (D.maybe (D.field "nucleotide" D.string))
-           ((D.field "seq_id" D.string))
-           (D.maybe (D.field "taxonomy" D.string))
+decodeSequenceResult : D.Decoder SequenceResult
+decodeSequenceResult =
+    D.oneOf
+        [D.map5 (\s a h n t -> SequenceResultFull { seqid = s, aa = a, habitat = h, nuc = n, tax = t })
+           (D.field "seq_id" D.string)
+           (D.field "aminoacid" D.string)
+           (D.field "habitat" D.string)
+           (D.field "nucleotide" D.string)
+           (D.field "taxonomy" D.string)
+        , D.map (\s -> SequenceResultShallow { seqid = s })
+            (D.field "seq_id" D.string)
+        ]
+
 
 type APIResult =
-        APIResultOK { cluster : List SequenceResultFull
+        APIResultOK { cluster : List SequenceResult
                     , status : String
                     }
         | APIError String
@@ -82,24 +88,14 @@ update msg model =
                 Http.BadBody s -> (LoadError (("Bad body: " ++ s)) , Cmd.none)
 
         DownloadResults -> case model of
-            Results r -> case r of
-                APIResultOK v -> 
-                    let allresults = String.join "\n" 
-                            (v.cluster 
-                                |> (List.map 
-                                        (\seq -> 
-                                            case (seq.aa, seq.habitat) of
-                                                (Just a, Just h) ->
-                                                    case ( seq.nuc, seq.tax ) of 
-                                                        (Just n, Just t) ->
-                                                            (seq.seqid ++ "\t" ++ a ++ "\t" ++ n ++ "\t" ++ h ++ "\t" ++ t)
-                                                        (_,_) -> ""
-                                                (_,_) -> ""
-                                        )
-                                    )
-                            )
-                    in ( model, Download.string "cluster.members.tsv" "text/plain" allresults)
-                _ -> ( model, Cmd.none )
+            Results (APIResultOK v) ->
+                let allresults =
+                        v.cluster
+                        |> List.map (\seq -> case seq of
+                                        SequenceResultShallow _ -> ""
+                                        SequenceResultFull f -> String.join "\t" [f.seqid, f.aa, f.nuc, f.habitat, f.tax])
+                        |> String.join "\n"
+                in ( model, Download.string "cluster.members.tsv" "text/plain" allresults)
             _ -> ( model, Cmd.none )
 
 viewModel : Model-> Html Msg
@@ -114,59 +110,48 @@ viewModel model =
                     [ text "Error "
                     , text e
                     ]
-        Results r -> viewResults r
+        Results (APIError err) ->
+                div []
+                    [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
+                    , Html.blockquote []
+                        [ Html.p [] [ Html.text err ] ]
+                    ]
+        Results (APIResultOK ok) -> viewResults ok
 
 
-viewResults r  = case r of
-    APIResultOK ok -> 
-        div [id "member"]
-              [ Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download members" ]
-              , Table.table
-                    { options = [ Table.striped, Table.hover ]
-                    , thead =  Table.simpleThead
-                        [ Table.th [] [ Html.text "100AA accession" ]
-                        , Table.th [] [ Html.text "Protein sequence" ]
-                        , Table.th [] [ Html.text "Nucleotide sequence" ]
-                        , Table.th [] [ Html.text "Habitat" ]
-                        , Table.th [] [ Html.text "Taxonomy" ]
-                        ]
-                    , tbody = Table.tbody []
-                            (List.map (\e ->
-                                case (e.aa, e.habitat) of 
-                                  (Just a, Just h) ->
-                                    case ( e.nuc, e.tax ) of 
-                                        (Just n, Just t) ->
-                                            Table.tr []
-                                            [  Table.td [] [ p [id "identifier"] [Html.a [href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
-                                            ,  Table.td [] [ p [id "detail"] [text a ] ]
-                                            ,  Table.td [] [ p [id "detail"] [text n ] ]
-                                            ,  Table.td [] [ p [id "detail"] [text h ] ]
-                                            ,  Table.td [] [ p [id "detail"] [text t ] ]
-                                            ]
-                                        (_, _) ->
-                                            Table.tr [] []
-                                            {-Table.tr []
-                                            [ Table.td [] [ p [id "identifier"] [text e.seqid] ]
-                                            ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                            ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                            ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                            ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                            ]-}
-                                  (_, _) ->
-                                    Table.tr [] []
-                                    {-Table.tr []
-                                      [  Table.td [] [ p [id "identifier"] [text e.seqid] ]
-                                      ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                      ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                      ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                      ,  Table.td [] [ p [id "detail"] [text "-"] ]
-                                      ]-}
-                                    ) <|ok.cluster)
-                    }
-        ]
-    APIError err ->
-        div []
-            [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
-            , Html.blockquote []
-                [ Html.p [] [ Html.text err ] ]
-            ]
+viewResults ok  =
+    div [id "member"]
+          [ Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download members" ]
+          , Table.table
+                { options = [ Table.striped, Table.hover ]
+                , thead =  Table.simpleThead
+                    [ Table.th [] [ Html.text "100AA accession" ]
+                    , Table.th [] [ Html.text "Protein sequence" ]
+                    , Table.th [] [ Html.text "Nucleotide sequence" ]
+                    , Table.th [] [ Html.text "Habitat" ]
+                    , Table.th [] [ Html.text "Taxonomy" ]
+                    ]
+                , tbody = Table.tbody []
+                        <| (ok.cluster
+                            |>  List.map (\e -> case e of
+                                SequenceResultShallow s ->
+                                    Table.tr []
+                                        [  Table.td [] [ p [id "identifier"] [Html.a [href ("/sequence/" ++ s.seqid)] [Html.text s.seqid] ] ]
+                                        ,  Table.td [] [ p [id "detail"] [text ""] ]
+                                        ,  Table.td [] [ p [id "detail"] [text ""] ]
+                                        ,  Table.td [] [ p [id "detail"] [text ""] ]
+                                        ,  Table.td [] [ p [id "detail"] [text ""] ]
+                                        ]
+                                SequenceResultFull f ->
+                                    Table.tr []
+                                        [  Table.td [] [ p [id "identifier"] [Html.a [href ("/sequence/" ++ f.seqid)] [Html.text f.seqid] ] ]
+                                        ,  Table.td [] [ p [id "detail"] [text f.aa ] ]
+                                        ,  Table.td [] [ p [id "detail"] [text f.nuc ] ]
+                                        ,  Table.td [] [ p [id "detail"] [text f.habitat ] ]
+                                        ,  Table.td [] [ p [id "detail"] [text f.tax ] ]
+                                        ]
+                                )
+                            )
+                }
+    ]
+
