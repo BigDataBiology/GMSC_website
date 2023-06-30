@@ -4,6 +4,9 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Bootstrap.Grid as Grid
 
+import Chart as C
+import Chart.Attributes as CA
+
 import Html.Attributes as HtmlAttr
 import Html.Attributes exposing (..)
 import Browser
@@ -120,7 +123,9 @@ viewModel model =
 
 
 viewResults ok  =
-    div [id "member"]
+    Html.div []
+        [viewSummary ok
+        ,Html.div [id "member"]
           [ Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download members" ]
           , Table.table
                 { options = [ Table.striped, Table.hover ]
@@ -153,5 +158,55 @@ viewResults ok  =
                                 )
                             )
                 }
-    ]
+    ]]
 
+
+anyShallow : List SequenceResult -> Bool
+anyShallow =
+    List.any (\e -> case e of
+        SequenceResultShallow _ -> True
+        SequenceResultFull _ -> False
+        )
+
+viewSummary ok =
+    let
+        data = summaryFor ok.cluster
+    in Html.div
+        [HtmlAttr.style "width" "460px"
+        ,HtmlAttr.style "margin-left" "4em"
+        ]
+        [Html.p [] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length ok.cluster)) ]
+        , Html.h4 [] [Html.text "Habitat distribution"]
+        , C.chart
+            [ CA.height 190
+            , CA.width 460
+            , CA.margin { top = 10, bottom = 40, left = 20, right = 20 }
+            , CA.padding { top = 10, bottom = 10, left = 10, right = 10 }
+
+            ]
+            [ C.binLabels .habitat [ CA.moveDown 20, CA.fontSize 12 ]
+            , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
+            , C.bars []
+                [ C.bar .count []
+                ]
+                data
+            ]
+        ,Html.div []
+            (if anyShallow ok.cluster
+             then [Html.p [] [ Html.strong [] [Html.text "Note: this cluster is too large, not all sequences shown"]]]
+             else [])
+        ]
+
+summaryFor : List SequenceResult -> List ({ habitat : String, count : Float })
+summaryFor seqs =
+    let
+        add1 : Maybe Float -> Maybe Float
+        add1 c = case c of
+            Nothing -> Just 1.0
+            Just x -> Just (x + 1.0)
+    in
+        List.foldl (\e acc -> case e of
+                                SequenceResultShallow _ -> acc
+                                SequenceResultFull f -> Dict.update f.habitat add1 acc) Dict.empty seqs
+        |> Dict.toList
+        |> List.map (\(habitat, count) -> { habitat = habitat, count = count })
