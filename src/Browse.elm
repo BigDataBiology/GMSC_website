@@ -145,8 +145,8 @@ subscriptions model =
 
 viewModel : Model -> Html Msg
 viewModel model =
-    case model.filterpost of
-    Filter.Loading ->
+    case model.filterpost.showpost of
+    Filter.SLoading ->
         if model.ask == True then
             div [] 
                 [ viewSearch model
@@ -158,7 +158,7 @@ viewModel model =
             div [] 
                 [ viewSearch model
                 ]
-    Filter.Results r ->
+    Filter.MultiResults r ->
         div [] 
             [ viewSearch model
             , Html.hr [] []
