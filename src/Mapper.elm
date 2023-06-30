@@ -284,7 +284,10 @@ viewSearch s  =
     else
         Alert.simpleInfo [] 
             [ p [] [ text "Search results are still not available (it may take 10-15 minutes)."]
-            , p [] [ text ("You can wait at this page or you can lookup your search later at the home page by your current search id: " ++ s.search_id)]
+            , p [] [ text "Save this link for later use: "
+                   , Html.a [ href ("https://gmsc.big-data-biology.org/mapper/" ++ s.search_id) ] [ text ("https://gmsc.big-data-biology.org/mapper/" ++ s.search_id) ]
+                   ]
+            , p [] [ text <| "Your search ID, which can be used to find the results is " ++ s.search_id ++ ". Results are saved for at least 7 days." ]
             , p [] [ text "Current status is "
                    , Html.strong [] [ text (if s.status == "Ok" then "Submitted" else s.status) ]
                    , text "."
