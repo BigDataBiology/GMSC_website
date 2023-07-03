@@ -216,66 +216,75 @@ viewSearch s  =
     if s.status == "Done" then
         case s.results of
           Just r ->
-            div [id "member"]
-                [ h2 [] [text ("Search id: " ++ s.search_id)]
-                , h3 [] [text "Annotation of query sequences"]
-                , Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download annotaions" ]
-                , Table.table
-                    { options = [ Table.striped, Table.hover ]
-                    , thead =  Table.simpleThead
-                        [ Table.th [] [ Html.text "Query sequence" ]
-                        , Table.th [] [ Html.text "Protein sequence" ]
-                        , Table.th [] [ Html.text "Habitat" ]
-                        , Table.th [] [ Html.text "Taxonomy" ]
-                        , Table.th [] [ Html.text "Quality" ]
-                        ]
-                    , tbody = Table.tbody []
-                      (Dict.toList r
-                        |> List.map (\(k,v) ->
-                            Table.tr []
-                            [ Table.td [] [ p [id "detail"] [ text k ] ]
-                            , Table.td [] [ p [id "detail"] [ text v.aa ] ]
-                            , Table.td [] [ p [id "detail"] [ text v.habitat ] ]
-                            , Table.td [] [ p [id "detail"] [ text v.tax ] ]
-                            , if v.quality == "high quality"  then
-                                 Table.td [] [ p [id "detail"] [ text "pass all quality tests & show experimental evidences" ] ]
-                              else 
-                                 Table.td [] [ p [id "detail"] [ text "not pass all quality tests or not show experimental evidences" ] ]
+            div []
+                [ h2 [] [ text ("Search id: " ++ s.search_id) ]
+                , h3 [] [ text "Annotation of query sequences" ]
+                , if List.length (Dict.toList r) /=0 then
+                    div []
+                    [ div [id "position"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotaions" ] ]
+                    , div [id "member"]
+                      [ Table.table
+                        { options = [ Table.striped, Table.hover ]
+                        , thead =  Table.simpleThead
+                            [ Table.th [] [ Html.text "Query sequence" ]
+                            , Table.th [] [ Html.text "Protein sequence" ]
+                            , Table.th [] [ Html.text "Habitat" ]
+                            , Table.th [] [ Html.text "Taxonomy" ]
+                            , Table.th [] [ Html.text "Quality" ]
                             ]
+                        , tbody = Table.tbody []
+                        ( Dict.toList r
+                            |> List.map (\(k,v) ->
+                                Table.tr []
+                                [ Table.td [] [ p [id "detail"] [ text k ] ]
+                                , Table.td [] [ p [id "detail"] [ text v.aa ] ]
+                                , Table.td [] [ p [id "detail"] [ text v.habitat ] ]
+                                , Table.td [] [ p [id "detail"] [ text v.tax ] ]
+                                , if v.quality == "high quality"  then
+                                    Table.td [] [ p [id "detail"] [ text "pass all quality tests & show experimental evidences" ] ]
+                                else 
+                                    Table.td [] [ p [id "detail"] [ text "not pass all quality tests or not show experimental evidences" ] ]
+                                ]
+                                )
+                        )                  
+                        }
+                      ]
+                    , h3 [] [ text "Hits in GMSC" ]
+                    , div [id "position"] [ Button.button [ Button.info, Button.onClick DownloadHits, Button.attrs [ class "float-left"]] [ Html.text "Download hits" ] ]
+                    , div [id "member"]
+                      [ Table.table
+                        { options = [ Table.striped, Table.hover ]
+                        , thead =  Table.simpleThead
+                            [ Table.th [] [ Html.text "Query sequence" ]
+                            , Table.th [] [ Html.text "GMSC Hits" ]
+                            , Table.th [] [ Html.text "E-value" ]
+                            , Table.th [] [ Html.text "Identity (%)" ]
+                            ]
+                        , tbody = Table.tbody []
+                        ( Dict.toList r
+                            |> List.map (\(k,v) ->
+                                Table.tr []
+                                [  Table.td [] [ p [id "identifier"] [text k] ]
+                                ,  Table.td [] (v.hits 
+                                                |> List.map (\hit -> p [id "detail"] [ Html.a [href ("/cluster/" ++ hit.id)] [ text hit.id ] ] 
+                                                            )
+                                               )
+                                ,  Table.td [] (v.hits 
+                                                |> List.map (\hit -> p [id "detail"] [ text (String.fromFloat hit.e) ] 
+                                                            )
+                                               )
+                                ,  Table.td [] (v.hits 
+                                                |> List.map (\hit -> p [id "detail"] [ text (String.fromFloat hit.identity) ] 
+                                                            )
+                                               )
+                                ]
                             )
-                      )                  
-                    }
-                , h3 [] [text "Hits in GMSC"]
-                , Button.button [ Button.info, Button.onClick DownloadHits, Button.attrs [ class "float-right"]] [ Html.text "Download hits" ]
-                , Table.table
-                    { options = [ Table.striped, Table.hover ]
-                    , thead =  Table.simpleThead
-                        [ Table.th [] [ Html.text "Query sequence" ]
-                        , Table.th [] [ Html.text "GMSC Hits" ]
-                        , Table.th [] [ Html.text "E-value" ]
-                        , Table.th [] [ Html.text "Identity (%)" ]
-                        ]
-                    , tbody = Table.tbody []
-                      (Dict.toList r
-                        |> List.map (\(k,v) ->
-                        Table.tr []
-                            [  Table.td [] [ p [id "identifier"] [text k] ]
-                            ,  Table.td [] (v.hits 
-                                               |> List.map (\hit -> p [id "detail"] [ Html.a [href ("/cluster/" ++ hit.id)] [ text hit.id ] ] 
-                                                           )
-                                           )
-                            ,  Table.td [] (v.hits 
-                                               |> List.map (\hit -> p [id "detail"] [ text (String.fromFloat hit.e) ] 
-                                                           )
-                                           )
-                            ,  Table.td [] (v.hits 
-                                               |> List.map (\hit -> p [id "detail"] [ text (String.fromFloat hit.identity) ] 
-                                                           )
-                                           )
-                            ]
                         )
-                      )
-                    }
+                        }
+                      ]
+                    ]
+                  else 
+                    div [] [ p [] [ text "No hits for your query sequences." ] ]
                 ]
                        
           Nothing ->
