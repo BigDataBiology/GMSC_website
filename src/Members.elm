@@ -250,7 +250,13 @@ viewResults r m times = case r of
                 Html.div []
                     [ viewSummary mok
                     , Html.div [id "member"]
-                        [ Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download members" ]
+                        [ Html.p [HtmlAttr.style "float" "left"] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length mok.cluster) )]
+                        , Html.div []
+                            ( if anyShallow mok.cluster then 
+                                [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
+                              else []
+                            )      
+                        , div [HtmlAttr.style "float" "left"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
                         , Table.table
                             { options = [ Table.striped, Table.hover ]
                             , thead =  Table.simpleThead
@@ -300,6 +306,7 @@ viewResults r m times = case r of
                           else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">>" ]
                         ]
                     ]
+                    
             APIError berr -> div []
                     [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
                     , Html.blockquote []
@@ -322,35 +329,55 @@ anyShallow =
 
 viewSummary ok =
     let
-        data = summaryFor ok.cluster
-    in Html.div
-        [HtmlAttr.style "width" "460px"
-        ,HtmlAttr.style "margin-left" "4em"
-        ]
-        [Html.p [] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length ok.cluster)) ]
-        , Html.h4 [] [Html.text "Habitat distribution"]
-        , C.chart
-            [ CA.height 190
-            , CA.width 460
-            , CA.margin { top = 10, bottom = 40, left = 20, right = 20 }
-            , CA.padding { top = 10, bottom = 10, left = 10, right = 10 }
-
-            ]
-            [ C.binLabels .habitat [ CA.moveDown 20, CA.fontSize 12 ]
-            , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
-            , C.bars []
-                [ C.bar .count []
+        datahabitat = summaryForhabitat ok.cluster
+        datatax = summaryFortax ok.cluster
+    in Html.div []
+        [ Html.div 
+          [ HtmlAttr.style "width" "460px"
+          , HtmlAttr.style "margin-left" "4em"
+          , HtmlAttr.style "float" "left"
+          ]
+            [ Html.h4 [] [Html.text "Habitat distribution"]
+            , C.chart
+              [ CA.height 190
+              , CA.width 460
+              , CA.margin { top = 10, bottom = 40, left = 20, right = 20 }
+              , CA.padding { top = 10, bottom = 10, left = 10, right = 10 }
+              ]
+              [ C.grid []
+              , C.binLabels .habitat [ CA.moveDown 20, CA.fontSize 12 ]
+              , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
+              , C.bars []
+                [ C.bar .count [CA.color CA.green]
                 ]
-                data
+                datahabitat
+              ]
             ]
-        ,Html.div []
-            (if anyShallow ok.cluster
-             then [Html.p [] [ Html.strong [] [Html.text "Note: this cluster is too large, not all sequences shown"]]]
-             else [])
+        , Html.div
+          [ HtmlAttr.style "width" "460px"
+          , HtmlAttr.style "margin-left" "4em"
+          , HtmlAttr.style "float" "left"
+          ]
+            [ Html.h4 [] [Html.text "Taxonomy distribution"]
+            , C.chart
+              [ CA.height 190
+              , CA.width 460
+              , CA.margin { top = 10, bottom = 40, left = 20, right = 20 }
+              , CA.padding { top = 10, bottom = 10, left = 10, right = 10 }
+              ]
+              [ C.binLabels .tax [ CA.moveDown 50, CA.fontSize 12, CA.rotate 20 ]
+              , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
+              , C.bars []
+                [ C.bar .count [CA.color CA.blue]
+                ]
+                datatax
+              ]
+            ]
         ]
 
-summaryFor : List SequenceResult -> List ({ habitat : String, count : Float })
-summaryFor seqs =
+
+summaryForhabitat : List SequenceResult -> List ({ habitat : String, count : Float })
+summaryForhabitat seqs =
     let
         add1 : Maybe Float -> Maybe Float
         add1 c = case c of
@@ -362,3 +389,23 @@ summaryFor seqs =
                                 SequenceResultFull f -> Dict.update f.habitat add1 acc) Dict.empty seqs
         |> Dict.toList
         |> List.map (\(habitat, count) -> { habitat = habitat, count = count })
+
+summaryFortax : List SequenceResult -> List ({ tax : String, count : Float })
+summaryFortax seqs =
+    let
+        add1 : Maybe Float -> Maybe Float
+        add1 c = case c of
+            Nothing -> Just 1.0
+            Just x -> Just (x + 1.0)
+    in
+        List.foldl (\e acc -> case e of
+                                SequenceResultShallow _ -> acc
+                                SequenceResultFull f -> 
+                                    let taxlist = List.reverse (String.split ";" f.tax)
+                                        species = if List.length taxlist == 7 then
+                                                    String.join "" (List.take 1 taxlist)
+                                                  else
+                                                    "Unknown"                                                    
+                                    in Dict.update species add1 acc) Dict.empty seqs
+        |> Dict.toList
+        |> List.map (\(tax, count) -> { tax = tax, count = count })
