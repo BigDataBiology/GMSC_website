@@ -154,8 +154,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
     HomeMsg Home.SubmitIdentifier -> case model.page of
         Home hm ->
-            if String.startsWith "GMSC10.100AA" hm.idcontent
-              then
+            let number = case (String.toInt (String.join "" (String.split "_" (String.join "" (List.take 1 (List.reverse (String.split "." hm.idcontent))))))) of
+                           Just num -> num
+                           _ -> 964970497        
+            in if String.startsWith "GMSC10.100AA" hm.idcontent && number < 964970496 then
                 let
                   (sm, cmd) = Sequence.initialState hm.idcontent model.key
                 in  ( { model | page = Sequence sm }
@@ -164,7 +166,7 @@ update msg model = case msg of
                         , Cmd.map SequenceMsg cmd
                         ]
                     )
-            else if String.startsWith "GMSC10.90AA" hm.idcontent then
+               else if String.startsWith "GMSC10.90AA" hm.idcontent && number < 287926875 then
                 let
                   (sm, cmd) = Cluster.initialState hm.idcontent model.key
                 in  ( { model | page = Cluster sm }
@@ -173,13 +175,13 @@ update msg model = case msg of
                         , Cmd.map ClusterMsg cmd
                         ]
                     )
-            else
+               else
                 ( model, Cmd.none )
         _ -> ( model, Cmd.none )
 
     HomeMsg Home.SubmitSequence -> case model.page of
         Home hm ->
-            if hm.seqcontent /= "" then
+            if hm.seqcontent /= "" && String.startsWith ">" hm.seqcontent then
                 let
                     (mm, cmd) = Mapper.initialState hm.seqcontent hm.is_contigs model.key
                 in  ( { model | page = Mapper mm } 
