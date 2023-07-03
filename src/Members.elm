@@ -249,15 +249,16 @@ viewResults r m times = case r of
             APIResultOK mok ->
                 Html.div []
                     [ viewSummary mok
-                    , Html.div [id "member"]
+                    , Html.div []
                         [ Html.p [HtmlAttr.style "float" "left"] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length mok.cluster) )]
                         , Html.div []
                             ( if anyShallow mok.cluster then 
                                 [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
                               else []
-                            )      
-                        , div [HtmlAttr.style "float" "left"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
-                        , Table.table
+                            )
+                        , div [id "position"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
+                        , div [id "member"] 
+                          [ Table.table
                             { options = [ Table.striped, Table.hover ]
                             , thead =  Table.simpleThead
                                 [ Table.th [] [ Html.text "100AA accession" ]
@@ -278,32 +279,35 @@ viewResults r m times = case r of
                                                ) ok
                                     )
                             }
-                        , if List.length mok.cluster > 100 then
-                            if List.length mok.cluster > (100*times) then
-                                div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (100*times) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
-                            else
-                                div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
-                          else 
-                            div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
-                        , if List.length mok.cluster > 100 then
-                            Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin mok.cluster 1)] [ Html.text "<<" ]
-                          else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text "<<" ]
-                        , if times > 1 then
-                            let other = (List.drop (100*(times-2)) mok.cluster)
-                            in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other)] [ Html.text "<" ]
-                          else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] ] [ Html.text "<" ]
-                        , if List.length mok.cluster >(100*times) then
-                            let other = (List.drop (100*times) mok.cluster)
-                            in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
-                          else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
-                        , if List.length mok.cluster > 100 then
-                            let 
-                                (other,all) = if modBy 100 (List.length mok.cluster) /= 0 then
-                                                  ((List.drop (100* (List.length mok.cluster//100)) mok.cluster),((List.length mok.cluster//100) + 1))
-                                              else
-                                                  ((List.drop (100* ((List.length mok.cluster//100)-1)) mok.cluster), (List.length mok.cluster//100))
-                            in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showfinal other all)] [ Html.text ">>" ]
-                          else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">>" ]
+                          ]
+                        , div [id "cluster"] 
+                          [ if List.length mok.cluster > 100 then
+                                if List.length mok.cluster > (100*times) then
+                                    div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (100*times) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
+                                else
+                                    div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
+                            else 
+                                div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
+                            , if List.length mok.cluster > 100 then
+                                Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin mok.cluster 1)] [ Html.text "<<" ]
+                            else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text "<<" ]
+                            , if times > 1 then
+                                let other = (List.drop (100*(times-2)) mok.cluster)
+                                in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other)] [ Html.text "<" ]
+                            else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] ] [ Html.text "<" ]
+                            , if List.length mok.cluster >(100*times) then
+                                let other = (List.drop (100*times) mok.cluster)
+                                in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
+                            else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
+                            , if List.length mok.cluster > 100 then
+                                let 
+                                    (other,all) = if modBy 100 (List.length mok.cluster) /= 0 then
+                                                    ((List.drop (100* (List.length mok.cluster//100)) mok.cluster),((List.length mok.cluster//100) + 1))
+                                                else
+                                                    ((List.drop (100* ((List.length mok.cluster//100)-1)) mok.cluster), (List.length mok.cluster//100))
+                                in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showfinal other all)] [ Html.text ">>" ]
+                            else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">>" ]
+                          ]
                         ]
                     ]
                     
@@ -337,7 +341,7 @@ viewSummary ok =
           , HtmlAttr.style "margin-left" "4em"
           , HtmlAttr.style "float" "left"
           ]
-            [ Html.h4 [] [Html.text "Habitat distribution"]
+            [ Html.h5 [] [Html.text "Habitat distribution"]
             , C.chart
               [ CA.height 190
               , CA.width 460
@@ -358,7 +362,7 @@ viewSummary ok =
           , HtmlAttr.style "margin-left" "4em"
           , HtmlAttr.style "float" "left"
           ]
-            [ Html.h4 [] [Html.text "Taxonomy distribution"]
+            [ Html.h5 [] [Html.text "Taxonomy distribution"]
             , C.chart
               [ CA.height 190
               , CA.width 460

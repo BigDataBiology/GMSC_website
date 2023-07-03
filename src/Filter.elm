@@ -237,61 +237,68 @@ viewResults r b times = case r of
     MultiResultOK ok ->
         case b of 
             APIResultOK bok ->
-                div [id "member"]
+                div []
                     [ if List.length bok.results /= 0 then
-                        Button.button [ Button.info, Button.onClick DownloadResults, Button.attrs [ class "float-right"]] [ Html.text "Download results" ]
+                        div [id "position"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download results" ] ]
                       else div [] [text ""]
                     , if List.isEmpty ok then
                             text "No small proteins in the selected habitats and/or taxonomy. Please try another selection."
-                      else Table.table
-                            { options = [ Table.striped, Table.hover ]
-                            , thead =  Table.simpleThead
-                                [ Table.th [] [ Html.text "90AA accession" ]
-                                , Table.th [] [ Html.text "Consensus protein sequence" ]
-                                , Table.th [] [ Html.text "Consensus nucleotide sequence" ]
-                                , Table.th [] [ Html.text "Habitat" ]
-                                , Table.th [] [ Html.text "Taxonomy" ]
-                                ]
-                            , tbody = Table.tbody []
-                                    (List.map (\e ->
-                                                    Table.tr []
-                                                    [  Table.td [] [ p [id "identifier"] [Html.a [href ("/cluster/" ++ e.seqid)] [Html.text e.seqid] ] ]
-                                                    ,  Table.td [] [ p [id "detail"] [text e.aa ] ]
-                                                    ,  Table.td [] [ p [id "detail"] [text e.nuc ] ]
-                                                    ,  Table.td [] [ p [id "detail"] [text e.habitat ] ]
-                                                    ,  Table.td [] [ p [id "detail"] [text e.tax ] ]
-                                                    ]
-                                              ) ok
-                                    )
-                            }
-                    , if List.length bok.results > 100 then
-                        if List.length bok.results > (100*times) then
-                            div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (100*times) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
-                        else
-                            div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
-                      else if List.length bok.results /= 0 then
-                                div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
-                           else 
-                                div [] [ text "" ]
-                    , if List.length bok.results > 100 then
-                            Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin bok.results 1)] [ Html.text "<<" ]
-                          else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text "<<" ]
-                    , if times > 1 then
-                        let other = (List.drop (100*(times-2)) bok.results)
-                        in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other)] [ Html.text "<" ]
-                      else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text "<" ]
-                    , if List.length bok.results >(100*times) then
-                        let other = (List.drop (100*times) bok.results)
-                        in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
-                      else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
-                    , if List.length bok.results > 100 then
-                            let 
-                                (other,all) = if modBy 100 (List.length bok.results) /= 0 then
-                                                  ((List.drop (100* (List.length bok.results//100)) bok.results),((List.length bok.results//100) + 1))
-                                              else
-                                                  ((List.drop (100* ((List.length bok.results//100)-1)) bok.results), (List.length bok.results//100))
-                            in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showfinal other all)] [ Html.text ">>" ]
-                          else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">>" ]
+                      else div []
+                        [ div [id "member"]
+                            [ Table.table
+                                { options = [ Table.striped, Table.hover ]
+                                , thead =  Table.simpleThead
+                                    [ Table.th [] [ Html.text "90AA accession" ]
+                                    , Table.th [] [ Html.text "Consensus protein sequence" ]
+                                    , Table.th [] [ Html.text "Consensus nucleotide sequence" ]
+                                    , Table.th [] [ Html.text "Habitat" ]
+                                    , Table.th [] [ Html.text "Taxonomy" ]
+                                    ]
+                                , tbody = Table.tbody []
+                                        (List.map (\e ->
+                                                        Table.tr []
+                                                        [  Table.td [] [ p [id "identifier"] [Html.a [href ("/cluster/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                                        ,  Table.td [] [ p [id "detail"] [text e.aa ] ]
+                                                        ,  Table.td [] [ p [id "detail"] [text e.nuc ] ]
+                                                        ,  Table.td [] [ p [id "detail"] [text e.habitat ] ]
+                                                        ,  Table.td [] [ p [id "detail"] [text e.tax ] ]
+                                                        ]
+                                                ) ok
+                                        )
+                                }
+                            ]
+                           
+                        , div [id "cluster"] 
+                            [ if List.length bok.results > 100 then
+                                    if List.length bok.results > (100*times) then
+                                        div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (100*times) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
+                                    else
+                                        div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
+                                else if List.length bok.results /= 0 then
+                                            div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
+                                    else 
+                                            div [] [ text "" ]
+                                , if List.length bok.results > 100 then
+                                        Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin bok.results 1)] [ Html.text "<<" ]
+                                    else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text "<<" ]
+                                , if times > 1 then
+                                    let other = (List.drop (100*(times-2)) bok.results)
+                                    in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other)] [ Html.text "<" ]
+                                else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text "<" ]
+                                , if List.length bok.results >(100*times) then
+                                    let other = (List.drop (100*times) bok.results)
+                                    in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
+                                else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
+                                , if List.length bok.results > 100 then
+                                        let 
+                                            (other,all) = if modBy 100 (List.length bok.results) /= 0 then
+                                                            ((List.drop (100* (List.length bok.results//100)) bok.results),((List.length bok.results//100) + 1))
+                                                        else
+                                                            ((List.drop (100* ((List.length bok.results//100)-1)) bok.results), (List.length bok.results//100))
+                                        in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showfinal other all)] [ Html.text ">>" ]
+                                    else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">>" ]
+                            ]                    
+                        ]
                     ]
             APIError berr -> div []
                     [ Html.p [] [ Html.text "Call to the GMSC server failed" ]

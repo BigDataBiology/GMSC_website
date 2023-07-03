@@ -236,16 +236,26 @@ td p#identifier{
 td p#detail{
     color:#2d2c2c;
     font-family:arial;
-    max-width: 340px;
+    max-width: 300px;
     position:relative;
     left:5px;
     word-wrap: break-word;
     word-break: normal;
 }
+div#member
+{ width: 1350px;
+  overflow: scroll;
+  position:relative;
+  left:35px;
+}
 div#member table
-{   max-width:100%;
-    position:relative;
-    left:0px
+{   position:relative;
+    left:0px;
+}
+div#position button
+{ position:relative;
+  left:35px;  
+  float: left
 }
 h4#cluster{
     color: #158BB8;
