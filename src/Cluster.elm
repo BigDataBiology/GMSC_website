@@ -76,6 +76,7 @@ initialState seq_id navkey =
     , memberpost = { memberpost = Members.MLoading
                    , showpost = Members.SLoading
                    , times = 1
+                   , myDrop1State = Dropdown.initialState
                    }
     , ask = False
     , navKey = navkey
@@ -155,11 +156,10 @@ viewModel model =
 
 -- main text
 title : Html Msg
-title = div [ id "cluster" ] 
-                [ h4 [id "cluster"] 
-                       [ text  "This 90AA cluster contains the following 100AA smORFs:"]
-                , Button.button [ Button.info, Button.onClick (Showmember)] [ text "Show" ]
-                ]
+title = div [] 
+            [ h4 [id "cluster"] [ text  "This 90AA cluster contains the following 100AA smORFs:" ]
+            , div [class "browse"] [ Button.button [ Button.info, Button.onClick (Showmember) ] [ text "Show" ] ]
+            ]
 
 viewCluster : Cluster -> Html Msg
 viewCluster v = 
