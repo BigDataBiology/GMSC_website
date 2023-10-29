@@ -128,21 +128,14 @@ TSV table relating the SignalP prediction of 90AA catalog.
 Columns:
 
 - `smORF accession`
-- `Cmax`
-- `pos`
-- `Ymax`
-- `pos`
-- `Smax`
-- `pos`
-- `Smean`
-- `D`
-- `? signal pepetide`
-- `Dmaxcut`
-- `Networks-used`
+- `Prediction`
+- `SP(Sec/SPI)`
+- `TAT(Tat/SPI)`
+- `LIPO(Sec/SPII)`
+- `OTHER`
+- `CS Position`
 
-**90AA catalog SignalP Gram+ prediction:**&emsp;[GMSC10.90AA.SignalP.gram+.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.SignalP.gram+.tsv.xz)
-
-**90AA catalog SignalP Gram- prediction:**&emsp;[GMSC10.90AA.SignalP.gram-.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.SignalP.gram-.tsv.xz)
+**90AA catalog SignalP prediction:**&emsp;[GMSC10.90AA.signalp.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.signalp.tsv.xz)
 
 ### Metadata
 TSV table relating the metadata of GMSC.
