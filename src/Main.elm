@@ -70,12 +70,6 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
 
--- SUBSCRIPTIONS
-
-subscriptions : Model -> Sub Msg
-subscriptions model = 
-    Sub.none
-
 -- INIT
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -289,7 +283,7 @@ main =
     { init = init
     , view = view
     , update = update
-    , subscriptions = subscriptions
+    , subscriptions = \_ -> Sub.none
     , onUrlRequest = LinkClicked
     , onUrlChange = UrlChanged
     }
