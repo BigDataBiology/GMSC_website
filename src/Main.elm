@@ -289,7 +289,8 @@ main =
     }
 
 view : Model -> Browser.Document Msg
-view model = { title = "GMSC"
+view model =
+        { title = titleFor model
         , body =
             [ CDN.stylesheet
             , CDN.fontAwesome
@@ -310,6 +311,18 @@ view model = { title = "GMSC"
                 ]
             ]
         }
+
+titleFor : Model -> String
+titleFor model = case model.page of
+    Home _      -> "GMSC"
+    Sequence _  -> "GMSC"
+    Cluster _   -> "GMSC"
+    Mapper _    -> "GMSC: Mapper"
+    Browse _    -> "GMSC: Browse"
+    Download    -> "GMSC: Downloads"
+    Help        -> "GMSC: Help"
+    About       -> "GMSC: About"
+    NotFoundP   -> "GMSC: Not found"
 
 viewModel : Model -> Html Msg
 viewModel model = case model.page of
