@@ -20,9 +20,8 @@ nav#topbar a:hover {
 
 /*footer*/
 div#footerbar p {
-    color: #b4c0c3;
+    color: #333333;
     text-align:center;
-    padding: 14px 0px;
 }
 
 h1 {

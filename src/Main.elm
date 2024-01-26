@@ -363,6 +363,11 @@ header =
 footer : Html Msg
 footer =
   div [id "footerbar"]
-      [  p [] [text "Copyright (c) 2023-2024 GMSC authors. All rights reserved."]
+      [p []
+            [Html.text "For more information, see "
+            ,Html.a [HtmlAttr.href "https://www.biorxiv.org/content/10.1101/2023.12.27.573469v1"]
+                    [Html.text "(Duan et al., 2023)"]
+            ,Html.text "."]
+      ,p [] [text "Copyright (c) 2023-2024 GMSC authors. All rights reserved."]
       ]
 
