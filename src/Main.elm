@@ -38,7 +38,6 @@ import Download
 import Help
 import About
 
-
 type alias Model =
   { key : Nav.Key
   , page : Page
@@ -54,6 +53,7 @@ type Page =
     | Download 
     | Help
     | About
+    | Index
     | NotFoundP
 
 type Msg
@@ -67,6 +67,7 @@ type Msg
     | GoToDownload
     | GoToHelp
     | GoToAbout
+    | GoToIndex
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
 
@@ -89,6 +90,9 @@ initCurrentPage ( model, existingCmds ) =
             case model.route of
                 Route.NotFound ->
                     ( NotFoundP, Cmd.none )
+
+                Route.IndexR ->
+                    ( Index, Cmd.none )
 
                 Route.HomeR ->
                     ( Home Home.initialModel, Cmd.none )
@@ -208,7 +212,7 @@ update msg model = case msg of
 
     GoToBrowse ->
         let (mm, cmd) = Browse.initialModel
-        in ({ model | page = Browse mm},Cmd.map BrowseMsg cmd)
+        in ({ model | page = Browse mm },Cmd.map BrowseMsg cmd)
     
     GoToDownload ->
         ({ model | page = Download },Cmd.none)
@@ -218,6 +222,9 @@ update msg model = case msg of
 
     GoToAbout ->
         ({ model | page = About },Cmd.none)
+
+    GoToIndex ->
+        ({ model | page = Index },Cmd.none)
 
     HomeMsg m -> case model.page of
         Home hm ->
@@ -322,6 +329,7 @@ titleFor model = case model.page of
     Download    -> "GMSC: Downloads"
     Help        -> "GMSC: Help"
     About       -> "GMSC: About"
+    Index       -> "GMSC: Index"
     NotFoundP   -> "GMSC: Not found"
 
 viewModel : Model -> Html Msg
@@ -347,9 +355,18 @@ viewModel model = case model.page of
         Help.viewModel 
     About ->
         About.viewModel
+    Index ->
+        indexView
     NotFoundP ->
         notFoundView
 
+indexView : Html msg
+indexView =
+    div []
+        [ Html.text "DB	{\"id\": \"gmsc\",\"title\": \"GMSC\",\"url\": \"https://gmsc.big-data-biology.org/\",\"description\": \"The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes.\",\"basicInfo\": \"The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes.A total of non-redundant ~965 million 100AA ORFs were predicted from 63,410 metagenomes from global habitats and 87,920 high-quality isolated microbial genomes from the ProGenomes database. The smORFs were clustered at 90% amino acid identity resulting in ~288 million 90AA smORFs families.\",\"categories\": [\"Sequences\"],\"species\": [\"bacteria\",\"archaea\"],\"updatedAt\": \"2024-03-24 12:00:00\"}"
+        , Html.text "ENTRY	{\"id\": \"GMSC10.90AA.000_000_000\",\"type\": \"gene\",\"title\": \"GMSC10.90AA.000_000_000\",\"url\": \"https://gmsc.big-data-biology.org/cluster/GMSC10.90AA.000_000_000\",\"dbId\": \"gmsc\",\"updatedAt\": \"2024-03-24 12:00:00\",\"description\": \"\",\"basicInfo\": \"\",\"species\": [\"\"],\"attrs\": {\"\":\"\"}}"
+        ]
+        
 notFoundView : Html msg
 notFoundView =
     h3 [] [ text "Oops! The page you requested was not found!" ]
