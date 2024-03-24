@@ -15,6 +15,7 @@ type Route
     | DownloadR 
     | HelpR
     | AboutR
+    | IndexR
 
 parseUrl : Url -> Route
 parseUrl url =
@@ -34,6 +35,7 @@ matchRoute =
         , Parser.map DownloadR (Parser.s "downloads")
         , Parser.map HelpR (Parser.s "help")
         , Parser.map AboutR (Parser.s "about")
+        , Parser.map IndexR (Parser.s "index.bs")
         , Parser.map SequenceR (Parser.s "sequence" </> Parser.string)
         , Parser.map ClusterR (Parser.s "cluster" </> Parser.string)
         , Parser.map MapperR (Parser.s "mapper")
@@ -65,6 +67,9 @@ routeToString route =
 
         AboutR ->
             "/about"
+
+        IndexR ->
+            "/index.bs"
 
         SequenceR seq_id ->
             "/sequence/" ++ seq_id
