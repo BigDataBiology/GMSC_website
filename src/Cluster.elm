@@ -183,7 +183,7 @@ viewCluster v =
                 [ Table.td [] [ p [id "title"] [text "Habitat"]  ]
                 , Table.td [] [ p [id "detail"] [text v.habitat]  ]
                 ]
-            , Table.tr []
+            {-, Table.tr []
                 [ Table.td [] [ p [id "title"] [text "Conserved domain"]  ]
                 , Table.td [] [ p [id "detail"] [text "-"]  ]
                 ]
@@ -191,7 +191,7 @@ viewCluster v =
                 [ Table.td [] [ p [id "title"] [text "Cellular localization"]  ]
                 , Table.td [] [ p [id "detail"] [text "-"]  ]
                 ]
-            {-, Table.tr []
+            , Table.tr []
                 [ Table.td [] [ p [id "title"] [text "Number of 100AA smORFs"]  ]
                 , Table.td [] [ p [id "detail"] [text "-"]  ]
                 ]-}
