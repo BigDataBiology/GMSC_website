@@ -143,10 +143,10 @@ intro : Html msg
 intro =
     span [id "introduction"]
         [Markdown.toHtml [] """
-# Global Microbial smORFs Catalog v1.0
+# Global Microbial smORFs Catalogue v1.0
 
 The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes.
-A total of non-redundant ~965 million 100AA ORFs were predicted from 63,410 metagenomes from global habitats and 87,920 high-quality isolated microbial genomes from the [ProGenomes](https://progenomes.embl.de/) database.
+A total of non-redundant ~965 million 100AA ORFs were predicted from 63,410 metagenomes across global habitats from the [SPIRE database](http://spire.embl.de) and 87,920 high-quality isolated microbial genomes from the [ProGenomes2 database](https://progenomes.embl.de/).
 The smORFs were clustered at 90% amino acid identity resulting in ~288 million 90AA smORFs families.
 
 - The annotation of GMSC contains:

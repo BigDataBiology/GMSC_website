@@ -21,121 +21,75 @@ content =
     span [id "introduction"]
         [Markdown.toHtml [] """
 # Data Downloads
-We provide a 100% non-redundant catalog (964,970,496 smORFs) and a 90% amino-acid level catalog (287,926,875 smORFs families).
+We provide the 964,970,496 non-redundant smORFs catalogue at 100% amino acid identity and 287,926,875 smORF families at 90% amino acid identity.
 
 - The download files contain: 
   - protein / nucleotide fasta file
   - cluster table
-  - taxonomy classification
-  - habitat assignment
-  - quality assessment
-  - conserved domains annotation
-  - cellular localization prediction
+  - annotation table
   - metadata
 
 ### Protein sequence (.fasta)
 Fasta file of 100AA / 90AA protein sequences.
 
-**100AA catalog:**&emsp;[GMSC10.100AA.faa.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.faa.xz)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.faa.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.fna.xz)
 
-**90AA catalog:**&emsp;[GMSC10.90AA.faa.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.faa.xz)
+**90AA smORF families:**&emsp;[GMSC10.90AA.faa.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.faa.xz)
 
 ### Nucleotide sequence (.fasta)
 Fasta file of 100AA / 90AA nucleotide sequences.
 
-**100AA catalog:**&emsp;[GMSC10.100AA.fna.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.fna.xz)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.fna.xz](https://zenodo.org/records/7944371/files/GMSC10.100AA.fna.xz?download=1)
 
-**90AA catalog:**&emsp;[GMSC10.90AA.fna.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.fna.xz)
+**90AA smORF families:**&emsp;[GMSC10.90AA.fna.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.fna.xz)
 
 ### Clusters
-TSV table relating 100AA smORF accession and the hierarchically obtained clusters at 90% amino acid identity (which represent sequences with the same function).
+TSV table relating 100AA smORF accession and the hierarchically obtained families at 90% amino acid identity (which represent sequences with the same function).
 
 Columns:
 
 - `100AA smORF accession`
 - `90AA smORF accession`
 
-**Protein clustering table:**&emsp;[GMSC10.cluster.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.cluster.tsv.xz)
+**Protein clustering table:**&emsp;[GMSC10.cluster.tsv.xz](https://zenodo.org/records/7944371/files/GMSC10.cluster.sorted2.tsv.xz?download=1)
 
-### Taxonomy classification
-TSV table relating the taxonomy classification of 100AA / 90AA catalog.
-
-Columns:
-
-- `smORF accession`
-- `taxonomy (separated by semicolon)`
-
-**100AA catalog:**&emsp;[GMSC10.100AA.taxonomy.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.taxonomy.tsv.xz)
-
-**90AA catalog:**&emsp;[GMSC10.90AA.taxonomy.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.taxonomy.tsv.xz)
-
-### Habitat assignment
-TSV table relating the habitat assignment of 100AA / 90AA catalog.
+### Annotations
+TSV table relating the annotations of 100AA smORF catalogue.
 
 Columns:
 
-- `smORF accession`
-- `habitats (separated by comma)`
+- `Habitat annotation`: separated by comma
+- `Taxonomic annotation`: separated by semicolon
 
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.annotation.tsv.xz](https://zenodo.org/records/7944371/files/GMSC10.100AA.annotation.tsv.xz?download=1)
 
-**100AA catalog:**&emsp;[GMSC10.100AA.general_habitat.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.general_habitat.tsv.xz)
+TSV table relating the annotations of 90AA smORF families.
 
-**90AA catalog:**&emsp;[GMSC10.90AA.general_habitat.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.general_habitat.tsv.xz)
+Columns:
+
+- `Habitat annotation`: separated by comma
+- `Taxonomic annotation`: separated by semicolon
+- `Conserved domain annotation`: identifiers in CDD database, separated by comma
+- `TMHMM prediction`: the number of predicted transmembrane helices and the topology predicted, separated by semicolon
+- `SignalP prediction`
+
+**90AA smORF families:**&emsp;[GMSC10.90AA.annotation.tsv.xz](https://zenodo.org/records/7944371/files/GMSC10.90AA.annotation.tsv.xz?download=1)
 
 ### Quality assessment
-TSV table relating the quality assessment of 100AA / 90AA catalog.
+TSV table relating the quality assessment of 100AA smORF catalogue and 90AA smORF families.
 
 Columns:
 
-- `smORF accession`
-- `RNAcode`
-- `AntiFam`
-- `metaProteome`
-- `(meta)Riboseq`
-- `Terminal checking`
-- `metaTranscriptome`
+- `AntiFam`: 'T' represents that smORF does not belong to the Antifam family. 'F' is the opposite.
+- `Terminal checking`: 'T' represents that the upstream of smORF contains an in-frame STOP codon to rule out the possibility that the smORF is part of a broken gene due to contig fragmentation. 'F' is the opposite. 'NA' represents the checking was not performed on smORFs from Progenomes2 database.
+- `RNAcode`: P-value from RNAcode. 'NA' represents the checking was not performed on smORFs families (8 members) or no reports in the results.
+- `MetaTranscriptome`: The number of samples that smORFs are mapped.
+- `Ribo-Seq`: The number of samples that smORFs are mapped.
+- `MetaProteome`: The total k-mer coverage of peptides on smORFs.
 
-**100AA catalog:**&emsp;[GMSC10.100AA.quality.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.quality.tsv.xz)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.quality_test.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.quality.tsv.xz)
 
-**90AA catalog:**&emsp;[GMSC10.90AA.quality.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.quality.tsv.xz)
-
-### Conserved domains annotation
-TSV table relating the Conserved domains annotation of 90AA catalog.
-
-Columns:
-
-- `smORF accession`
-- `identifier in CDD database (separated by comma)`
-
-**90AA catalog CDD annotation:**&emsp;[GMSC10.90AA.cdd.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.cdd.tsv.xz)
-
-### Cellular localization prediction
-TSV table relating the TMHMM prediction of 90AA catalog.
-
-Columns:
-
-- `smORF accession`
-- `The length of the protein sequence`
-- `The expected number of amino acids intransmembrane`
-- `The expected number of amino acids in transmembrane helices in the first 60 amino acids of the protein`
-- `The number of predicted transmembrane helices by N-best`
-- `The topology predicted by N-best`
-
-**90AA catalog TMHMM prediction:**&emsp;[GMSC10.90AA.TMHMM.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.TMHMM.tsv.xz)
-
-TSV table relating the SignalP prediction of 90AA catalog.
-
-Columns:
-
-- `smORF accession`
-- `Prediction`
-- `SP(Sec/SPI)`
-- `TAT(Tat/SPI)`
-- `LIPO(Sec/SPII)`
-- `OTHER`
-- `CS Position`
-
-**90AA catalog SignalP prediction:**&emsp;[GMSC10.90AA.signalp.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.signalp.tsv.xz)
+**90AA smORF families:**&emsp;[GMSC10.90AA.quality_test.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.quality.tsv.xz)
 
 ### Metadata
 TSV table relating the metadata of GMSC.
@@ -143,11 +97,11 @@ TSV table relating the metadata of GMSC.
 Columns:
 
 - `smORF accession`
-- `samples (separated by comma)`
+- `samples`: separated by comma
 
-**100AA catalog original sample:**&emsp;[GMSC10.100AA.sample.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.sample.tsv.xz)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.sample.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.sample.tsv.xz)
 
-**90AA catalog original sample:**&emsp;[GMSC10.90AA.sample.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.sample.tsv.xz)
+**90AA smORF families:**&emsp;[GMSC10.90AA.sample.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.sample.tsv.xz)
 
 TSV table relating to metadata of samples used in GMSC.
 
