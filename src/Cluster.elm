@@ -24,12 +24,29 @@ import View exposing (View)
 import Route exposing (Route)
 import Members
 
+stringFromBool : Bool -> String
+stringFromBool value =
+  if value then
+    "True"
+  else
+    "False"
+
+type alias Quality = 
+    { antifam: Bool
+    , metap: Float
+    , metat: Int
+    , riboseq : Int
+    , rnacode : Float
+    , terminal : Bool
+    }
+
 type alias Cluster =
     { aa: String
     , habitat: String
     , nuc: String
     , seqid: String
     , tax: String
+    , quality: Quality
     }
 
 type ClusterPost = 
@@ -51,6 +68,7 @@ type APIResult =
                   , nuc: String
                   , seqid: String
                   , tax: String
+                  , quality: Quality
                   }
 
 type Msg
@@ -58,16 +76,27 @@ type Msg
     | Showmember
     | MembersMsg Members.Msg
 
+decodeQuality : D.Decoder Quality
+decodeQuality = 
+    D.map6 Quality
+        (D.field "antifam" D.bool)
+        (D.field "metap" D.float)
+        (D.field "metat" D.int)
+        (D.field "riboseq" D.int)
+        (D.field "rnacode" D.float)
+        (D.field "terminal" D.bool)
+
 decodeAPIResult : D.Decoder APIResult
 decodeAPIResult =
     let
-        bAPIResultOK a h n s t = APIResultOK { aa = a, habitat = h, nuc = n, seqid = s, tax=t}
-    in D.map5 bAPIResultOK
+        bAPIResultOK a h n s t q = APIResultOK { aa = a, habitat = h, nuc = n, seqid = s, tax = t, quality = q}
+    in D.map6 bAPIResultOK
         (D.field "aminoacid" D.string)
         (D.field "habitat" D.string)
         (D.field "nucleotide" D.string)
         (D.field "seq_id" D.string)
         (D.field "taxonomy" D.string)
+        (D.field "quality" decodeQuality)
 
 
 initialState : String -> Nav.Key -> (Model, Cmd Msg)
@@ -197,7 +226,13 @@ viewCluster v =
                 ]-}
             , Table.tr []
                 [ Table.td [] [ p [id "title"] [text "Quality"]  ]
-                , Table.td [] [ p [id "detail"] [text "-"]  ]
+                , Table.td [] [ p [id "detail"] [text ("Antifam:" ++ (stringFromBool v.quality.antifam))]
+                              , p [id "detail"] [text ("Terminal checking:" ++ (stringFromBool v.quality.terminal))]
+                              , p [id "detail"] [text ("RNAcode:" ++ (String.fromFloat v.quality.rnacode))]
+                              , p [id "detail"] [text ("metaTranscriptome:" ++ (String.fromInt v.quality.metat))] 
+                              , p [id "detail"] [text ("Riboseq:" ++ (String.fromInt v.quality.riboseq))] 
+                              , p [id "detail"] [text ("metaProteome: " ++ (String.fromFloat v.quality.metap))]
+                                ]
                 ]
             ]
         }
