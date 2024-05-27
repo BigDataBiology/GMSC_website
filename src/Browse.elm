@@ -34,8 +34,7 @@ import Shared
 import Selectitem
 
 type alias SelectModel =
-    { hq: Bool
-    , habitatSearch : Selectshared.Model Selectitem.Habitat
+    { habitatSearch : Selectshared.Model Selectitem.Habitat
     , taxonomySearch : Selectshared.Model Selectitem.Taxonomy
     }
 
@@ -45,6 +44,13 @@ type alias Model =
     , ask: Bool
     , popoverState1 : Popover.State
     , popoverState2 : Popover.State
+    , antifamcontent : String
+    , terminalcontent : String
+    , rnacodecontent : String
+    , metatcontent : String
+    , riboseqcontent : String
+    , metapcontent : String
+    , hq: String
     }
 
 type Msg 
@@ -55,32 +61,45 @@ type Msg
     | NoOp
     | PopoverMsg1 Popover.State
     | PopoverMsg2 Popover.State
+    | SetAntifam String
+    | SetTerminal String
+    | SetRnacode String
+    | SetmetaT String
+    | SetRiboseq String
+    | SetmetaP String
+    | SetHQ String
 
 initialModel : (Model, Cmd Msg)
 initialModel =
     let
-        (sm, cmd) = Filter.initialState "" ""
+        (sm, cmd) = Filter.initialState "" "" "" "" "" "" "" "" ""
     in
-        ({ selectpost = { hq = True
-                   , habitatSearch = Selectshared.initialModel 
+        ({ selectpost = { habitatSearch = Selectshared.initialModel 
                                { id = "exampleMulti"
                                , available = Selectitem.habitats
                                , itemToLabel = Selectitem.habitattoLabel
                                , selected = [ ]
                                , selectConfig = selectConfigHabitatSearch
                                }
-                   , taxonomySearch = Selectshared.initialModel 
+                        , taxonomySearch = Selectshared.initialModel 
                                { id = "exampleEmptySearch"
                                , available = Selectitem.taxonomy
                                , itemToLabel = Selectitem.taxtoLabel
                                , selected = [ ]
                                , selectConfig = selectConfigTaxonomySearch
                                }
-                   }
+                        }
         , filterpost = sm
         , ask = False
         , popoverState1 = Popover.initialState
         , popoverState2 = Popover.initialState
+        , antifamcontent = ""
+        , terminalcontent = ""
+        , rnacodecontent = ""
+        , metatcontent = ""
+        , riboseqcontent = ""
+        , metapcontent = ""
+        , hq = ""
         }
         , Cmd.map FilterMsg cmd
         )
@@ -121,16 +140,36 @@ update msg model =
                 ({ qmodel | taxonomySearch = subModel }
                 , Cmd.map TaxonomySearchMsg subCmd
                 )
-              
+        SetAntifam number ->
+            ( { model | antifamcontent = number }, Cmd.none )
+
+        SetTerminal number ->
+            ( { model | terminalcontent = number }, Cmd.none )
+
+        SetRnacode number ->
+            ( { model | rnacodecontent = number }, Cmd.none )
+
+        SetmetaT number ->
+            ( { model | metatcontent = number }, Cmd.none )  
+
+        SetRiboseq number ->
+            ( { model | riboseqcontent = number }, Cmd.none )  
+
+        SetmetaP number ->
+            ( { model | metapcontent = number }, Cmd.none )  
+
+        SetHQ number ->
+            ( { model | hq = number }, Cmd.none )     
+
         Search ->
                 let (qhabitat,qtaxonomy) = ( (String.join "," <| List.sort (Set.toList ( Set.fromList ( List.map model.selectpost.habitatSearch.itemToLabel model.selectpost.habitatSearch.selected ))))
                                            , (String.join "," <| List.map model.selectpost.taxonomySearch.itemToLabel model.selectpost.taxonomySearch.selected))
                 in
-                  if qhabitat == "" && qtaxonomy == "" then
+                  if qhabitat == "" && qtaxonomy == "" && model.antifamcontent == "" && model.terminalcontent == "" && model.rnacodecontent == "" && model.metatcontent == "" && model.riboseqcontent == "" && model.metapcontent == "" && model.hq == "" then
                     (model, Cmd.none)
                   else
                     let
-                      (sm, cmd) = Filter.initialState qhabitat qtaxonomy
+                      (sm, cmd) = Filter.initialState qhabitat qtaxonomy model.antifamcontent model.terminalcontent model.rnacodecontent model.metatcontent model.riboseqcontent model.metapcontent model.hq
                     in ({ model| filterpost = sm, ask=True }, Cmd.map FilterMsg cmd)
 
         FilterMsg m -> 
@@ -171,20 +210,7 @@ viewModel model =
 
 viewSearch: Model -> Html Msg
 viewSearch model = div []
-        [ h5 [] [ text "Browse by habitats and taxonomy "
-                , Popover.config
-                    ( Button.button
-                    [ Button.small
-                    , Button.outlineInfo
-                    , Button.attrs <|
-                        Popover.onHover model.popoverState1 PopoverMsg1
-                    ]
-                    [ span [class "fa fa-question-circle"][]]
-                    )
-                        |> Popover.right
-                        |> Popover.content [] [ text "Only browse high quality 90AA small protein families which can pass all computational quality tests and show experimental evidances." ]
-                        |> Popover.view model.popoverState1
-                ] 
+        [ h5 [] [ text "Browse by habitats and taxonomy "] 
         , div [] [ p [] [ label [id "browse"] [ text "Browse by habitats " 
                                               , Popover.config
                                                ( Button.button
@@ -208,6 +234,84 @@ viewSearch model = div []
         , Selectshared.view
             model.selectpost.taxonomySearch
             |> Html.map TaxonomySearchMsg
+        , h5 [] [ text "Browse by quality"]
+        , div [] [ Form.form []
+                    [ Form.group []
+                        [ Form.label [] [ text "If not belong to the Antifam database" ]
+                        , Input.text 
+                            [ Input.value model.antifamcontent
+                            , Input.attrs [ placeholder "BOOL" ] 
+                            , Input.onInput SetAntifam
+                            ]
+                        ]
+                    ]
+                  ]
+        , div [] [ Form.form []
+                    [ Form.group []
+                        [ Form.label [] [ text "If pass the Terminal checking" ]
+                        , Input.text 
+                            [ Input.value model.terminalcontent
+                            , Input.attrs [ placeholder "BOOL" ] 
+                            , Input.onInput SetTerminal
+                            ]
+                        ]
+                    ]
+                  ]
+        , div [] [ Form.form []
+                    [ Form.group []
+                        [ Form.label [] [ text "P-value of RNAcode" ]
+                        , Input.text 
+                            [ Input.value model.rnacodecontent
+                            , Input.attrs [ placeholder "FLOAT" ] 
+                            , Input.onInput SetRnacode
+                            ]
+                        ]
+                    ]
+                  ]
+        , div [] [ Form.form []
+                    [ Form.group []
+                        [ Form.label [] [ text "The number of mapped samples of metaTranscriptome" ]
+                        , Input.text 
+                            [ Input.value model.metatcontent
+                            , Input.attrs [ placeholder "INT" ] 
+                            , Input.onInput SetmetaT
+                            ]
+                        ]
+                    ]
+                  ]
+        , div [] [ Form.form []
+                    [ Form.group []
+                        [ Form.label [] [ text "The number of mapped samples of Riboseq" ]
+                        , Input.text 
+                            [ Input.value model.riboseqcontent
+                            , Input.attrs [ placeholder "INT" ] 
+                            , Input.onInput SetRiboseq
+                            ]
+                        ]
+                    ]
+                  ]
+        , div [] [ Form.form []
+                    [ Form.group []
+                        [ Form.label [] [ text "The coverage of metaProteome" ]
+                        , Input.text 
+                            [ Input.value model.metapcontent
+                            , Input.attrs [ placeholder "FLOAT ranges from 0-1" ] 
+                            , Input.onInput SetmetaP
+                            ]
+                        ]
+                    ]
+                  ]
+        , div [] [ Form.form []
+                    [ Form.group []
+                        [ Form.label [] [ text "Only show high quality" ]
+                        , Input.text 
+                            [ Input.value model.hq
+                            , Input.attrs [ placeholder "BOOL" ] 
+                            , Input.onInput SetHQ
+                            ]
+                        ]
+                    ]
+                  ]
         , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
         ]
 
