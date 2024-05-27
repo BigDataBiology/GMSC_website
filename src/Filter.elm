@@ -114,8 +114,8 @@ multi ids =
         [  ("seq_ids", Encode.list Encode.string ids)
         ]
 
-initialState : String -> String -> (Model, Cmd Msg)
-initialState habitat taxonomy=
+initialState : String -> String -> String -> String -> String -> String -> String -> String -> String -> (Model, Cmd Msg)
+initialState habitat taxonomy antifam terminal rnacode metat riboseq metap hq=
     ( { browsepost = BLoading
       , showpost = SLoading
       , times = 1
@@ -126,7 +126,13 @@ initialState habitat taxonomy=
     , body = Http.multipartBody
                 [ Http.stringPart "habitat" habitat
                 , Http.stringPart "taxonomy" taxonomy
-                , Http.stringPart "hq_only" "True"
+                , Http.stringPart "quality_antifam" antifam
+                , Http.stringPart "quality_terminal" terminal
+                , Http.stringPart "quality_rnacode" rnacode
+                , Http.stringPart "quality_metat" metat
+                , Http.stringPart "quality_riboseq" riboseq
+                , Http.stringPart "quality_metap" metap
+                , Http.stringPart "hq_only" hq
                 ]
     , expect = Http.expectJson ResultsData decodeAPIResult
     }
