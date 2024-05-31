@@ -26,12 +26,20 @@ import Bootstrap.Card as Card
 import Bootstrap.Text as Text
 import Bootstrap.Card.Block as Block
 import Bootstrap.Popover as Popover
+import Bootstrap.Form.Checkbox as Checkbox
 
 import Filter
 import Selects
 import Selectshared
 import Shared
 import Selectitem
+
+stringFromBool : Bool -> String
+stringFromBool value =
+  if value then
+    "True"
+  else
+    "False"
 
 type alias SelectModel =
     { habitatSearch : Selectshared.Model Selectitem.Habitat
@@ -67,7 +75,7 @@ type Msg
     | SetmetaT String
     | SetRiboseq String
     | SetmetaP String
-    | SetHQ String
+    | MyCheckMsg Bool
 
 initialModel : (Model, Cmd Msg)
 initialModel =
@@ -140,14 +148,14 @@ update msg model =
                 ({ qmodel | taxonomySearch = subModel }
                 , Cmd.map TaxonomySearchMsg subCmd
                 )
-        SetAntifam number ->
-            ( { model | antifamcontent = number }, Cmd.none )
+        SetAntifam b ->
+            ( { model | antifamcontent = b }, Cmd.none )
 
-        SetTerminal number ->
-            ( { model | terminalcontent = number }, Cmd.none )
+        SetTerminal b ->
+            ( { model | terminalcontent = b }, Cmd.none )
 
-        SetRnacode number ->
-            ( { model | rnacodecontent = number }, Cmd.none )
+        SetRnacode p ->
+            ( { model | rnacodecontent = p }, Cmd.none )
 
         SetmetaT number ->
             ( { model | metatcontent = number }, Cmd.none )  
@@ -155,15 +163,16 @@ update msg model =
         SetRiboseq number ->
             ( { model | riboseqcontent = number }, Cmd.none )  
 
-        SetmetaP number ->
-            ( { model | metapcontent = number }, Cmd.none )  
+        SetmetaP cov ->
+            ( { model | metapcontent = cov }, Cmd.none )  
 
-        SetHQ number ->
-            ( { model | hq = number }, Cmd.none )     
+        MyCheckMsg b ->
+            ( { model | hq = stringFromBool b }, Cmd.none )     
 
         Search ->
                 let (qhabitat,qtaxonomy) = ( (String.join "," <| List.sort (Set.toList ( Set.fromList ( List.map model.selectpost.habitatSearch.itemToLabel model.selectpost.habitatSearch.selected ))))
-                                           , (String.join "," <| List.map model.selectpost.taxonomySearch.itemToLabel model.selectpost.taxonomySearch.selected))
+                                           , (String.join "," <| List.map model.selectpost.taxonomySearch.itemToLabel model.selectpost.taxonomySearch.selected)
+                                           )
                 in
                   if qhabitat == "" && qtaxonomy == "" && model.antifamcontent == "" && model.terminalcontent == "" && model.rnacodecontent == "" && model.metatcontent == "" && model.riboseqcontent == "" && model.metapcontent == "" && model.hq == "" then
                     (model, Cmd.none)
@@ -235,6 +244,17 @@ viewSearch model = div []
             model.selectpost.taxonomySearch
             |> Html.map TaxonomySearchMsg
         , h5 [] [ text "Browse by quality"]
+        , div [] [ Form.form [] 
+                    [ Form.group []
+                        [  Checkbox.checkbox
+                           [ Checkbox.id "myChk"
+                           , Checkbox.indeterminate
+                           , Checkbox.onCheck MyCheckMsg
+                           ] 
+                           "Only show high quality"
+                        ]
+                    ]
+                 ]
         , div [] [ Form.form []
                     [ Form.group []
                         [ Form.label [] [ text "If not belong to the Antifam database" ]
@@ -297,17 +317,6 @@ viewSearch model = div []
                             [ Input.value model.metapcontent
                             , Input.attrs [ placeholder "FLOAT ranges from 0-1" ] 
                             , Input.onInput SetmetaP
-                            ]
-                        ]
-                    ]
-                  ]
-        , div [] [ Form.form []
-                    [ Form.group []
-                        [ Form.label [] [ text "Only show high quality" ]
-                        , Input.text 
-                            [ Input.value model.hq
-                            , Input.attrs [ placeholder "BOOL" ] 
-                            , Input.onInput SetHQ
                             ]
                         ]
                     ]
