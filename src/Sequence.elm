@@ -95,7 +95,7 @@ viewModel model =
                                           [ Table.td [] [ p [id "title"] [text "Habitat"]  ]
                                           , Table.td [] [ p [id "detail"] [text v.habitat]  ]
                                           ]
-                                      , Table.tr []
+                                      {-, Table.tr []
                                           [ Table.td [] [ p [id "title"] [text "Protein cluster"]  ]
                                           , Table.td [] [a [ href "https://guide.elm-lang.org" ] [ text "-" ]]
                                           ]
@@ -103,6 +103,7 @@ viewModel model =
                                           [ Table.td [] [ p [id "title"] [text "Quality"]  ]
                                           , Table.td [] [ p [id "detail"] [text "-"]  ]
                                           ]
+                                      -}
                                      ]
                                   }
                     ]

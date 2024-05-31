@@ -295,7 +295,7 @@ viewResults r m times model = case r of
                             , tbody = Table.tbody []
                                     ( List.map (\e ->
                                                     Table.tr []
-                                                    [  Table.td [] [ p [id "identifier"] [Html.a [href ("/cluster/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                                    [  Table.td [] [ p [id "identifier"] [Html.a [href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
                                                     ,  Table.td [] [ p [id "detail"] [text e.aa ] ]
                                                     ,  Table.td [] [ p [id "detail"] [text e.nuc ] ]
                                                     ,  Table.td [] [ p [id "detail"] [text e.habitat ] ]
