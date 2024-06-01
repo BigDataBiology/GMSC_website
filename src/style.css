@@ -270,12 +270,20 @@ div#cluster button{
 
 /* browser page */
 label#browse{
-    color:#158BB8;
-    font-weight: bold;
+  color:#158BB8;
+  font-weight: bold;
+}
+label#quality {
+  color:#158BB8;
 }
 div.browse {
-    position:relative;
-    left:35px;
+  position:relative;
+  left:35px;
+  width:30%;
+}
+div.dropdown {
+  position:relative;
+  width:30%;
 }
 p#selected {
   color:#126E82;
@@ -283,6 +291,7 @@ p#selected {
   position:relative;
   left:50px;
 }
+
 /* elm-select */
 .elm-select-input-wrapper {
     display: flex;
