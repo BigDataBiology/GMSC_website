@@ -1,5 +1,42 @@
 module Selectitem exposing (..)
 
+type alias Antifam =
+    { id : String
+    , label : String
+    }
+
+antifam : List Antifam
+antifam =
+    List.map (\( id, name ) -> Antifam id name) antifamDB
+
+antifamtoLabel : Antifam -> String
+antifamtoLabel =
+    .label
+
+antifamDB : List (String, String)
+antifamDB =
+    [ ("0","Pass")
+    , ("1","Fail")
+    ]
+
+type alias Terminal =
+    { id : String
+    , label : String
+    }
+
+terminal : List Terminal
+terminal =
+    List.map (\( id, name ) -> Terminal id name) terminalDB
+
+terminaltoLabel : Terminal -> String
+terminaltoLabel =
+    .label
+
+terminalDB : List (String, String)
+terminalDB =
+    [ ("0","Pass")
+    , ("1","Fail")
+    ]
 
 type Habitat
     = Activated_sludge

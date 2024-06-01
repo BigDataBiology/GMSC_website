@@ -57,7 +57,7 @@ update msg model =
                         |> Maybe.withDefault []
             in
             ( { model | selected = selected }, Cmd.none )
-
+        
         OnSingleSelect maybeColor ->
             case maybeColor of
               Just a ->
