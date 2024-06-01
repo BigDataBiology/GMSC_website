@@ -41,9 +41,34 @@ stringFromBool value =
   else
     "False"
 
+trueFromPass : String -> String
+trueFromPass value = 
+  if value == "Pass" then
+    "True"
+  else
+    "False"
+
+habitatItem : Model -> String
+habitatItem model =
+  String.join "," <| List.sort (Set.toList ( Set.fromList ( List.map model.selectpost.habitatSearch.itemToLabel model.selectpost.habitatSearch.selected )))
+  
+taxItem : Model -> String
+taxItem model =
+  String.join "," <| List.map model.selectpost.taxonomySearch.itemToLabel model.selectpost.taxonomySearch.selected
+
+antifamItem : Model -> String
+antifamItem model =
+  trueFromPass (String.join "," <| List.map model.selectpost.antifamSearch.itemToLabel model.selectpost.antifamSearch.selected)
+
+terminalItem : Model -> String
+terminalItem model =
+  trueFromPass (String.join "," <| List.map model.selectpost.terminalSearch.itemToLabel model.selectpost.terminalSearch.selected)
+
 type alias SelectModel =
     { habitatSearch : Selectshared.Model Selectitem.Habitat
     , taxonomySearch : Selectshared.Model Selectitem.Taxonomy
+    , antifamSearch : Selectshared.Model Selectitem.Antifam
+    , terminalSearch : Selectshared.Model Selectitem.Terminal
     }
 
 type alias Model =
@@ -52,13 +77,15 @@ type alias Model =
     , ask: Bool
     , popoverState1 : Popover.State
     , popoverState2 : Popover.State
-    , antifamcontent : String
-    , terminalcontent : String
+    {- 
+      , antifamcontent : String
+    , terminalcontent : String-}
     , rnacodecontent : String
     , metatcontent : String
     , riboseqcontent : String
     , metapcontent : String
     , hq: String
+    , quality : Bool
     }
 
 type Msg 
@@ -66,16 +93,21 @@ type Msg
     | FilterMsg Filter.Msg
     | HabitatSearchMsg (Selectshared.Msg Selectitem.Habitat)
     | TaxonomySearchMsg (Selectshared.Msg Selectitem.Taxonomy)
+    | AntifamSearchMsg (Selectshared.Msg Selectitem.Antifam)
+    | TerminalSearchMsg (Selectshared.Msg Selectitem.Terminal)
     | NoOp
     | PopoverMsg1 Popover.State
     | PopoverMsg2 Popover.State
-    | SetAntifam String
+    {-
+     | SetAntifam String
     | SetTerminal String
+    -}
     | SetRnacode String
     | SetmetaT String
     | SetRiboseq String
     | SetmetaP String
     | MyCheckMsg Bool
+    | Choose
 
 initialModel : (Model, Cmd Msg)
 initialModel =
@@ -96,18 +128,34 @@ initialModel =
                                , selected = [ ]
                                , selectConfig = selectConfigTaxonomySearch
                                }
+                        , antifamSearch = Selectshared.initialModel 
+                               { id = "exampleEmptySearch"
+                               , available = Selectitem.antifam
+                               , itemToLabel = Selectitem.antifamtoLabel
+                               , selected = [ ]
+                               , selectConfig = selectConfigAntifamSearch
+                               }
+                        , terminalSearch = Selectshared.initialModel 
+                               { id = "exampleEmptySearch"
+                               , available = Selectitem.terminal
+                               , itemToLabel = Selectitem.terminaltoLabel
+                               , selected = [ ]
+                               , selectConfig = selectConfigTerminalSearch
+                               }
                         }
         , filterpost = sm
         , ask = False
         , popoverState1 = Popover.initialState
         , popoverState2 = Popover.initialState
+        {-
         , antifamcontent = ""
-        , terminalcontent = ""
+        , terminalcontent = ""-}
         , rnacodecontent = ""
         , metatcontent = ""
         , riboseqcontent = ""
         , metapcontent = ""
         , hq = ""
+        , quality = False
         }
         , Cmd.map FilterMsg cmd
         )
@@ -148,11 +196,32 @@ update msg model =
                 ({ qmodel | taxonomySearch = subModel }
                 , Cmd.map TaxonomySearchMsg subCmd
                 )
-        SetAntifam b ->
+
+        AntifamSearchMsg sub ->
+            ifQuery <| \qmodel ->
+              let
+                ( subModel, subCmd ) =
+                    Selectshared.update sub qmodel.antifamSearch
+              in
+                ({ qmodel | antifamSearch = subModel }
+                , Cmd.map AntifamSearchMsg subCmd
+                )
+
+        TerminalSearchMsg sub ->
+            ifQuery <| \qmodel ->
+              let
+                ( subModel, subCmd ) =
+                    Selectshared.update sub qmodel.terminalSearch
+              in
+                ({ qmodel | terminalSearch = subModel }
+                , Cmd.map TerminalSearchMsg subCmd
+                )
+
+        {-SetAntifam b ->
             ( { model | antifamcontent = b }, Cmd.none )
 
         SetTerminal b ->
-            ( { model | terminalcontent = b }, Cmd.none )
+            ( { model | terminalcontent = b }, Cmd.none )-}
 
         SetRnacode p ->
             ( { model | rnacodecontent = p }, Cmd.none )
@@ -170,22 +239,21 @@ update msg model =
             ( { model | hq = stringFromBool b }, Cmd.none )     
 
         Search ->
-                let (qhabitat,qtaxonomy) = ( (String.join "," <| List.sort (Set.toList ( Set.fromList ( List.map model.selectpost.habitatSearch.itemToLabel model.selectpost.habitatSearch.selected ))))
-                                           , (String.join "," <| List.map model.selectpost.taxonomySearch.itemToLabel model.selectpost.taxonomySearch.selected)
-                                           )
-                in
-                  if qhabitat == "" && qtaxonomy == "" && model.antifamcontent == "" && model.terminalcontent == "" && model.rnacodecontent == "" && model.metatcontent == "" && model.riboseqcontent == "" && model.metapcontent == "" && model.hq == "" then
-                    (model, Cmd.none)
-                  else
-                    let
-                      (sm, cmd) = Filter.initialState qhabitat qtaxonomy model.antifamcontent model.terminalcontent model.rnacodecontent model.metatcontent model.riboseqcontent model.metapcontent model.hq
-                    in ({ model| filterpost = sm, ask=True }, Cmd.map FilterMsg cmd)
+            if habitatItem model == "" && taxItem model == "" && antifamItem model == "" && terminalItem model == "" && model.rnacodecontent == "" && model.metatcontent == "" && model.riboseqcontent == "" && model.metapcontent == "" && model.hq == "" then
+                (model, Cmd.none)
+            else
+                let
+                    (sm, cmd) = Filter.initialState (habitatItem model) (taxItem model) (antifamItem model) (terminalItem model) model.rnacodecontent model.metatcontent model.riboseqcontent model.metapcontent model.hq
+                in ({ model| filterpost = sm, ask=True }, Cmd.map FilterMsg cmd)
 
         FilterMsg m -> 
             let
                 (nqm, cmd) = Filter.update m model.filterpost
             in
                 ({ model| filterpost = nqm }, Cmd.map FilterMsg cmd)
+
+        Choose ->
+          ( { model | quality = True }, Cmd.none )  
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -255,7 +323,80 @@ viewSearch model = div []
                         ]
                     ]
                  ]
-        , div [] [ Form.form []
+        , div [class "browse"] [Button.button [ Button.info, Button.onClick Choose ] [ text "Specific quality tests" ] ]
+        , if model.quality == True then
+            viewSpecific model
+          else
+            p [] [ text "" ]
+        , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
+        ]
+
+selectConfigHabitat =
+    Selects.newConfig
+        { onSelect = Selectshared.OnSelect
+        , toLabel = Selectitem.habitattoLabel
+        , filter = Shared.filter 1 Selectitem.habitattoLabel
+        , toMsg = Selectshared.SelectMsg
+        }
+
+selectConfigHabitatSearch =
+    selectConfigHabitat
+        |> Selects.withMultiSelection True
+        |> Selects.withOnRemoveItem Selectshared.OnRemoveItem
+        -- |> Selects.withCutoff 12
+        |> Selects.withEmptySearch True
+        |> Selects.withNotFound "No matches"
+        |> Selects.withPrompt "Select habitats"
+
+selectConfigTaxonomySearch =
+    Selects.newConfig
+        { onSelect = Selectshared.OnSingleSelect
+        , toLabel = .label
+        , filter = Shared.filter 1 .label
+        , toMsg = Selectshared.SelectMsg
+        }
+        -- |> Selects.withCutoff 12
+        |> Selects.withEmptySearch True
+        |> Selects.withNotFound "No matches"
+        |> Selects.withPrompt "Select taxonomy"
+
+selectConfigAntifamSearch =
+    Selects.newConfig
+        { onSelect = Selectshared.OnSingleSelect
+        , toLabel = .label
+        , filter = Shared.filter 1 .label
+        , toMsg = Selectshared.SelectMsg
+        }
+        -- |> Selects.withCutoff 12
+        |> Selects.withEmptySearch True
+        |> Selects.withNotFound "No matches"
+        |> Selects.withPrompt "Select antifam"
+
+selectConfigTerminalSearch =
+    Selects.newConfig
+        { onSelect = Selectshared.OnSingleSelect
+        , toLabel = .label
+        , filter = Shared.filter 1 .label
+        , toMsg = Selectshared.SelectMsg
+        }
+        -- |> Selects.withCutoff 12
+        |> Selects.withEmptySearch True
+        |> Selects.withNotFound "No matches"
+        |> Selects.withPrompt "Select terminal"
+
+viewSpecific : Model -> Html Msg
+viewSpecific model =  
+    div []
+        [ div [] [ p [] [ label [id "browse"] [ text "Antifam" ] ] ]
+        , Selectshared.view
+          model.selectpost.antifamSearch
+          |> Html.map AntifamSearchMsg
+        , div [] [ p [] [ label [id "browse"] [ text "Terminal checking" ] ] ]
+          , Selectshared.view
+          model.selectpost.terminalSearch
+          |> Html.map TerminalSearchMsg
+        {-
+        div [] [ Form.form []
                     [ Form.group []
                         [ Form.label [] [ text "If not belong to the Antifam database" ]
                         , Input.text 
@@ -277,6 +418,7 @@ viewSearch model = div []
                         ]
                     ]
                   ]
+        -}
         , div [] [ Form.form []
                     [ Form.group []
                         [ Form.label [] [ text "P-value of RNAcode" ]
@@ -321,34 +463,4 @@ viewSearch model = div []
                         ]
                     ]
                   ]
-        , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
-        ]
-
-selectConfigTaxonomySearch =
-    Selects.newConfig
-        { onSelect = Selectshared.OnSingleSelect
-        , toLabel = .label
-        , filter = Shared.filter 1 .label
-        , toMsg = Selectshared.SelectMsg
-        }
-        -- |> Selects.withCutoff 12
-        |> Selects.withEmptySearch True
-        |> Selects.withNotFound "No matches"
-        |> Selects.withPrompt "Select taxonomy"
-
-selectConfigHabitat =
-    Selects.newConfig
-        { onSelect = Selectshared.OnSelect
-        , toLabel = Selectitem.habitattoLabel
-        , filter = Shared.filter 1 Selectitem.habitattoLabel
-        , toMsg = Selectshared.SelectMsg
-        }
-
-selectConfigHabitatSearch =
-    selectConfigHabitat
-        |> Selects.withMultiSelection True
-        |> Selects.withOnRemoveItem Selectshared.OnRemoveItem
-        -- |> Selects.withCutoff 12
-        |> Selects.withEmptySearch True
-        |> Selects.withNotFound "No matches"
-        |> Selects.withPrompt "Select habitats"
+    ]
