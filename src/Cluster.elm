@@ -25,6 +25,7 @@ import View exposing (View)
 import Route exposing (Route)
 import Members
 
+
 ifHighQuality : Bool -> Bool -> Float -> Int -> Int -> Float -> String
 ifHighQuality a t r mt rb mp = 
     if a == True && t == True && r < 0.05 && (mt > 1 || rb > 1 || mp > 0.5) then
@@ -62,14 +63,6 @@ ifmetaP n =
     "Pass (" ++ (String.fromFloat n) ++ ")"
   else
     "Not Pass (" ++ (String.fromFloat n) ++ ")"
-=======
-stringFromBool : Bool -> String
-stringFromBool value =
-  if value then
-    "True"
-  else
-    "False"
->>>>>>> 1e355cea14ac9d33b70bec9f7f1d483a6db93136
 
 type alias Quality = 
     { antifam: Bool
@@ -119,16 +112,6 @@ type Msg
     | Showquality
     | MembersMsg Members.Msg
     | PopoverMsg1 Popover.State
-
-decodeQuality : D.Decoder Quality
-decodeQuality = 
-    D.map6 Quality
-        (D.field "antifam" D.bool)
-        (D.field "metap" D.float)
-        (D.field "metat" D.int)
-        (D.field "riboseq" D.int)
-        (D.field "rnacode" D.float)
-        (D.field "terminal" D.bool)
 
 decodeQuality : D.Decoder Quality
 decodeQuality = 
@@ -283,11 +266,10 @@ viewCluster v ifq pop =
                 , Table.td [] [ p [id "detail"] [text "-"]  ]
                 ]
             , Table.tr []
-                [ Table.td [] [ p [id "title"] [text "Number of 100AA smORFs"]  ]
-                , Table.td [] [ p [id "detail"] [text "-"]  ]
+                [ Table.td [] [ p [id "title"] [text "Number of 100AA smORFs"] ]
+                , Table.td [] [ p [id "detail"] [text "-"] ]
                 ]-}
             , Table.tr []
-<<<<<<< HEAD
                 [ Table.td [] [ p [id "title"] [ text "Quality  "
                                                , Popover.config
                                                  ( Button.button
@@ -296,9 +278,7 @@ viewCluster v ifq pop =
                                                    , Button.attrs <|
                                                        Popover.onHover pop PopoverMsg1
                                                    ]
-                                                   [ span [class "fa fa-question-circle"]
-                                                   []
-                                                   ]
+                                                   [ span [ class "fa fa-question-circle" ] [] ]
                                                  )
                                                  |> Popover.right
                                                  |> Popover.content []
@@ -313,16 +293,6 @@ viewCluster v ifq pop =
                                 else 
                                   p [] [text ""]
                               ]
-=======
-                [ Table.td [] [ p [id "title"] [text "Quality"]  ]
-                , Table.td [] [ p [id "detail"] [text ("Antifam:" ++ (stringFromBool v.quality.antifam))]
-                              , p [id "detail"] [text ("Terminal checking:" ++ (stringFromBool v.quality.terminal))]
-                              , p [id "detail"] [text ("RNAcode:" ++ (String.fromFloat v.quality.rnacode))]
-                              , p [id "detail"] [text ("metaTranscriptome:" ++ (String.fromInt v.quality.metat))] 
-                              , p [id "detail"] [text ("Riboseq:" ++ (String.fromInt v.quality.riboseq))] 
-                              , p [id "detail"] [text ("metaProteome: " ++ (String.fromFloat v.quality.metap))]
-                                ]
->>>>>>> 1e355cea14ac9d33b70bec9f7f1d483a6db93136
                 ]
             ]
         }
