@@ -25,8 +25,6 @@ import View exposing (View)
 import Route exposing (Route)
 import Members
 
-<<<<<<< HEAD
-
 ifHighQuality : Bool -> Bool -> Float -> Int -> Int -> Float -> String
 ifHighQuality a t r mt rb mp = 
     if a == True && t == True && r < 0.05 && (mt > 1 || rb > 1 || mp > 0.5) then
