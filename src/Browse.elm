@@ -304,15 +304,19 @@ viewSearch model = div []
                                                |> Popover.content []
                                                       [ text "Habitats with the suffix 'associated' represent a wider range of environments that cannot be traced further to more specific habitats. For example, 'human associated' represents human related habitats other than those listed in 'gut', 'south', etc." ]
                                                |> Popover.view model.popoverState2] ] ]
-        , Selectshared.view
-            model.selectpost.habitatSearch
-            |> Html.map HabitatSearchMsg
+        , div [] 
+            [ Selectshared.view
+              model.selectpost.habitatSearch
+              |> Html.map HabitatSearchMsg 
+            ]
         , div [] [ p [] [ label [id "browse"] [ text "Browse by taxonomy" ] ] ]
-        , Selectshared.view
-            model.selectpost.taxonomySearch
-            |> Html.map TaxonomySearchMsg
+        , div [] 
+            [ Selectshared.view
+              model.selectpost.taxonomySearch
+              |> Html.map TaxonomySearchMsg
+            ]
         , h5 [] [ text "Browse by quality"]
-        , div [] [ Form.form [] 
+        , div [ class "browse" ] [ Form.form [] 
                     [ Form.group []
                         [  Checkbox.checkbox
                            [ Checkbox.id "myChk"
@@ -323,7 +327,7 @@ viewSearch model = div []
                         ]
                     ]
                  ]
-        , div [class "browse"] [Button.button [ Button.info, Button.onClick Choose ] [ text "Specific quality tests" ] ]
+        , div [class "browse"] [Button.button [ Button.outlineInfo, Button.onClick Choose ] [ text "Specific quality tests" ] ]
         , if model.quality == True then
             viewSpecific model
           else
@@ -370,7 +374,7 @@ selectConfigAntifamSearch =
         -- |> Selects.withCutoff 12
         |> Selects.withEmptySearch True
         |> Selects.withNotFound "No matches"
-        |> Selects.withPrompt "Select antifam"
+        |> Selects.withPrompt "Pass / Fail"
 
 selectConfigTerminalSearch =
     Selects.newConfig
@@ -382,19 +386,23 @@ selectConfigTerminalSearch =
         -- |> Selects.withCutoff 12
         |> Selects.withEmptySearch True
         |> Selects.withNotFound "No matches"
-        |> Selects.withPrompt "Select terminal"
+        |> Selects.withPrompt "Pass / Fail"
 
 viewSpecific : Model -> Html Msg
 viewSpecific model =  
     div []
-        [ div [] [ p [] [ label [id "browse"] [ text "Antifam" ] ] ]
-        , Selectshared.view
-          model.selectpost.antifamSearch
-          |> Html.map AntifamSearchMsg
-        , div [] [ p [] [ label [id "browse"] [ text "Terminal checking" ] ] ]
-          , Selectshared.view
-          model.selectpost.terminalSearch
-          |> Html.map TerminalSearchMsg
+        [ div [] [ p [] [ label [ id "quality" ] [ text "Antifam" ] ] ]
+        , div [ class "dropdown" ] 
+            [ Selectshared.view
+              model.selectpost.antifamSearch
+              |> Html.map AntifamSearchMsg
+            ]
+        , div [] [ p [] [ label [ id "quality" ] [ text "Terminal checking" ] ] ]
+        , div [ class "dropdown" ] 
+            [ Selectshared.view
+              model.selectpost.terminalSearch
+              |> Html.map TerminalSearchMsg
+            ]
         {-
         div [] [ Form.form []
                     [ Form.group []
@@ -419,9 +427,9 @@ viewSpecific model =
                     ]
                   ]
         -}
-        , div [] [ Form.form []
+        , div [ class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [] [ text "P-value of RNAcode" ]
+                        [ Form.label [ id "quality" ] [ text "P-value of RNAcode" ]
                         , Input.text 
                             [ Input.value model.rnacodecontent
                             , Input.attrs [ placeholder "FLOAT" ] 
@@ -430,9 +438,9 @@ viewSpecific model =
                         ]
                     ]
                   ]
-        , div [] [ Form.form []
+        , div [ class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [] [ text "The number of mapped samples of metaTranscriptome" ]
+                        [ Form.label [id "quality"] [ text "The number of mapped samples of metaTranscriptome" ]
                         , Input.text 
                             [ Input.value model.metatcontent
                             , Input.attrs [ placeholder "INT" ] 
@@ -441,9 +449,9 @@ viewSpecific model =
                         ]
                     ]
                   ]
-        , div [] [ Form.form []
+        , div [ class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [] [ text "The number of mapped samples of Riboseq" ]
+                        [ Form.label [ id "quality" ] [ text "The number of mapped samples of Riboseq" ]
                         , Input.text 
                             [ Input.value model.riboseqcontent
                             , Input.attrs [ placeholder "INT" ] 
@@ -452,9 +460,9 @@ viewSpecific model =
                         ]
                     ]
                   ]
-        , div [] [ Form.form []
+        , div [ class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [] [ text "The coverage of metaProteome" ]
+                        [ Form.label [ id "quality" ] [ text "The coverage of metaProteome" ]
                         , Input.text 
                             [ Input.value model.metapcontent
                             , Input.attrs [ placeholder "FLOAT ranges from 0-1" ] 
