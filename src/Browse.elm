@@ -64,6 +64,8 @@ terminalItem : Model -> String
 terminalItem model =
   trueFromPass (String.join "," <| List.map model.selectpost.terminalSearch.itemToLabel model.selectpost.terminalSearch.selected)
 
+type OperationType = All | HQ
+
 type alias SelectModel =
     { habitatSearch : Selectshared.Model Selectitem.Habitat
     , taxonomySearch : Selectshared.Model Selectitem.Taxonomy
@@ -77,15 +79,12 @@ type alias Model =
     , ask: Bool
     , popoverState1 : Popover.State
     , popoverState2 : Popover.State
-    {- 
-      , antifamcontent : String
-    , terminalcontent : String-}
     , rnacodecontent : String
     , metatcontent : String
     , riboseqcontent : String
     , metapcontent : String
     , hq: String
-    , quality : Bool
+    , optype : OperationType
     }
 
 type Msg 
@@ -98,16 +97,11 @@ type Msg
     | NoOp
     | PopoverMsg1 Popover.State
     | PopoverMsg2 Popover.State
-    {-
-     | SetAntifam String
-    | SetTerminal String
-    -}
     | SetRnacode String
     | SetmetaT String
     | SetRiboseq String
     | SetmetaP String
-    | MyCheckMsg Bool
-    | Choose
+    | SelectOp OperationType
 
 initialModel : (Model, Cmd Msg)
 initialModel =
@@ -147,15 +141,12 @@ initialModel =
         , ask = False
         , popoverState1 = Popover.initialState
         , popoverState2 = Popover.initialState
-        {-
-        , antifamcontent = ""
-        , terminalcontent = ""-}
         , rnacodecontent = ""
         , metatcontent = ""
         , riboseqcontent = ""
         , metapcontent = ""
         , hq = ""
-        , quality = False
+        , optype = HQ
         }
         , Cmd.map FilterMsg cmd
         )
@@ -217,12 +208,6 @@ update msg model =
                 , Cmd.map TerminalSearchMsg subCmd
                 )
 
-        {-SetAntifam b ->
-            ( { model | antifamcontent = b }, Cmd.none )
-
-        SetTerminal b ->
-            ( { model | terminalcontent = b }, Cmd.none )-}
-
         SetRnacode p ->
             ( { model | rnacodecontent = p }, Cmd.none )
 
@@ -233,10 +218,7 @@ update msg model =
             ( { model | riboseqcontent = number }, Cmd.none )  
 
         SetmetaP cov ->
-            ( { model | metapcontent = cov }, Cmd.none )  
-
-        MyCheckMsg b ->
-            ( { model | hq = stringFromBool b }, Cmd.none )     
+            ( { model | metapcontent = cov }, Cmd.none )      
 
         Search ->
             if habitatItem model == "" && taxItem model == "" && antifamItem model == "" && terminalItem model == "" && model.rnacodecontent == "" && model.metatcontent == "" && model.riboseqcontent == "" && model.metapcontent == "" && model.hq == "" then
@@ -252,8 +234,13 @@ update msg model =
             in
                 ({ model| filterpost = nqm }, Cmd.map FilterMsg cmd)
 
-        Choose ->
-          ( { model | quality = True }, Cmd.none )  
+        SelectOp p ->
+            if model.optype == All && p == HQ then
+                ( { model | optype = HQ , hq = "True"}, Cmd.none )
+            else if model.optype == HQ && p == All then
+                ( { model | optype = All, hq = "False" }, Cmd.none )
+            else
+                ( { model | optype = p }, Cmd.none )
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -316,19 +303,8 @@ viewSearch model = div []
               |> Html.map TaxonomySearchMsg
             ]
         , h5 [] [ text "Browse by quality"]
-        , div [ class "browse" ] [ Form.form [] 
-                    [ Form.group []
-                        [  Checkbox.checkbox
-                           [ Checkbox.id "myChk"
-                           , Checkbox.indeterminate
-                           , Checkbox.onCheck MyCheckMsg
-                           ] 
-                           "Only show high quality"
-                        ]
-                    ]
-                 ]
-        , div [class "browse"] [Button.button [ Button.outlineInfo, Button.onClick Choose ] [ text "Specific quality tests" ] ]
-        , if model.quality == True then
+        , viewHq model
+        , if model.optype == All then
             viewSpecific model
           else
             p [] [ text "" ]
@@ -388,6 +364,24 @@ selectConfigTerminalSearch =
         |> Selects.withNotFound "No matches"
         |> Selects.withPrompt "Pass / Fail"
 
+viewHq : Model -> Html Msg
+viewHq model =  
+  let
+    buttonStyle who active =
+        [ if who == active then Button.info else Button.outlineInfo, Button.onClick (SelectOp who) ]
+  in div [class "browse"] 
+    [ Form.form []
+        [ Form.row []
+            [ Form.col [ Col.sm10 ]
+                [ ButtonGroup.buttonGroup [ ButtonGroup.small ]
+                    [ ButtonGroup.button (buttonStyle HQ model.optype) [ text "Only show high quality" ]
+                    , ButtonGroup.button (buttonStyle All model.optype) [ text "Show all" ]
+                    ]
+                ]
+            ] 
+        ]
+    ]              
+
 viewSpecific : Model -> Html Msg
 viewSpecific model =  
     div []
@@ -403,30 +397,6 @@ viewSpecific model =
               model.selectpost.terminalSearch
               |> Html.map TerminalSearchMsg
             ]
-        {-
-        div [] [ Form.form []
-                    [ Form.group []
-                        [ Form.label [] [ text "If not belong to the Antifam database" ]
-                        , Input.text 
-                            [ Input.value model.antifamcontent
-                            , Input.attrs [ placeholder "BOOL" ] 
-                            , Input.onInput SetAntifam
-                            ]
-                        ]
-                    ]
-                  ]
-        , div [] [ Form.form []
-                    [ Form.group []
-                        [ Form.label [] [ text "If pass the Terminal checking" ]
-                        , Input.text 
-                            [ Input.value model.terminalcontent
-                            , Input.attrs [ placeholder "BOOL" ] 
-                            , Input.onInput SetTerminal
-                            ]
-                        ]
-                    ]
-                  ]
-        -}
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [ id "quality" ] [ text "P-value of RNAcode" ]
