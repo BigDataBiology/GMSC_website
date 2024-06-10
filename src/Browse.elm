@@ -43,8 +43,10 @@ stringFromBool value =
 
 trueFromPass : String -> String
 trueFromPass value = 
-  if value == "Pass" then
-    "True"
+  if value == "Pass"
+    then "True"
+  else if value == ""
+    then ""
   else
     "False"
 
@@ -64,6 +66,37 @@ terminalItem : Model -> String
 terminalItem model =
   trueFromPass (String.join "," <| List.map model.selectpost.terminalSearch.itemToLabel model.selectpost.terminalSearch.selected)
 
+rnaCode : String -> String
+rnaCode val =
+    if val == "10"
+        then "1.0"
+    else if val == "9"
+        then "0.1"
+    else if val == "8"
+        then "0.05"
+    else if val == "7"
+        then "0.01"
+    else if val == "6"
+        then "0.005"
+    else if val == "5"
+        then "0.001"
+    else if val == "4"
+        then "0.0005"
+    else if val == "3"
+        then "0.0001"
+    else if val == "2"
+        then "0.00005"
+    else if val == "1"
+        then "0.00001"
+    else if val == "0"
+        then "0.0"
+    else
+        ""
+
+metaP : String -> String
+metaP val = 
+    String.fromFloat ((Maybe.withDefault 0 (String.toFloat val))/100)   
+ 
 type OperationType = All | HQ
 
 type alias SelectModel =
@@ -141,10 +174,10 @@ initialModel =
         , ask = False
         , popoverState1 = Popover.initialState
         , popoverState2 = Popover.initialState
-        , rnacodecontent = ""
-        , metatcontent = ""
-        , riboseqcontent = ""
-        , metapcontent = ""
+        , rnacodecontent = "8"
+        , metatcontent = "2"
+        , riboseqcontent = "2"
+        , metapcontent = "50"
         , hq = ""
         , optype = HQ
         }
@@ -218,14 +251,31 @@ update msg model =
             ( { model | riboseqcontent = number }, Cmd.none )  
 
         SetmetaP cov ->
-            ( { model | metapcontent = cov }, Cmd.none )      
+            ( { model | metapcontent = cov}, Cmd.none )      
 
         Search ->
-            if habitatItem model == "" && taxItem model == "" && antifamItem model == "" && terminalItem model == "" && model.rnacodecontent == "" && model.metatcontent == "" && model.riboseqcontent == "" && model.metapcontent == "" && model.hq == "" then
-                (model, Cmd.none)
+            if  habitatItem model == "" &&
+                taxItem model == "" &&
+                antifamItem model == "" &&
+                terminalItem model == "" &&
+                model.rnacodecontent == "" &&
+                model.metatcontent == "" &&
+                model.riboseqcontent == "" &&
+                model.metapcontent == "" &&
+                model.hq == "" then
+                (model, Cmd.none) 
             else
                 let
-                    (sm, cmd) = Filter.initialState (habitatItem model) (taxItem model) (antifamItem model) (terminalItem model) model.rnacodecontent model.metatcontent model.riboseqcontent model.metapcontent model.hq
+                    (sm, cmd) = Filter.initialState 
+                                    (habitatItem model) 
+                                    (taxItem model) 
+                                    (antifamItem model) 
+                                    (terminalItem model) 
+                                    (rnaCode model.rnacodecontent)
+                                    model.metatcontent 
+                                    model.riboseqcontent 
+                                    (metaP model.metapcontent)
+                                    model.hq
                 in ({ model| filterpost = sm, ask=True }, Cmd.map FilterMsg cmd)
 
         FilterMsg m -> 
@@ -250,7 +300,7 @@ viewModel : Model -> Html Msg
 viewModel model =
     case model.filterpost.showpost of
     Filter.SLoading ->
-        if model.ask == True then
+        if model.ask then
             div [] 
                 [ viewSearch model
                 , Html.hr [] []
@@ -400,44 +450,64 @@ viewSpecific model =
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [ id "quality" ] [ text "P-value of RNAcode" ]
-                        , Input.text 
-                            [ Input.value model.rnacodecontent
-                            , Input.attrs [ placeholder "FLOAT" ] 
-                            , Input.onInput SetRnacode
-                            ]
+                        , Form.help [] [ text "" ]
+                        , input
+                            [ type_ "range"
+                            , HtmlAttr.value model.rnacodecontent
+                            , HtmlAttr.min "0"
+                            , HtmlAttr.max "10"
+                            , HtmlAttr.step "1"
+                            , onInput SetRnacode
+                            ] []
+                        , text <| "(" ++ rnaCode model.rnacodecontent ++ ")"
                         ]
                     ]
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [id "quality"] [ text "The number of mapped samples of metaTranscriptome" ]
-                        , Input.text 
-                            [ Input.value model.metatcontent
-                            , Input.attrs [ placeholder "INT" ] 
-                            , Input.onInput SetmetaT
-                            ]
+                        , input
+                            [ type_ "range"
+                            , HtmlAttr.value model.metatcontent
+                            , HtmlAttr.min "0"
+                            , HtmlAttr.max "221"
+                            , HtmlAttr.step "1"
+                            , onInput SetmetaT
+                            ] []
+                        , text <| "(" ++ model.metatcontent ++ ")"
                         ]
                     ]
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [ id "quality" ] [ text "The number of mapped samples of Riboseq" ]
-                        , Input.text 
-                            [ Input.value model.riboseqcontent
-                            , Input.attrs [ placeholder "INT" ] 
-                            , Input.onInput SetRiboseq
-                            ]
+                        , input
+                            [ type_ "range"
+                            , HtmlAttr.value model.riboseqcontent
+                            , HtmlAttr.min "0"
+                            , HtmlAttr.max "142"
+                            , HtmlAttr.step "1"
+                            , onInput SetRiboseq
+                            ] []
+                        {-, text <| "(" ++ String.fromInt (Maybe.withDefault 2 (String.toInt model.riboseqcontent)) ++ ")"-}
+                        , text <| "(" ++ model.riboseqcontent ++ ")"
                         ]
                     ]
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [ id "quality" ] [ text "The coverage of metaProteome" ]
-                        , Input.text 
-                            [ Input.value model.metapcontent
-                            , Input.attrs [ placeholder "FLOAT ranges from 0-1" ] 
-                            , Input.onInput SetmetaP
-                            ]
+                        , Form.help [] [ text "" ]
+                        , input
+                            [ type_ "range"
+                            , HtmlAttr.value model.metapcontent
+                            , HtmlAttr.min "0"
+                            , HtmlAttr.max "100"
+                            , HtmlAttr.step "1"
+                            , onInput SetmetaP
+                            ] []
+                        {-, text <| "(" ++ String.fromInt (Maybe.withDefault 50 (String.toInt model.metapcontent)) ++ "%)"-}
+                        , text <| "(" ++ model.metapcontent ++ "%)"
                         ]
                     ]
                   ]
