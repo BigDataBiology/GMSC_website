@@ -97,7 +97,9 @@ metaP : String -> String
 metaP val = 
     String.fromFloat ((Maybe.withDefault 0 (String.toFloat val))/100)   
  
-type OperationType = All | HQ
+type OperationType = All 
+                    | HQ 
+                    | Advanced
 
 type alias SelectModel =
     { habitatSearch : Selectshared.Model Selectitem.Habitat
@@ -174,12 +176,12 @@ initialModel =
         , ask = False
         , popoverState1 = Popover.initialState
         , popoverState2 = Popover.initialState
-        , rnacodecontent = "8"
-        , metatcontent = "2"
-        , riboseqcontent = "2"
-        , metapcontent = "50"
+        , rnacodecontent = ""
+        , metatcontent = ""
+        , riboseqcontent = ""
+        , metapcontent = ""
         , hq = ""
-        , optype = HQ
+        , optype = All
         }
         , Cmd.map FilterMsg cmd
         )
@@ -285,10 +287,18 @@ update msg model =
                 ({ model| filterpost = nqm }, Cmd.map FilterMsg cmd)
 
         SelectOp p ->
-            if model.optype == All && p == HQ then
-                ( { model | optype = HQ , hq = "True"}, Cmd.none )
-            else if model.optype == HQ && p == All then
-                ( { model | optype = All, hq = "False" }, Cmd.none )
+            if model.optype == All && p == HQ 
+                then ( { model | optype = HQ , hq = "True", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = ""}, Cmd.none )
+            else if model.optype == All && p == Advanced 
+                then ( { model | optype = Advanced , hq = "False", rnacodecontent = "8", metatcontent = "2", riboseqcontent = "2", metapcontent = "50" }, Cmd.none )
+            else if model.optype == HQ && p == All 
+                then ( { model | optype = All, hq = "False", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
+            else if model.optype == HQ && p == Advanced 
+                then ( { model | optype = Advanced, hq = "False", rnacodecontent = "8", metatcontent = "2", riboseqcontent = "2", metapcontent = "50" }, Cmd.none )
+            else if model.optype == Advanced && p == All 
+                then ( { model | optype = All, hq = "False", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
+            else if model.optype == Advanced && p == HQ 
+                then ( { model | optype = HQ, hq = "True", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
             else
                 ( { model | optype = p }, Cmd.none )
 
@@ -354,10 +364,12 @@ viewSearch model = div []
             ]
         , h5 [] [ text "Browse by quality"]
         , viewHq model
-        , if model.optype == All then
-            viewSpecific model
+        , if model.optype == All
+            then p [] [ text "" ]
+          else if model.optype == HQ
+            then p [] [ text "" ]
           else
-            p [] [ text "" ]
+            viewSpecific model
         , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
         ]
 
@@ -419,13 +431,14 @@ viewHq model =
   let
     buttonStyle who active =
         [ if who == active then Button.info else Button.outlineInfo, Button.onClick (SelectOp who) ]
-  in div [class "browse"] 
+  in div [class "buttonselect"] 
     [ Form.form []
         [ Form.row []
             [ Form.col [ Col.sm10 ]
                 [ ButtonGroup.buttonGroup [ ButtonGroup.small ]
-                    [ ButtonGroup.button (buttonStyle HQ model.optype) [ text "Only show high quality" ]
-                    , ButtonGroup.button (buttonStyle All model.optype) [ text "Show all" ]
+                    [ ButtonGroup.button (buttonStyle All model.optype) [ text "Show all" ]
+                    , ButtonGroup.button (buttonStyle HQ model.optype) [ text "Only show high quality" ]
+                    , ButtonGroup.button (buttonStyle Advanced model.optype) [ text "Advanced quality filter showing" ]
                     ]
                 ]
             ] 
@@ -459,7 +472,7 @@ viewSpecific model =
                             , HtmlAttr.step "1"
                             , onInput SetRnacode
                             ] []
-                        , text <| "(" ++ rnaCode model.rnacodecontent ++ ")"
+                        , text <| " (" ++ rnaCode model.rnacodecontent ++ ")"
                         ]
                     ]
                   ]
@@ -474,7 +487,7 @@ viewSpecific model =
                             , HtmlAttr.step "1"
                             , onInput SetmetaT
                             ] []
-                        , text <| "(" ++ model.metatcontent ++ ")"
+                        , text <| " (" ++ model.metatcontent ++ ")"
                         ]
                     ]
                   ]
@@ -489,8 +502,7 @@ viewSpecific model =
                             , HtmlAttr.step "1"
                             , onInput SetRiboseq
                             ] []
-                        {-, text <| "(" ++ String.fromInt (Maybe.withDefault 2 (String.toInt model.riboseqcontent)) ++ ")"-}
-                        , text <| "(" ++ model.riboseqcontent ++ ")"
+                        , text <| " (" ++ model.riboseqcontent ++ ")"
                         ]
                     ]
                   ]
@@ -506,8 +518,7 @@ viewSpecific model =
                             , HtmlAttr.step "1"
                             , onInput SetmetaP
                             ] []
-                        {-, text <| "(" ++ String.fromInt (Maybe.withDefault 50 (String.toInt model.metapcontent)) ++ "%)"-}
-                        , text <| "(" ++ model.metapcontent ++ "%)"
+                        , text <| " (" ++ model.metapcontent ++ "%)"
                         ]
                     ]
                   ]
