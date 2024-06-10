@@ -26,43 +26,41 @@ import Route exposing (Route)
 import Members
 
 
-ifHighQuality : Bool -> Bool -> Float -> Int -> Int -> Float -> String
-ifHighQuality a t r mt rb mp = 
-    if a == True && t == True && r < 0.05 && (mt > 1 || rb > 1 || mp > 0.5) then
+qualityString : Quality -> String
+qualityString q =
+    if q.antifam && q.terminal && q.rnacode < 0.05 && (q.metat > 1 || q.riboseq > 1 || q.metap > 0.5) then
       "High quality"
     else
       "Not high quality"
 
-ifRNAcode : Float -> String
-ifRNAcode n = 
-  if n == 2 then 
-    "Not perform"
-  else 
-    if n < 0.05 then 
-      "Pass (" ++ (String.fromFloat n) ++ ")"
-    else 
-      "Not Pass (" ++ (String.fromFloat n) ++ ")"
+rnaCodeString : Float -> String
+rnaCodeString n =
+  if n == 2 then
+    "Not performed (not enough smORFs in family)"
+  else if n < 0.05 then
+      "✔ Passed (p-value: " ++ (String.fromFloat n) ++ ")"
+  else
+      "✘ Not passed (p-value" ++ (String.fromFloat n) ++ ")"
 
-stringFromBool : Bool -> String
-stringFromBool value =
+passOrFail : Bool -> String
+passOrFail value =
   if value then
-    "Pass"
+    "✔ Passed"
   else
-    "Not pass"
+    "✘ Failed"
 
-ifmetaTR : Int -> String
-ifmetaTR n = 
+metaTRString : Int -> String
+metaTRString n =
   if n > 1 then
-    "Pass (" ++ (String.fromInt n) ++ ")"
+    "✔ Passed (detected in " ++ (String.fromInt n) ++ " samples)"
+  else if n == 1 then
+    "✘ Not passed (detected in only 1 sample)"
   else
-    "Not Pass (" ++ (String.fromInt n) ++ ")"
+    "✘ Not detected"
 
-ifmetaP : Float -> String
-ifmetaP n = 
-  if n > 0.5 then
-    "Pass (" ++ (String.fromFloat n) ++ ")"
-  else
-    "Not Pass (" ++ (String.fromFloat n) ++ ")"
+metaPString : Float -> String
+metaPString n =
+    (if n > 0.5 then "✔ Passed " else "✗ Not passed") ++ "(coverage of smORF on proteomics: " ++ (String.fromFloat (n * 100.0) |> String.left 5) ++ "%)"
 
 type alias Quality = 
     { antifam: Bool
@@ -91,7 +89,7 @@ type alias Model =
     { clusterpost : ClusterPost
     , memberpost : Members.Model
     , ask: Bool
-    , ifquality : Bool
+    , showQualityDetails : Bool
     , navKey : Nav.Key
     , popoverState1 : Popover.State
     }
@@ -109,7 +107,7 @@ type APIResult =
 type Msg
     = ResultsData ( Result Http.Error APIResult )
     | Showmember
-    | Showquality
+    | ShowQuality
     | MembersMsg Members.Msg
     | PopoverMsg1 Popover.State
 
@@ -145,7 +143,7 @@ initialState seq_id navkey =
                    , myDrop1State = Dropdown.initialState
                    }
     , ask = False
-    , ifquality = False
+    , showQualityDetails = False
     , navKey = navkey
     , popoverState1 = Popover.initialState
     }
@@ -177,8 +175,8 @@ update msg model =
               _ -> 
                 (model,Cmd.none)
         
-        Showquality -> 
-            ( {model | ifquality = True}, Cmd.none )
+        ShowQuality -> 
+            ( {model | showQualityDetails = True}, Cmd.none )
 
         MembersMsg m -> 
             let
@@ -202,9 +200,9 @@ viewModel model =
                 ]
         (Loaded v, Members.SLoading) ->
             if model.ask == True then
-                div [] 
+                div []
                 [ h1 [] [text v.seqid]
-                , viewCluster v model.ifquality model.popoverState1
+                , viewCluster v model.showQualityDetails model.popoverState1
                 , title
                 , Html.hr [] []
                 , Members.viewModel model.memberpost
@@ -212,13 +210,13 @@ viewModel model =
             else
                 div [] 
                     [ h1 [] [text v.seqid]
-                    , viewCluster v model.ifquality model.popoverState1
+                    , viewCluster v model.showQualityDetails model.popoverState1
                     , title
                     ]
         (Loaded v, Members.MultiResults r) ->
             div [] 
                 [ h1 [] [text v.seqid]
-                , viewCluster v model.ifquality model.popoverState1
+                , viewCluster v model.showQualityDetails model.popoverState1
                 , title
                 , Html.hr [] []
                 , Members.viewModel model.memberpost
@@ -282,28 +280,28 @@ viewCluster v ifq pop =
                                                  )
                                                  |> Popover.right
                                                  |> Popover.content []
-                                                      [ text "High quality is defined as: Pass all in silico quality tests (Not in Antifam database, Pass the terminal checking, P-value of RNAcode < 0.05) and contained at least one experimental evidence (Align to at least 2 metatranscriptomic samples, alignment to at least 2 Riboseq samples, or the coverage of metaproteomic peptides on small protein sequences >0.5)" ]
+                                                      [ text "High quality is defined as: Pass all in silico quality tests (Not in Antifam database, Pass the terminal checking, P-value of RNAcode < 0.05) and contained at least one item of experimental evidence (Align to at least 2 metatranscriptomic samples, alignment to at least 2 Riboseq samples, or the coverage of metaproteomic peptides on small protein sequences >0.5)" ]
                                                  |> Popover.view pop
                                                ]   
                               ]
-                , Table.td [] [ p [id "detail"] [text (ifHighQuality v.quality.antifam v.quality.terminal v.quality.rnacode v.quality.metat v.quality.riboseq v.quality.metap)]
-                              , div [class "browse"] [ Button.button [ Button.info, Button.onClick (Showquality) ] [ text "Show detailed quality" ] ]
-                              , if ifq == True then
-                                  viewQuality v
-                                else 
-                                  p [] [text ""]
+                , Table.td [] [ p [id "detail"] [text (qualityString v.quality)]
+                              , if ifq then
+                                  viewQualityDetails v
+                                else
+                                  div [class "browse"] [ Button.button [ Button.info, Button.onClick ShowQuality ] [ text "Show detailed quality information" ] ]
                               ]
                 ]
             ]
         }
 
-viewQuality : Cluster -> Html Msg
-viewQuality v =  
-  div [] 
-      [ p [id "detail"] [text ("Antifam: " ++ (stringFromBool v.quality.antifam))]
-      , p [id "detail"] [text ("Terminal checking: " ++ (stringFromBool v.quality.terminal))]
-      , p [id "detail"] [text ("RNAcode: " ++ (ifRNAcode v.quality.rnacode))]
-      , p [id "detail"] [text ("metaTranscriptome: " ++ (ifmetaTR v.quality.metat))] 
-      , p [id "detail"] [text ("Riboseq: " ++ (ifmetaTR v.quality.riboseq))] 
-      , p [id "detail"] [text ("metaProteome: " ++ (ifmetaP v.quality.metap))]
+viewQualityDetails : Cluster -> Html Msg
+viewQualityDetails v =  
+  div []
+      [ p [class "detail"] [text ("Antifam: " ++ (passOrFail v.quality.antifam))]
+      , p [class "detail"] [text ("Terminal checking: " ++ (passOrFail v.quality.terminal))]
+      , p [class "detail"] [text ("RNAcode: " ++ (rnaCodeString v.quality.rnacode))]
+      , p [class "detail"] [text ("metaTranscriptome: " ++ (metaTRString v.quality.metat))]
+      , p [class "detail"] [text ("Riboseq: " ++ (metaTRString v.quality.riboseq))]
+      , p [class "detail"] [text ("metaProteome: " ++ (metaPString v.quality.metap))]
       ]
+
