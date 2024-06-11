@@ -43,8 +43,10 @@ stringFromBool value =
 
 trueFromPass : String -> String
 trueFromPass value = 
-  if value == "Pass" then
-    "True"
+  if value == "Pass"
+    then "True"
+  else if value == ""
+    then ""
   else
     "False"
 
@@ -64,7 +66,40 @@ terminalItem : Model -> String
 terminalItem model =
   trueFromPass (String.join "," <| List.map model.selectpost.terminalSearch.itemToLabel model.selectpost.terminalSearch.selected)
 
-type OperationType = All | HQ
+rnaCode : String -> String
+rnaCode val =
+    if val == "10"
+        then "1.0"
+    else if val == "9"
+        then "0.1"
+    else if val == "8"
+        then "0.05"
+    else if val == "7"
+        then "0.01"
+    else if val == "6"
+        then "0.005"
+    else if val == "5"
+        then "0.001"
+    else if val == "4"
+        then "0.0005"
+    else if val == "3"
+        then "0.0001"
+    else if val == "2"
+        then "0.00005"
+    else if val == "1"
+        then "0.00001"
+    else if val == "0"
+        then "0.0"
+    else
+        ""
+
+metaP : String -> String
+metaP val = 
+    String.fromFloat ((Maybe.withDefault 0 (String.toFloat val))/100)   
+ 
+type OperationType = All 
+                    | HQ 
+                    | Advanced
 
 type alias SelectModel =
     { habitatSearch : Selectshared.Model Selectitem.Habitat
@@ -146,7 +181,7 @@ initialModel =
         , riboseqcontent = ""
         , metapcontent = ""
         , hq = ""
-        , optype = HQ
+        , optype = All
         }
         , Cmd.map FilterMsg cmd
         )
@@ -218,14 +253,31 @@ update msg model =
             ( { model | riboseqcontent = number }, Cmd.none )  
 
         SetmetaP cov ->
-            ( { model | metapcontent = cov }, Cmd.none )      
+            ( { model | metapcontent = cov}, Cmd.none )      
 
         Search ->
-            if habitatItem model == "" && taxItem model == "" && antifamItem model == "" && terminalItem model == "" && model.rnacodecontent == "" && model.metatcontent == "" && model.riboseqcontent == "" && model.metapcontent == "" && model.hq == "" then
-                (model, Cmd.none)
+            if  habitatItem model == "" &&
+                taxItem model == "" &&
+                antifamItem model == "" &&
+                terminalItem model == "" &&
+                model.rnacodecontent == "" &&
+                model.metatcontent == "" &&
+                model.riboseqcontent == "" &&
+                model.metapcontent == "" &&
+                model.hq == "" then
+                (model, Cmd.none) 
             else
                 let
-                    (sm, cmd) = Filter.initialState (habitatItem model) (taxItem model) (antifamItem model) (terminalItem model) model.rnacodecontent model.metatcontent model.riboseqcontent model.metapcontent model.hq
+                    (sm, cmd) = Filter.initialState 
+                                    (habitatItem model) 
+                                    (taxItem model) 
+                                    (antifamItem model) 
+                                    (terminalItem model) 
+                                    (rnaCode model.rnacodecontent)
+                                    model.metatcontent 
+                                    model.riboseqcontent 
+                                    (metaP model.metapcontent)
+                                    model.hq
                 in ({ model| filterpost = sm, ask=True }, Cmd.map FilterMsg cmd)
 
         FilterMsg m -> 
@@ -235,10 +287,18 @@ update msg model =
                 ({ model| filterpost = nqm }, Cmd.map FilterMsg cmd)
 
         SelectOp p ->
-            if model.optype == All && p == HQ then
-                ( { model | optype = HQ , hq = "True"}, Cmd.none )
-            else if model.optype == HQ && p == All then
-                ( { model | optype = All, hq = "False" }, Cmd.none )
+            if model.optype == All && p == HQ 
+                then ( { model | optype = HQ , hq = "True", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = ""}, Cmd.none )
+            else if model.optype == All && p == Advanced 
+                then ( { model | optype = Advanced , hq = "False", rnacodecontent = "8", metatcontent = "2", riboseqcontent = "2", metapcontent = "50" }, Cmd.none )
+            else if model.optype == HQ && p == All 
+                then ( { model | optype = All, hq = "False", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
+            else if model.optype == HQ && p == Advanced 
+                then ( { model | optype = Advanced, hq = "False", rnacodecontent = "8", metatcontent = "2", riboseqcontent = "2", metapcontent = "50" }, Cmd.none )
+            else if model.optype == Advanced && p == All 
+                then ( { model | optype = All, hq = "False", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
+            else if model.optype == Advanced && p == HQ 
+                then ( { model | optype = HQ, hq = "True", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
             else
                 ( { model | optype = p }, Cmd.none )
 
@@ -250,7 +310,7 @@ viewModel : Model -> Html Msg
 viewModel model =
     case model.filterpost.showpost of
     Filter.SLoading ->
-        if model.ask == True then
+        if model.ask then
             div [] 
                 [ viewSearch model
                 , Html.hr [] []
@@ -304,10 +364,12 @@ viewSearch model = div []
             ]
         , h5 [] [ text "Browse by quality"]
         , viewHq model
-        , if model.optype == All then
-            viewSpecific model
+        , if model.optype == All
+            then p [] [ text "" ]
+          else if model.optype == HQ
+            then p [] [ text "" ]
           else
-            p [] [ text "" ]
+            viewSpecific model
         , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
         ]
 
@@ -369,13 +431,14 @@ viewHq model =
   let
     buttonStyle who active =
         [ if who == active then Button.info else Button.outlineInfo, Button.onClick (SelectOp who) ]
-  in div [class "browse"] 
+  in div [class "buttonselect"] 
     [ Form.form []
         [ Form.row []
             [ Form.col [ Col.sm10 ]
                 [ ButtonGroup.buttonGroup [ ButtonGroup.small ]
-                    [ ButtonGroup.button (buttonStyle HQ model.optype) [ text "Only show high quality" ]
-                    , ButtonGroup.button (buttonStyle All model.optype) [ text "Show all" ]
+                    [ ButtonGroup.button (buttonStyle All model.optype) [ text "Show all" ]
+                    , ButtonGroup.button (buttonStyle HQ model.optype) [ text "Only show high quality" ]
+                    , ButtonGroup.button (buttonStyle Advanced model.optype) [ text "Advanced quality filter showing" ]
                     ]
                 ]
             ] 
@@ -400,44 +463,62 @@ viewSpecific model =
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [ id "quality" ] [ text "P-value of RNAcode" ]
-                        , Input.text 
-                            [ Input.value model.rnacodecontent
-                            , Input.attrs [ placeholder "FLOAT" ] 
-                            , Input.onInput SetRnacode
-                            ]
+                        , Form.help [] [ text "" ]
+                        , input
+                            [ type_ "range"
+                            , HtmlAttr.value model.rnacodecontent
+                            , HtmlAttr.min "0"
+                            , HtmlAttr.max "10"
+                            , HtmlAttr.step "1"
+                            , onInput SetRnacode
+                            ] []
+                        , text <| " (" ++ rnaCode model.rnacodecontent ++ ")"
                         ]
                     ]
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [id "quality"] [ text "The number of mapped samples of metaTranscriptome" ]
-                        , Input.text 
-                            [ Input.value model.metatcontent
-                            , Input.attrs [ placeholder "INT" ] 
-                            , Input.onInput SetmetaT
-                            ]
+                        , input
+                            [ type_ "range"
+                            , HtmlAttr.value model.metatcontent
+                            , HtmlAttr.min "0"
+                            , HtmlAttr.max "221"
+                            , HtmlAttr.step "1"
+                            , onInput SetmetaT
+                            ] []
+                        , text <| " (" ++ model.metatcontent ++ ")"
                         ]
                     ]
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [ id "quality" ] [ text "The number of mapped samples of Riboseq" ]
-                        , Input.text 
-                            [ Input.value model.riboseqcontent
-                            , Input.attrs [ placeholder "INT" ] 
-                            , Input.onInput SetRiboseq
-                            ]
+                        , input
+                            [ type_ "range"
+                            , HtmlAttr.value model.riboseqcontent
+                            , HtmlAttr.min "0"
+                            , HtmlAttr.max "142"
+                            , HtmlAttr.step "1"
+                            , onInput SetRiboseq
+                            ] []
+                        , text <| " (" ++ model.riboseqcontent ++ ")"
                         ]
                     ]
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [ id "quality" ] [ text "The coverage of metaProteome" ]
-                        , Input.text 
-                            [ Input.value model.metapcontent
-                            , Input.attrs [ placeholder "FLOAT ranges from 0-1" ] 
-                            , Input.onInput SetmetaP
-                            ]
+                        , Form.help [] [ text "" ]
+                        , input
+                            [ type_ "range"
+                            , HtmlAttr.value model.metapcontent
+                            , HtmlAttr.min "0"
+                            , HtmlAttr.max "100"
+                            , HtmlAttr.step "1"
+                            , onInput SetmetaP
+                            ] []
+                        , text <| " (" ++ model.metapcontent ++ "%)"
                         ]
                     ]
                   ]
