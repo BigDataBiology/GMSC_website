@@ -291,6 +291,11 @@ p#selected {
   position:relative;
   left:50px;
 }
+div.buttonselect {
+  position:relative;
+  left:35px;
+  width:50%;
+}
 
 /* elm-select */
 .elm-select-input-wrapper {
