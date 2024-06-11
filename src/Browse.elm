@@ -438,31 +438,32 @@ viewHq model =
                 [ ButtonGroup.buttonGroup [ ButtonGroup.small ]
                     [ ButtonGroup.button (buttonStyle All model.optype) [ text "Show all" ]
                     , ButtonGroup.button (buttonStyle HQ model.optype) [ text "Only show high quality" ]
-                    , ButtonGroup.button (buttonStyle Advanced model.optype) [ text "Advanced quality filter showing" ]
+                    , ButtonGroup.button (buttonStyle Advanced model.optype) [ text "Advanced quality filtering" ]
                     ]
                 ]
-            ] 
+            ]
         ]
     ]              
 
 viewSpecific : Model -> Html Msg
 viewSpecific model =  
     div []
-        [ div [] [ p [] [ label [ id "quality" ] [ text "Antifam" ] ] ]
+        [ p [] [ em [] [text "Note that using quality filters can be slow" ]]
+        , div [] [ p [] [ label [ id "quality" ] [ text "Antifam filtering" ] ] ]
         , div [ class "dropdown" ] 
             [ Selectshared.view
               model.selectpost.antifamSearch
               |> Html.map AntifamSearchMsg
             ]
         , div [] [ p [] [ label [ id "quality" ] [ text "Terminal checking" ] ] ]
-        , div [ class "dropdown" ] 
+        , div [ class "dropdown" ]
             [ Selectshared.view
               model.selectpost.terminalSearch
               |> Html.map TerminalSearchMsg
             ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ id "quality" ] [ text "P-value of RNAcode" ]
+                        [ Form.label [ id "quality" ] [ text "P-value for RNAcode threshold (default: 0.05)" ]
                         , Form.help [] [ text "" ]
                         , input
                             [ type_ "range"
@@ -478,7 +479,7 @@ viewSpecific model =
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [id "quality"] [ text "The number of mapped samples of metaTranscriptome" ]
+                        [ Form.label [id "quality"] [ text "Minimum number of metatranscriptome hits (default: 2)" ]
                         , Form.help [] [ text "" ]
                         , input
                             [ type_ "range"
@@ -494,7 +495,7 @@ viewSpecific model =
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ id "quality" ] [ text "The number of mapped samples of Riboseq" ]
+                        [ Form.label [ id "quality" ] [ text "Minimum number of Riboseq hits (default: 2)" ]
                         , Form.help [] [ text "" ]
                         , input
                             [ type_ "range"
@@ -510,7 +511,7 @@ viewSpecific model =
                   ]
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ id "quality" ] [ text "The coverage of metaProteome" ]
+                        [ Form.label [ id "quality" ] [ text "Minimum smORF coverage in metaproteomics (default: 50%)" ]
                         , Form.help [] [ text "" ]
                         , input
                             [ type_ "range"
