@@ -479,6 +479,7 @@ viewSpecific model =
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [id "quality"] [ text "The number of mapped samples of metaTranscriptome" ]
+                        , Form.help [] [ text "" ]
                         , input
                             [ type_ "range"
                             , HtmlAttr.value model.metatcontent
@@ -494,6 +495,7 @@ viewSpecific model =
         , div [ class "browse" ] [ Form.form []
                     [ Form.group []
                         [ Form.label [ id "quality" ] [ text "The number of mapped samples of Riboseq" ]
+                        , Form.help [] [ text "" ]
                         , input
                             [ type_ "range"
                             , HtmlAttr.value model.riboseqcontent
