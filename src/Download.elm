@@ -87,21 +87,22 @@ Columns:
 - `Ribo-Seq`: The number of samples that smORFs are mapped.
 - `MetaProteome`: The total k-mer coverage of peptides on smORFs.
 
-**100AA smORF catalogue:**&emsp;[GMSC10.100AA.quality_test.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.quality.tsv.xz)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.quality_test.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.100AA.quality_test.tsv.xz?download=1)
 
-**90AA smORF families:**&emsp;[GMSC10.90AA.quality_test.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.quality.tsv.xz)
+**90AA smORF families:**&emsp;[GMSC10.90AA.quality_test.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.90AA.quality_test.tsv.xz?download=1)
 
 ### Metadata
 TSV table relating the metadata of GMSC.
 
+The position in the file indicates which line each row refers to
+
 Columns:
 
-- `smORF accession`
 - `samples`: separated by comma
 
-**100AA smORF catalogue:**&emsp;[GMSC10.100AA.sample.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.sample.tsv.xz)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.sample.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.100AA.sample.txt.xz?download=1)
 
-**90AA smORF families:**&emsp;[GMSC10.90AA.sample.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.sample.tsv.xz)
+**90AA smORF families:**&emsp;[GMSC10.90AA.sample.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.sample.txt.xz)
 
 TSV table relating to metadata of samples used in GMSC.
 
