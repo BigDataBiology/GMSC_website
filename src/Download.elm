@@ -32,7 +32,7 @@ We provide the 964,970,496 non-redundant smORFs catalogue at 100% amino acid ide
 ### Protein sequence (.fasta)
 Fasta file of 100AA / 90AA protein sequences.
 
-**100AA smORF catalogue:**&emsp;[GMSC10.100AA.faa.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.fna.xz)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.faa.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.100AA.faa.xz)
 
 **90AA smORF families:**&emsp;[GMSC10.90AA.faa.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.faa.xz)
 
@@ -61,7 +61,7 @@ Columns:
 - `Habitat annotation`: separated by comma
 - `Taxonomic annotation`: separated by semicolon
 
-**100AA smORF catalogue:**&emsp;[GMSC10.100AA.annotation.tsv.xz](https://zenodo.org/records/7944371/files/GMSC10.100AA.annotation.tsv.xz?download=1)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.annotation.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.100AA.annotation.tsv.xz?download=1)
 
 TSV table relating the annotations of 90AA smORF families.
 
@@ -73,7 +73,7 @@ Columns:
 - `TMHMM prediction`: the number of predicted transmembrane helices and the topology predicted, separated by semicolon
 - `SignalP prediction`
 
-**90AA smORF families:**&emsp;[GMSC10.90AA.annotation.tsv.xz](https://zenodo.org/records/7944371/files/GMSC10.90AA.annotation.tsv.xz?download=1)
+**90AA smORF families:**&emsp;[GMSC10.90AA.annotation.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.90AA.annotation.tsv.xz?download=1)
 
 ### Quality assessment
 TSV table relating the quality assessment of 100AA smORF catalogue and 90AA smORF families.
@@ -101,8 +101,6 @@ Columns:
 - `samples`: separated by comma
 
 **100AA smORF catalogue:**&emsp;[GMSC10.100AA.sample.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.100AA.sample.txt.xz?download=1)
-
-**90AA smORF families:**&emsp;[GMSC10.90AA.sample.tsv.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.sample.txt.xz)
 
 TSV table relating to metadata of samples used in GMSC.
 
