@@ -401,8 +401,8 @@ footer =
   div [id "footerbar"]
       [p []
             [Html.text "For more information, see "
-            ,Html.a [HtmlAttr.href "https://www.biorxiv.org/content/10.1101/2023.12.27.573469v1"]
-                    [Html.text "(Duan et al., 2023)"]
+            ,Html.a [HtmlAttr.href "https://www.nature.com/articles/s41467-024-51894-6"]
+                    [Html.text "(Duan et al., 2024)"]
             ,Html.text "."]
       ,p [] [text "Copyright (c) 2023-2024 GMSC authors. All rights reserved."]
       ]
