@@ -152,9 +152,15 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
     HomeMsg Home.SubmitIdentifier -> case model.page of
         Home hm ->
-            let number = case (String.toInt (String.join "" (String.split "_" (String.join "" (List.take 1 (List.reverse (String.split "." hm.idcontent))))))) of
-                           Just num -> num
-                           _ -> 964970497        
+            let number = hm.idcontent
+                            |> String.split "."
+                            |> List.reverse
+                            |> List.take 1
+                            |> String.join ""
+                            |> String.split "_"
+                            |> String.join ""
+                            |> String.toInt
+                            |> Maybe.withDefault 964970497
             in if String.startsWith "GMSC10.100AA" hm.idcontent && number < 964970496 then
                 let
                   (sm, cmd) = Sequence.initialState hm.idcontent model.key
