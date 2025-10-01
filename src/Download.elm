@@ -1,4 +1,5 @@
 module Download exposing (viewModel)
+import Html
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
 import Html.Attributes exposing (..)
@@ -14,16 +15,15 @@ import Bootstrap.Grid.Row as Row
 
 viewModel : Html msg
 viewModel =
-    content
-
-content: Html msg
-content = 
-    span [id "introduction"]
+    Html.span [HtmlAttr.id "introduction"]
         [Markdown.toHtml [] """
 # Data Downloads
+
+See also the [Zenodo repository](https://zenodo.org/records/11206513) for files and details.
+
 We provide the 964,970,496 non-redundant smORFs catalogue at 100% amino acid identity and 287,926,875 smORF families at 90% amino acid identity.
 
-- The download files contain: 
+- The download files contain:
   - protein / nucleotide fasta file
   - cluster table
   - annotation table
@@ -54,7 +54,8 @@ Columns:
 **Protein clustering table:**&emsp;[GMSC10.cluster.tsv.xz](https://zenodo.org/records/7944371/files/GMSC10.cluster.sorted2.tsv.xz?download=1)
 
 ### Annotations
-TSV table relating the annotations of 100AA smORF catalogue.
+
+TSV table containing the annotations of 100AA smORF catalogue. The position in the file indicates which smORF the annotation refers to (e.g., the line with index 1,621 refers to GMSC10.100AA.000_001_621 — index starting at 0/GMSC10.100AA.000_000_000). Two column are:
 
 Columns:
 
@@ -63,7 +64,7 @@ Columns:
 
 **100AA smORF catalogue:**&emsp;[GMSC10.100AA.annotation.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.100AA.annotation.tsv.xz?download=1)
 
-TSV table relating the annotations of 90AA smORF families.
+TSV table containing the annotations of 90AA smORF families. The position in the file indicates which smORF the annotation refers to (e.g., the line with index 1,621 refers to GMSC10.90AA.000_001_621 — index starting at 0/GMSC10.90AA.000_000_000). The table contains five columns:
 
 Columns:
 
@@ -76,7 +77,7 @@ Columns:
 **90AA smORF families:**&emsp;[GMSC10.90AA.annotation.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.90AA.annotation.tsv.xz?download=1)
 
 ### Quality assessment
-TSV table relating the quality assessment of 100AA smORF catalogue and 90AA smORF families.
+TSV table containing the quality assessment of 100AA smORF catalogue and 90AA smORF families. As above, the position in the file indicates which smORF the annotation refers to (e.g., the line with index 1,621 refers to GMSC10.100AA.000_001_621 / GMSC10.90AA.000_001_621 — index starting at 0). Six quality assessment metrics are provided:
 
 Columns:
 
