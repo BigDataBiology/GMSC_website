@@ -24,7 +24,7 @@ content =
         [Markdown.toHtml [] """
 ## The global microbial smORF catalogue (GMSC)
 
-For more information see [(Duan et al., 2023)](https://www.biorxiv.org/content/10.1101/2023.12.27.573469v1).
+For more information see [(Duan et al., 2024)](https://www.nature.com/articles/s41467-024-51894-6).
 
 GMSC was developed by the [Big Data Biology Research Group](https://www.big-data-biology.org/).
 ___
