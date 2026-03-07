@@ -1,4 +1,4 @@
-module Selectitem exposing (..)
+module Selectitem exposing (Antifam, Terminal, Taxonomy, Habitat, antifam, terminal, terminaltoLabel, taxonomy, habitats, habitattoLabel)
 
 type alias Antifam =
     { id : String
@@ -8,10 +8,6 @@ type alias Antifam =
 antifam : List Antifam
 antifam =
     List.map (\( id, name ) -> Antifam id name) antifamDB
-
-antifamtoLabel : Antifam -> String
-antifamtoLabel =
-    .label
 
 antifamDB : List (String, String)
 antifamDB =
@@ -354,10 +350,6 @@ type alias Taxonomy =
 taxonomy : List Taxonomy
 taxonomy =
     List.map (\( id, name ) -> Taxonomy id name) taxonomyDB
-
-taxtoLabel : Taxonomy -> String
-taxtoLabel =
-    .label
 
 taxonomyDB : List (String, String)
 taxonomyDB =

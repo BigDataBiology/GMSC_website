@@ -153,14 +153,14 @@ initialModel =
                         , taxonomySearch = Selectshared.initialModel 
                                { id = "exampleEmptySearch"
                                , available = Selectitem.taxonomy
-                               , itemToLabel = Selectitem.taxtoLabel
+                               , itemToLabel = .label
                                , selected = [ ]
                                , selectConfig = selectConfigTaxonomySearch
                                }
-                        , antifamSearch = Selectshared.initialModel 
+                        , antifamSearch = Selectshared.initialModel
                                { id = "exampleEmptySearch"
                                , available = Selectitem.antifam
-                               , itemToLabel = Selectitem.antifamtoLabel
+                               , itemToLabel = .label
                                , selected = [ ]
                                , selectConfig = selectConfigAntifamSearch
                                }
