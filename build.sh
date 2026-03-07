@@ -10,4 +10,4 @@ mkdir dist
 
 elm make --optimize src/Main.elm --output=dist/index.html
 cp src/style.css dist/
-cp -r src/assets dist/ && cp _redirects di
+cp -r src/assets dist/ && cp _redirects dist/
