@@ -1,2 +1,4 @@
 /index.bs /assets/index.bs 200
+/style.css /style.css 200
+/assets/* /assets/:splat 200
 /* /index.html 200

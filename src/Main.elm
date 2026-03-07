@@ -404,6 +404,6 @@ footer =
             ,Html.a [HtmlAttr.href "https://www.nature.com/articles/s41467-024-51894-6"]
                     [Html.text "(Duan et al., 2024)"]
             ,Html.text "."]
-      ,p [] [text "Copyright (c) 2023-2024 GMSC authors. All rights reserved."]
+      ,p [] [text "Copyright (c) 2023-2026 GMSC authors. All rights reserved."]
       ]
 

@@ -349,7 +349,7 @@ viewSearch model = div []
                                                )
                                                |> Popover.right
                                                |> Popover.content []
-                                                      [ text "Habitats with the suffix 'associated' represent a wider range of environments that cannot be traced further to more specific habitats. For example, 'human associated' represents human related habitats other than those listed in 'gut', 'south', etc." ]
+                                                      [ text "Habitats with the suffix 'associated' represent a wider range of environments that cannot be traced further to more specific habitats. For example, 'human associated' represents human related habitats other than those listed in 'gut', 'mouth', etc." ]
                                                |> Popover.view model.popoverState2] ] ]
         , div [] 
             [ Selectshared.view

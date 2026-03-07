@@ -178,7 +178,7 @@ viewSearch model =
                                 [ placeholder "GMSC10.100AA.XXX_XXX_XXX   or   GMSC10.90AA.XXX_XXX_XXX" ]
                             , Input.onInput SetIdentifier
                             ]
-                        , Form.help [] [ text "The maximum 100AA identifier is GMSC10.100AA.964_970_495. The maximum 90AA identifier is GMSC10.90AA.287.926.874" ]
+                        , Form.help [] [ text "The maximum 100AA identifier is GMSC10.100AA.964_970_495. The maximum 90AA identifier is GMSC10.90AA.287_926_874" ]
                         , Button.button [ Button.info, Button.attrs [ class "float-right"], Button.onClick SubmitIdentifier ] [ text "Submit" ] 
                         , Button.button[ Button.light, Button.attrs [ class "float-right"], Button.onClick ClearId ] [ text "Clear" ]
                         , Button.button [ Button.outlineSecondary, Button.attrs [ class "float-right"], Button.onClick SetIdentifierExample ] [ text "Example" ] 

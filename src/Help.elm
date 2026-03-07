@@ -23,7 +23,7 @@ content =
 ## Overview
 The global microbial smORFs catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining 63,410 publicly available metagenomes from the [SPIRE database](http://spire.embl.de) and 87,920 high-quality isolated microbial genomes from the [ProGenomes2 database](https://progenomes.embl.de/).
 
-A total of 4.5 billion smORFs were predicted to build the catalogue. After removing redundancy with 100% amino acid itentity, we obtained a 100AA non-redundant catalogue with 964,970,496 sequences. Further, the smORFs were clustered at 90% amino acid identity resulting in 287,926,875 90AA smORFs catalogue.
+A total of 4.5 billion smORFs were predicted to build the catalogue. After removing redundancy with 100% amino acid identity, we obtained a 100AA non-redundant catalogue with 964,970,496 sequences. Further, the smORFs were clustered at 90% amino acid identity resulting in 287,926,875 90AA smORFs catalogue.
 
 ## Benefits and Features
 **Integration:**
@@ -82,7 +82,7 @@ Users can browse by habitats and taxonomy. (e.g., passing marine will match fres
 The results are 90AA smORFs families span in selected habitats and taxonomy.
 
 
-## Data acquistion
+## Data acquisition
 63,410 assembled metagenomes were used from the [SPIRE database](http://spire.embl.de)
 
 87,920 high-quality microbial genomes were downloaded from the [ProGenomes v2 database](https://progenomes.embl.de/).

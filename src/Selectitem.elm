@@ -46,7 +46,7 @@ type Habitat
     | Anthropogenic
     | Bat_gut
     | Bear_gut
-    | Beatle_gut
+    | Beetle_gut
     | Bee_gut
     | Bird_gut
     | Bird_skin
@@ -124,7 +124,7 @@ habitats =
     , Anthropogenic
     , Bat_gut
     , Bear_gut
-    , Beatle_gut
+    , Beetle_gut
     , Bee_gut
     , Bird_gut
     , Bird_skin
@@ -211,8 +211,8 @@ habitattoLabel h =
             "bat gut"
         Bear_gut ->
             "bear gut"
-        Beatle_gut ->
-            "beatle gut"
+        Beetle_gut ->
+            "beetle gut"
         Bee_gut ->
             "bee gut"
         Bird_gut ->

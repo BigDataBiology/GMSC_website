@@ -167,9 +167,9 @@ update msg model =
                                                         |> List.map (\(k,v) ->
                                                            let
                                                                 quality = if v.quality == "high quality"  then
-                                                                             "pass all quality tests & show experimental evidences"
+                                                                             "pass all quality tests & show experimental evidence"
                                                                           else 
-                                                                             "not pass all quality tests or not show experimental evidences"
+                                                                             "did not pass all quality tests or did not show experimental evidence"
                                                            in ( k ++ "\t" ++ v.aa ++ "\t" ++ v.habitat ++ "\t" ++ v.tax ++ "\t" ++ quality)
                                                         )
                                                       )
@@ -221,7 +221,7 @@ viewSearch s  =
                 , h3 [] [ text "Annotation of query sequences" ]
                 , if List.length (Dict.toList r) /=0 then
                     div []
-                    [ div [id "position"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotaions" ] ]
+                    [ div [id "position"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotations" ] ]
                     , div [id "member"]
                       [ Table.table
                         { options = [ Table.striped, Table.hover ]
@@ -241,9 +241,9 @@ viewSearch s  =
                                 , Table.td [] [ p [id "detail"] [ text v.habitat ] ]
                                 , Table.td [] [ p [id "detail"] [ text v.tax ] ]
                                 , if v.quality == "high quality"  then
-                                    Table.td [] [ p [id "detail"] [ text "pass all quality tests & show experimental evidences" ] ]
+                                    Table.td [] [ p [id "detail"] [ text "pass all quality tests & show experimental evidence" ] ]
                                 else 
-                                    Table.td [] [ p [id "detail"] [ text "not pass all quality tests or not show experimental evidences" ] ]
+                                    Table.td [] [ p [id "detail"] [ text "did not pass all quality tests or did not show experimental evidence" ] ]
                                 ]
                                 )
                         )                  
