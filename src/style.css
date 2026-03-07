@@ -167,7 +167,7 @@ span#help
     padding: 4px;
     margin-bottom:2em;
 }
-span#help h2,h3{
+span#help h2, span#help h3{
     color: #158BB8;
     text-align:left;
     padding: 5px;
@@ -223,7 +223,7 @@ td p#title{
     font-family:arial;
     width: 100%;
     position:relative;
-    left:5px
+    left:5px;
 }
 td p#identifier{
   color:#2d2c2c;
@@ -242,7 +242,8 @@ td p#detail{
     word-break: normal;
 }
 div#member
-{ width: 1350px;
+{ max-width: 1350px;
+  width: 100%;
   overflow: scroll;
   position:relative;
   left:35px;
