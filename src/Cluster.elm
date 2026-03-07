@@ -1,10 +1,8 @@
 module Cluster exposing (Model, Msg(..), initialState, update, viewModel)
 
 import Html
-import Html exposing (..)
-import Html.Events exposing (..)
+import Html exposing (Html, div, h1, h4, p, span, text)
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
 import Browser.Navigation as Nav
 import Browser
 import Dict
@@ -229,8 +227,8 @@ viewModel model =
 -- main text
 title : Html Msg
 title = div [] 
-            [ h4 [id "cluster"] [ text  "This 90AA cluster contains the following 100AA smORFs:" ]
-            , div [class "browse"] [ Button.button [ Button.info, Button.onClick (Showmember) ] [ text "Show" ] ]
+            [ h4 [HtmlAttr.id "cluster"] [ text  "This 90AA cluster contains the following 100AA smORFs:" ]
+            , div [HtmlAttr.class "browse"] [ Button.button [ Button.info, Button.onClick (Showmember) ] [ text "Show" ] ]
             ]
 
 viewCluster : Cluster -> Bool -> Popover.State -> Html Msg
@@ -240,20 +238,20 @@ viewCluster v ifq pop =
         , thead =  Table.simpleThead []
         , tbody = Table.tbody []
             [ Table.tr []
-                [ Table.td [] [p [id "title"] [text "Consensus protein sequence"]  ]
-                , Table.td [] [p [id "detail"] [text v.aa] ]
+                [ Table.td [] [p [HtmlAttr.id "title"] [text "Consensus protein sequence"]  ]
+                , Table.td [] [p [HtmlAttr.id "detail"] [text v.aa] ]
                 ]
             , Table.tr []
-                [ Table.td [] [ p [id "title"] [text "Consensus nucleotide sequence"] ]
-                , Table.td [] [ p [id "detail"] [text v.nuc] ]
+                [ Table.td [] [ p [HtmlAttr.id "title"] [text "Consensus nucleotide sequence"] ]
+                , Table.td [] [ p [HtmlAttr.id "detail"] [text v.nuc] ]
                 ]
             , Table.tr []
-                [ Table.td [] [ p [id "title"] [text "Taxonomic assignment"] ]
-                , Table.td [] [ p [id "detail"] [text v.tax] ]
+                [ Table.td [] [ p [HtmlAttr.id "title"] [text "Taxonomic assignment"] ]
+                , Table.td [] [ p [HtmlAttr.id "detail"] [text v.tax] ]
                 ]
             , Table.tr []
-                [ Table.td [] [ p [id "title"] [text "Habitat"]  ]
-                , Table.td [] [ p [id "detail"] [text v.habitat]  ]
+                [ Table.td [] [ p [HtmlAttr.id "title"] [text "Habitat"]  ]
+                , Table.td [] [ p [HtmlAttr.id "detail"] [text v.habitat]  ]
                 ]
             {-, Table.tr []
                 [ Table.td [] [ p [id "title"] [text "Conserved domain"]  ]
@@ -268,7 +266,7 @@ viewCluster v ifq pop =
                 , Table.td [] [ p [id "detail"] [text "-"] ]
                 ]-}
             , Table.tr []
-                [ Table.td [] [ p [id "title"] [ text "Quality  "
+                [ Table.td [] [ p [HtmlAttr.id "title"] [ text "Quality  "
                                                , Popover.config
                                                  ( Button.button
                                                    [ Button.small
@@ -276,7 +274,7 @@ viewCluster v ifq pop =
                                                    , Button.attrs <|
                                                        Popover.onHover pop PopoverMsg1
                                                    ]
-                                                   [ span [ class "fa fa-question-circle" ] [] ]
+                                                   [ span [ HtmlAttr.class "fa fa-question-circle" ] [] ]
                                                  )
                                                  |> Popover.right
                                                  |> Popover.content []
@@ -284,11 +282,11 @@ viewCluster v ifq pop =
                                                  |> Popover.view pop
                                                ]   
                               ]
-                , Table.td [] [ p [id "detail"] [text (qualityString v.quality)]
+                , Table.td [] [ p [HtmlAttr.id "detail"] [text (qualityString v.quality)]
                               , if ifq then
                                   viewQualityDetails v
                                 else
-                                  div [class "browse"] [ Button.button [ Button.info, Button.onClick ShowQuality ] [ text "Show detailed quality information" ] ]
+                                  div [HtmlAttr.class "browse"] [ Button.button [ Button.info, Button.onClick ShowQuality ] [ text "Show detailed quality information" ] ]
                               ]
                 ]
             ]
@@ -297,11 +295,10 @@ viewCluster v ifq pop =
 viewQualityDetails : Cluster -> Html Msg
 viewQualityDetails v =  
   div []
-      [ p [class "detail"] [text ("Antifam: " ++ (passOrFail v.quality.antifam))]
-      , p [class "detail"] [text ("Terminal checking: " ++ (passOrFail v.quality.terminal))]
-      , p [class "detail"] [text ("RNAcode: " ++ (rnaCodeString v.quality.rnacode))]
-      , p [class "detail"] [text ("metaTranscriptome: " ++ (metaTRString v.quality.metat))]
-      , p [class "detail"] [text ("Riboseq: " ++ (metaTRString v.quality.riboseq))]
-      , p [class "detail"] [text ("metaProteome: " ++ (metaPString v.quality.metap))]
+      [ p [HtmlAttr.class "detail"] [text ("Antifam: " ++ (passOrFail v.quality.antifam))]
+      , p [HtmlAttr.class "detail"] [text ("Terminal checking: " ++ (passOrFail v.quality.terminal))]
+      , p [HtmlAttr.class "detail"] [text ("RNAcode: " ++ (rnaCodeString v.quality.rnacode))]
+      , p [HtmlAttr.class "detail"] [text ("metaTranscriptome: " ++ (metaTRString v.quality.metat))]
+      , p [HtmlAttr.class "detail"] [text ("Riboseq: " ++ (metaTRString v.quality.riboseq))]
+      , p [HtmlAttr.class "detail"] [text ("metaProteome: " ++ (metaPString v.quality.metap))]
       ]
-

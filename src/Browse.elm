@@ -1,9 +1,8 @@
 module Browse exposing (Model, Msg(..), initialModel, update, viewModel)
 
-import Html exposing (..)
+import Html exposing (Html, div, em, h5, input, label, p, span, text)
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html.Events exposing (onInput)
 import Browser
 import Dict
 import Set
@@ -335,7 +334,7 @@ viewModel model =
 viewSearch: Model -> Html Msg
 viewSearch model = div []
         [ h5 [] [ text "Browse by habitats and taxonomy "] 
-        , div [] [ p [] [ label [id "browse"] [ text "Browse by habitats " 
+        , div [] [ p [] [ label [HtmlAttr.id "browse"] [ text "Browse by habitats " 
                                               , Popover.config
                                                ( Button.button
                                                    [ Button.small
@@ -343,7 +342,7 @@ viewSearch model = div []
                                                    , Button.attrs <|
                                                        Popover.onHover model.popoverState2 PopoverMsg2
                                                    ]
-                                                   [ span [class "fa fa-question-circle"]
+                                                   [ span [HtmlAttr.class "fa fa-question-circle"]
                                                    []
                                                    ]
                                                )
@@ -356,7 +355,7 @@ viewSearch model = div []
               model.selectpost.habitatSearch
               |> Html.map HabitatSearchMsg 
             ]
-        , div [] [ p [] [ label [id "browse"] [ text "Browse by taxonomy" ] ] ]
+        , div [] [ p [] [ label [HtmlAttr.id "browse"] [ text "Browse by taxonomy" ] ] ]
         , div [] 
             [ Selectshared.view
               model.selectpost.taxonomySearch
@@ -370,7 +369,7 @@ viewSearch model = div []
             then p [] [ text "" ]
           else
             viewSpecific model
-        , div [class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
+        , div [HtmlAttr.class "browse"] [Button.button [ Button.info, Button.onClick Search] [ text "Browse" ]]
         ]
 
 selectConfigHabitat =
@@ -431,7 +430,7 @@ viewHq model =
   let
     buttonStyle who active =
         [ if who == active then Button.info else Button.outlineInfo, Button.onClick (SelectOp who) ]
-  in div [class "buttonselect"] 
+  in div [HtmlAttr.class "buttonselect"] 
     [ Form.form []
         [ Form.row []
             [ Form.col [ Col.sm10 ]
@@ -449,24 +448,24 @@ viewSpecific : Model -> Html Msg
 viewSpecific model =  
     div []
         [ p [] [ em [] [text "Note that using quality filters can be slow" ]]
-        , div [] [ p [] [ label [ id "quality" ] [ text "Antifam filtering" ] ] ]
-        , div [ class "dropdown" ] 
+        , div [] [ p [] [ label [ HtmlAttr.id "quality" ] [ text "Antifam filtering" ] ] ]
+        , div [ HtmlAttr.class "dropdown" ] 
             [ Selectshared.view
               model.selectpost.antifamSearch
               |> Html.map AntifamSearchMsg
             ]
-        , div [] [ p [] [ label [ id "quality" ] [ text "Terminal checking" ] ] ]
-        , div [ class "dropdown" ]
+        , div [] [ p [] [ label [ HtmlAttr.id "quality" ] [ text "Terminal checking" ] ] ]
+        , div [ HtmlAttr.class "dropdown" ]
             [ Selectshared.view
               model.selectpost.terminalSearch
               |> Html.map TerminalSearchMsg
             ]
-        , div [ class "browse" ] [ Form.form []
+        , div [ HtmlAttr.class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ id "quality" ] [ text "P-value for RNAcode threshold (default: 0.05)" ]
+                        [ Form.label [ HtmlAttr.id "quality" ] [ text "P-value for RNAcode threshold (default: 0.05)" ]
                         , Form.help [] [ text "" ]
                         , input
-                            [ type_ "range"
+                            [ HtmlAttr.type_ "range"
                             , HtmlAttr.value model.rnacodecontent
                             , HtmlAttr.min "0"
                             , HtmlAttr.max "10"
@@ -477,12 +476,12 @@ viewSpecific model =
                         ]
                     ]
                   ]
-        , div [ class "browse" ] [ Form.form []
+        , div [ HtmlAttr.class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [id "quality"] [ text "Minimum number of metatranscriptome hits (default: 2)" ]
+                        [ Form.label [HtmlAttr.id "quality"] [ text "Minimum number of metatranscriptome hits (default: 2)" ]
                         , Form.help [] [ text "" ]
                         , input
-                            [ type_ "range"
+                            [ HtmlAttr.type_ "range"
                             , HtmlAttr.value model.metatcontent
                             , HtmlAttr.min "0"
                             , HtmlAttr.max "221"
@@ -493,12 +492,12 @@ viewSpecific model =
                         ]
                     ]
                   ]
-        , div [ class "browse" ] [ Form.form []
+        , div [ HtmlAttr.class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ id "quality" ] [ text "Minimum number of Riboseq hits (default: 2)" ]
+                        [ Form.label [ HtmlAttr.id "quality" ] [ text "Minimum number of Riboseq hits (default: 2)" ]
                         , Form.help [] [ text "" ]
                         , input
-                            [ type_ "range"
+                            [ HtmlAttr.type_ "range"
                             , HtmlAttr.value model.riboseqcontent
                             , HtmlAttr.min "0"
                             , HtmlAttr.max "142"
@@ -509,12 +508,12 @@ viewSpecific model =
                         ]
                     ]
                   ]
-        , div [ class "browse" ] [ Form.form []
+        , div [ HtmlAttr.class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ id "quality" ] [ text "Minimum smORF coverage in metaproteomics (default: 50%)" ]
+                        [ Form.label [ HtmlAttr.id "quality" ] [ text "Minimum smORF coverage in metaproteomics (default: 50%)" ]
                         , Form.help [] [ text "" ]
                         , input
-                            [ type_ "range"
+                            [ HtmlAttr.type_ "range"
                             , HtmlAttr.value model.metapcontent
                             , HtmlAttr.min "0"
                             , HtmlAttr.max "100"

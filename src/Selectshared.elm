@@ -6,8 +6,8 @@ module Selectshared exposing
     , initialModel
     )
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, div, p, text)
+import Html.Attributes as HtmlAttr
 import Selects
 import Shared
 import Set
@@ -91,7 +91,7 @@ view model =
     let
         currentSelection = 
             if (List.length (model.selected)) > 0 then
-              p [id "selected"]
+              p [ HtmlAttr.id "selected"]
                 [ text ( "Selected: " ++ ( String.join ", " <| List.sort ( Set.toList ( Set.fromList ( List.map model.itemToLabel model.selected ))))) 
                 ]
             else

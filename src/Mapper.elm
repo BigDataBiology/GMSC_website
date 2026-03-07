@@ -1,9 +1,7 @@
 module Mapper exposing (Model, Msg(..), initialState, lookupState, update, viewModel)
 
-import Html exposing (..)
-import Html.Events exposing (..)
+import Html exposing (Html, div, h2, h3, p, text)
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
 import Browser.Navigation as Nav
 import Browser
 import Dict
@@ -221,8 +219,8 @@ viewSearch s  =
                 , h3 [] [ text "Annotation of query sequences" ]
                 , if List.length (Dict.toList r) /=0 then
                     div []
-                    [ div [id "position"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotations" ] ]
-                    , div [id "member"]
+                    [ div [HtmlAttr.id "position"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotations" ] ]
+                    , div [HtmlAttr.id "member"]
                       [ Table.table
                         { options = [ Table.striped, Table.hover ]
                         , thead =  Table.simpleThead
@@ -236,22 +234,22 @@ viewSearch s  =
                         ( Dict.toList r
                             |> List.map (\(k,v) ->
                                 Table.tr []
-                                [ Table.td [] [ p [id "detail"] [ text k ] ]
-                                , Table.td [] [ p [id "detail"] [ text v.aa ] ]
-                                , Table.td [] [ p [id "detail"] [ text v.habitat ] ]
-                                , Table.td [] [ p [id "detail"] [ text v.tax ] ]
+                                [ Table.td [] [ p [HtmlAttr.id "detail"] [ text k ] ]
+                                , Table.td [] [ p [HtmlAttr.id "detail"] [ text v.aa ] ]
+                                , Table.td [] [ p [HtmlAttr.id "detail"] [ text v.habitat ] ]
+                                , Table.td [] [ p [HtmlAttr.id "detail"] [ text v.tax ] ]
                                 , if v.quality == "high quality"  then
-                                    Table.td [] [ p [id "detail"] [ text "pass all quality tests & show experimental evidence" ] ]
+                                    Table.td [] [ p [HtmlAttr.id "detail"] [ text "pass all quality tests & show experimental evidence" ] ]
                                 else 
-                                    Table.td [] [ p [id "detail"] [ text "did not pass all quality tests or did not show experimental evidence" ] ]
+                                    Table.td [] [ p [HtmlAttr.id "detail"] [ text "did not pass all quality tests or did not show experimental evidence" ] ]
                                 ]
                                 )
                         )                  
                         }
                       ]
                     , h3 [] [ text "Hits in GMSC" ]
-                    , div [id "position"] [ Button.button [ Button.info, Button.onClick DownloadHits, Button.attrs [ class "float-left"]] [ Html.text "Download hits" ] ]
-                    , div [id "member"]
+                    , div [HtmlAttr.id "position"] [ Button.button [ Button.info, Button.onClick DownloadHits, Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "Download hits" ] ]
+                    , div [HtmlAttr.id "member"]
                       [ Table.table
                         { options = [ Table.striped, Table.hover ]
                         , thead =  Table.simpleThead
@@ -264,17 +262,17 @@ viewSearch s  =
                         ( Dict.toList r
                             |> List.map (\(k,v) ->
                                 Table.tr []
-                                [  Table.td [] [ p [id "identifier"] [text k] ]
+                                [  Table.td [] [ p [HtmlAttr.id "identifier"] [text k] ]
                                 ,  Table.td [] (v.hits 
-                                                |> List.map (\hit -> p [id "detail"] [ Html.a [href ("/cluster/" ++ hit.id)] [ text hit.id ] ] 
+                                                |> List.map (\hit -> p [HtmlAttr.id "detail"] [ Html.a [HtmlAttr.href ("/cluster/" ++ hit.id)] [ text hit.id ] ] 
                                                             )
                                                )
                                 ,  Table.td [] (v.hits 
-                                                |> List.map (\hit -> p [id "detail"] [ text (String.fromFloat hit.e) ] 
+                                                |> List.map (\hit -> p [HtmlAttr.id "detail"] [ text (String.fromFloat hit.e) ] 
                                                             )
                                                )
                                 ,  Table.td [] (v.hits 
-                                                |> List.map (\hit -> p [id "detail"] [ text (String.fromFloat hit.identity) ] 
+                                                |> List.map (\hit -> p [HtmlAttr.id "detail"] [ text (String.fromFloat hit.identity) ] 
                                                             )
                                                )
                                 ]
@@ -294,7 +292,7 @@ viewSearch s  =
         Alert.simpleInfo [] 
             [ p [] [ text "Search results are still not available (it may take 10-15 minutes)."]
             , p [] [ text "Save this link for later use: "
-                   , Html.a [ href ("https://gmsc.big-data-biology.org/mapper/" ++ s.search_id) ] [ text ("https://gmsc.big-data-biology.org/mapper/" ++ s.search_id) ]
+                   , Html.a [ HtmlAttr.href ("https://gmsc.big-data-biology.org/mapper/" ++ s.search_id) ] [ text ("https://gmsc.big-data-biology.org/mapper/" ++ s.search_id) ]
                    ]
             , p [] [ text <| "Your search ID, which can be used to find the results is " ++ s.search_id ++ ". Results are saved for at least 7 days." ]
             , p [] [ text "Current status is "

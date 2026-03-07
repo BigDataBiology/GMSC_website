@@ -1,7 +1,6 @@
 module Help exposing (viewModel)
-import Html exposing (..)
+import Html exposing (Html, span)
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
 import Browser
 import Dict
 import Markdown
@@ -18,7 +17,7 @@ viewModel =
 
 content : Html msg
 content =
-    span [id "help"]
+    span [HtmlAttr.id "help"]
         [Markdown.toHtml [] """
 ## Overview
 The global microbial smORFs catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining 63,410 publicly available metagenomes from the [SPIRE database](http://spire.embl.de) and 87,920 high-quality isolated microbial genomes from the [ProGenomes2 database](https://progenomes.embl.de/).

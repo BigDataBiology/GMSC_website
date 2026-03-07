@@ -14,7 +14,7 @@ module Select.Shared exposing
 
 import Array
 import Html exposing (Attribute)
-import Html.Attributes exposing (attribute, autocomplete, class)
+import Html.Attributes as HtmlAttr
 import Html.Events exposing (keyCode, on, onFocus, onInput, preventDefaultOn, stopPropagationOn)
 import Json.Decode as Decode
 import Regex
@@ -54,7 +54,7 @@ referenceDataName =
 
 referenceAttr : Config msg item -> State -> Attribute msg2
 referenceAttr config model =
-    attribute referenceDataName model.id
+    HtmlAttr.attribute referenceDataName model.id
 
 
 difference : List item -> List item -> List item
@@ -88,16 +88,16 @@ inputAttributes config model availableItems selectedItems maybeMatchedItems =
                             Array.fromList matchedItems
                                 |> Array.get (remainderBy (List.length matchedItems) n)
     in
-    [ autocomplete False
-    , attribute "autocorrect" "off" -- for mobile Safari
-    , onBlurAttribute config model |> Html.Attributes.map config.toMsg
-    , onKeyUpAttribute preselectedItem |> Html.Attributes.map config.toMsg
-    , onKeyPressAttribute preselectedItem |> Html.Attributes.map config.toMsg
-    , onInput Msg.OnQueryChange |> Html.Attributes.map config.toMsg
-    , onFocus Msg.OnFocus |> Html.Attributes.map config.toMsg
+    [ HtmlAttr.autocomplete False
+    , HtmlAttr.attribute "autocorrect" "off" -- for mobile Safari
+    , onBlurAttribute config model |> HtmlAttr.map config.toMsg
+    , onKeyUpAttribute preselectedItem |> HtmlAttr.map config.toMsg
+    , onKeyPressAttribute preselectedItem |> HtmlAttr.map config.toMsg
+    , onInput Msg.OnQueryChange |> HtmlAttr.map config.toMsg
+    , onFocus Msg.OnFocus |> HtmlAttr.map config.toMsg
     , referenceAttr config model
     ]
-        ++ [ class classNames.input ]
+        ++ [ HtmlAttr.class classNames.input ]
         ++ config.inputAttrs
         ++ promptAttrs
 

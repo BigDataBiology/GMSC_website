@@ -1,12 +1,12 @@
 module Select.Update exposing (update)
 
 import Select.Config exposing (Config)
-import Select.Messages exposing (..)
+import Select.Messages as Messages
 import Select.Models exposing (State)
 import Task
 
 
-update : Config msg item -> Msg item -> State -> ( State, Cmd msg )
+update : Config msg item -> Messages.Msg item -> State -> ( State, Cmd msg )
 update config msg model =
     let
         queryChangeCmd value =
@@ -19,13 +19,13 @@ update config msg model =
                         |> Task.perform constructor
     in
     case msg of
-        NoOp ->
+        Messages.NoOp ->
             ( model, Cmd.none )
 
-        OnEsc ->
+        Messages.OnEsc ->
             ( { model | query = Nothing }, Cmd.none )
 
-        OnDownArrow ->
+        Messages.OnDownArrow ->
             let
                 newHightlightedItem =
                     case model.highlightedItem of
@@ -37,7 +37,7 @@ update config msg model =
             in
             ( { model | highlightedItem = newHightlightedItem }, Cmd.none )
 
-        OnUpArrow ->
+        Messages.OnUpArrow ->
             let
                 newHightlightedItem =
                     case model.highlightedItem of
@@ -52,7 +52,7 @@ update config msg model =
             in
             ( { model | highlightedItem = newHightlightedItem }, Cmd.none )
 
-        OnFocus ->
+        Messages.OnFocus ->
             let
                 cmd =
                     case config.onFocus of
@@ -79,10 +79,10 @@ update config msg model =
                 False ->
                     ( model, cmd )
 
-        OnBlur ->
+        Messages.OnBlur ->
             ( { model | query = Nothing }, Cmd.none )
 
-        OnClear ->
+        Messages.OnClear ->
             let
                 cmd =
                     Task.succeed Nothing
@@ -90,7 +90,7 @@ update config msg model =
             in
             ( { model | query = Nothing }, cmd )
 
-        OnRemoveItem item ->
+        Messages.OnRemoveItem item ->
             let
                 cmd =
                     case config.onRemoveItem of
@@ -103,7 +103,7 @@ update config msg model =
             in
             ( model, cmd )
 
-        OnQueryChange value ->
+        Messages.OnQueryChange value ->
             let
                 newQuery =
                     value |> config.transformQuery
@@ -118,7 +118,7 @@ update config msg model =
             in
             ( { model | highlightedItem = Nothing, query = Just value }, cmd )
 
-        OnSelect item ->
+        Messages.OnSelect item ->
             let
                 cmd =
                     Task.succeed (Just item)

@@ -1,7 +1,6 @@
 module Home exposing (Model, Msg(..), initialModel, update, viewModel)
-import Html exposing (..)
+import Html exposing (Html, a, div, h4, img, label, p, span, text)
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
 import Browser
 import Dict
 import Markdown
@@ -140,7 +139,7 @@ viewModel model =
 
 intro : Html msg
 intro =
-    span [id "introduction"]
+    span [HtmlAttr.id "introduction"]
         [Markdown.toHtml [] """
 # Global Microbial smORFs Catalogue v1.0
 
@@ -161,7 +160,7 @@ viewSearch model =
   let
     buttonStyle who active =
                 [ if who == active then Button.info else Button.outlineInfo, Button.onClick (SelectOp who) ]
-    in div [class "search"] 
+    in div [HtmlAttr.class "search"] 
         [ Form.form []
             [ Form.row []
                 [ Form.col [ Col.sm10 ] 
@@ -170,17 +169,17 @@ viewSearch model =
             , Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ Form.label [id "browse"] [ text "Search from Identifier" ]
+                        [ Form.label [HtmlAttr.id "browse"] [ text "Search from Identifier" ]
                         , Input.text
                             [ Input.value model.idcontent
                             , Input.attrs
-                                [ placeholder "GMSC10.100AA.XXX_XXX_XXX   or   GMSC10.90AA.XXX_XXX_XXX" ]
+                                [ HtmlAttr.placeholder "GMSC10.100AA.XXX_XXX_XXX   or   GMSC10.90AA.XXX_XXX_XXX" ]
                             , Input.onInput SetIdentifier
                             ]
                         , Form.help [] [ text "The maximum 100AA identifier is GMSC10.100AA.964_970_495. The maximum 90AA identifier is GMSC10.90AA.287_926_874" ]
-                        , Button.button [ Button.info, Button.attrs [ class "float-right"], Button.onClick SubmitIdentifier ] [ text "Submit" ] 
-                        , Button.button[ Button.light, Button.attrs [ class "float-right"], Button.onClick ClearId ] [ text "Clear" ]
-                        , Button.button [ Button.outlineSecondary, Button.attrs [ class "float-right"], Button.onClick SetIdentifierExample ] [ text "Example" ] 
+                        , Button.button [ Button.info, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick SubmitIdentifier ] [ text "Submit" ] 
+                        , Button.button[ Button.light, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick ClearId ] [ text "Clear" ]
+                        , Button.button [ Button.outlineSecondary, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick SetIdentifierExample ] [ text "Example" ] 
                         ]
                     ]
                 ]
@@ -197,21 +196,21 @@ viewSearch model =
             [ Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ label [ id "browse"] [ text "Input an amino acid / nucleotide sequence in FASTA format"]
+                        [ label [ HtmlAttr.id "browse"] [ text "Input an amino acid / nucleotide sequence in FASTA format"]
                         , Textarea.textarea
                             [ Textarea.id "myarea"
                             , Textarea.value model.seqcontent
                             , Textarea.onInput SetSequence
                             , Textarea.rows 3
                             , Textarea.attrs [
-                                placeholder <| if model.optype == Contigs then
+                                HtmlAttr.placeholder <| if model.optype == Contigs then
                                     ">contigID\n AATACTACATGTCA..."
                                 else
                                     ">proteinID\n MTIISR..."]
                             ]
-                        , Button.button [ Button.info, Button.attrs [ class "float-right"], Button.onClick SubmitSequence] [ text "Submit" ]
-                        , Button.button [ Button.light, Button.attrs [ class "float-right"], Button.onClick ClearSeq] [ text "Clear" ]
-                        , Button.button [ Button.outlineSecondary, Button.attrs [ class "float-right"], Button.onClick SetSeqExample] [ text "Example" ]
+                        , Button.button [ Button.info, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick SubmitSequence] [ text "Submit" ]
+                        , Button.button [ Button.light, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick ClearSeq] [ text "Clear" ]
+                        , Button.button [ Button.outlineSecondary, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick SetSeqExample] [ text "Example" ]
                         ]
                     ]
                 ]
@@ -220,16 +219,16 @@ viewSearch model =
             [ Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ Form.label [id "browse"] [ text "Lookup a sequence search result" ]
+                        [ Form.label [HtmlAttr.id "browse"] [ text "Lookup a sequence search result" ]
                         , Input.text
                             [ Input.value model.lookupIDContent
                             , Input.attrs
-                                [ placeholder "1-xxxx" ]
+                                [ HtmlAttr.placeholder "1-xxxx" ]
                             , Input.onInput SetLookupId
                             ]
                         , Button.button
                             [ Button.info
-                            , Button.attrs [ class "float-right"]
+                            , Button.attrs [ HtmlAttr.class "float-right"]
                             , Button.onClick LookupSearch
                             ]
                             [ text "Lookup" ]
@@ -239,7 +238,7 @@ viewSearch model =
             , Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Alert.simpleInfo [] [ p [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
-                                                 , a [href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]
+                                                 , a [HtmlAttr.href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]
                                                  ]
                                           , p [] [text "The searching will take a few minutes. To lookup the sequence search results, please type your search ID above that automatically generated when submitting."]
                                           ] 
@@ -250,7 +249,7 @@ viewSearch model =
 
 viewFig: Model -> Html Msg
 viewFig model =
-  div [class "fig"]
+  div [HtmlAttr.class "fig"]
     [ Carousel.config CarouselMsg []
         |> Carousel.withControls
         |> Carousel.withIndicators
@@ -264,7 +263,7 @@ viewFig model =
                     , Card.align Text.alignSmCenter
                     ]
                     |> Card.headerH4 []
-                        [ img [ src "assets/home_geo.svg" ] []
+                        [ img [ HtmlAttr.src "assets/home_geo.svg" ] []
                         , p [] [text " Geographical distribution"]
                         ]
                     |> Card.view
@@ -279,7 +278,7 @@ viewFig model =
                     , Card.align Text.alignSmCenter
                     ]
                     |> Card.headerH4 []
-                        [ img [ src "assets/home_taxonomy.svg" ] []
+                        [ img [ HtmlAttr.src "assets/home_taxonomy.svg" ] []
                         , p [] [text " Taxonomy distribution"]
                         ]
                     |> Card.view
@@ -294,7 +293,7 @@ viewFig model =
                     , Card.align Text.alignSmCenter
                     ]
                     |> Card.headerH4 []
-                        [ img [ src "assets/home_habitat_single.png" ] []
+                        [ img [ HtmlAttr.src "assets/home_habitat_single.png" ] []
                         , p [] [text " Habitat distribution"]
                         ]
                     |> Card.view

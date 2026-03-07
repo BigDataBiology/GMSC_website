@@ -1,9 +1,8 @@
 module Main exposing (main)
 
-import Html exposing (..)
-import Html.Attributes exposing(..)
+import Html exposing (Html, div, h3, p, text)
 import Html.Attributes as HtmlAttr
-import Html.Events exposing (..)
+import Html.Events exposing (onClick)
 import Browser
 import Browser.Navigation as Nav
 import Url exposing (Url)
@@ -382,13 +381,13 @@ notFoundView =
 
 header : Html Msg
 header =
-    Html.nav [id "topbar"]
+    Html.nav [HtmlAttr.id "topbar"]
         [Grid.simpleRow
-            [ Grid.col [] [ Html.a [href "/home", onClick GoToHome] [Html.text "Home"]] 
-            , Grid.col [] [ Html.a [href "/browse", onClick GoToBrowse] [Html.text "Browse"]] 
-            , Grid.col [] [ Html.a [href "/downloads", onClick GoToDownload] [Html.text "Downloads"]]
-            , Grid.col [] [ Html.a [href "/help", onClick GoToHelp] [Html.text "Help"]]
-            , Grid.col [] [ Html.a [href "/about", onClick GoToAbout] [Html.text "About&Contact"]]
+            [ Grid.col [] [ Html.a [HtmlAttr.href "/home", onClick GoToHome] [Html.text "Home"]] 
+            , Grid.col [] [ Html.a [HtmlAttr.href "/browse", onClick GoToBrowse] [Html.text "Browse"]] 
+            , Grid.col [] [ Html.a [HtmlAttr.href "/downloads", onClick GoToDownload] [Html.text "Downloads"]]
+            , Grid.col [] [ Html.a [HtmlAttr.href "/help", onClick GoToHelp] [Html.text "Help"]]
+            , Grid.col [] [ Html.a [HtmlAttr.href "/about", onClick GoToAbout] [Html.text "About&Contact"]]
             ]
         ]
 
@@ -397,7 +396,7 @@ header =
 
 footer : Html Msg
 footer =
-  div [id "footerbar"]
+  div [HtmlAttr.id "footerbar"]
       [p []
             [Html.text "For more information, see "
             ,Html.a [HtmlAttr.href "https://www.nature.com/articles/s41467-024-51894-6"]

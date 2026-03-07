@@ -1,8 +1,7 @@
 module Download exposing (viewModel)
 import Html
-import Html exposing (..)
+import Html exposing (Html)
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
 import Browser
 import Dict
 import Markdown

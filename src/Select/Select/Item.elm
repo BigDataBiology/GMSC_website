@@ -3,11 +3,11 @@ module Select.Select.Item exposing
     , viewNotFound
     )
 
-import Html exposing (..)
-import Html.Attributes exposing (attribute, class)
+import Html exposing (Html, div, text)
+import Html.Attributes as HtmlAttr
 import Html.Events exposing (onMouseDown)
 import Select.Config exposing (Config)
-import Select.Messages exposing (..)
+import Select.Messages as Messages
 import Select.Models exposing (State)
 import Select.Shared exposing (classNames, referenceAttr)
 
@@ -50,10 +50,10 @@ view config state itemCount selectedItems index item =
                     fn item
     in
     div
-        ([ class classNames.menuItem
-         , class classNames.menuItemSelectable
-         , attribute "data-select-item" label
-         , onMouseDown (config.toMsg (OnSelect item))
+        ([ HtmlAttr.class classNames.menuItem
+         , HtmlAttr.class classNames.menuItemSelectable
+         , HtmlAttr.attribute "data-select-item" label
+         , onMouseDown (config.toMsg (Messages.OnSelect item))
          , referenceAttr config state
          ]
             ++ highlightedItemAttrs
@@ -70,5 +70,5 @@ viewNotFound config =
 
     else
         div
-            ([ class classNames.menuItem ] ++ config.notFoundAttrs)
+            ([ HtmlAttr.class classNames.menuItem ] ++ config.notFoundAttrs)
             [ text config.notFound ]

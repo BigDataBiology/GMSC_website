@@ -1,9 +1,8 @@
 module Select.Select.Menu exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (class, style)
+import Html exposing (Html, div, text)
+import Html.Attributes as HtmlAttr
 import Select.Config exposing (Config)
-import Select.Messages exposing (..)
 import Select.Models as Models exposing (State)
 import Select.Select.Item as Item
 import Select.Shared exposing (classNames)
@@ -11,7 +10,7 @@ import Select.Shared exposing (classNames)
 
 view : Config msg item -> State -> Maybe (List item) -> List item -> Html msg
 view config state maybeMatchedItems selectedItems =
-    div [ class classNames.menuAnchor ] [ maybeMenu config state maybeMatchedItems selectedItems ]
+    div [ HtmlAttr.class classNames.menuAnchor ] [ maybeMenu config state maybeMatchedItems selectedItems ]
 
 
 maybeMenu : Config msg item -> State -> Maybe (List item) -> List item -> Html msg
@@ -32,7 +31,7 @@ menu config state matchedItems selectedItems =
 
         menuStyles =
             if hideWhenNotFound then
-                [ style "display" "none" ]
+                [ HtmlAttr.style "display" "none" ]
 
             else
                 []
@@ -52,7 +51,7 @@ menu config state matchedItems selectedItems =
                 |> List.indexedMap (Item.view config state itemCount selectedItems)
     in
     div
-        ([ class classNames.menu ]
+        ([ HtmlAttr.class classNames.menu ]
             ++ menuStyles
             ++ config.menuAttrs
         )

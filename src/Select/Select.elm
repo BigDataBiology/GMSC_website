@@ -1,9 +1,8 @@
 module Select.Select exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (class, id, style)
+import Html exposing (Html, div)
+import Html.Attributes as HtmlAttr
 import Select.Config exposing (Config)
-import Select.Messages exposing (..)
 import Select.Models exposing (State)
 import Select.Search as Search
 import Select.Select.Input
@@ -50,8 +49,8 @@ view config state availableItems selectedItems =
                 selectedItems
     in
     div
-        [ id state.id
-        , class classNames.root
+        [ HtmlAttr.id state.id
+        , HtmlAttr.class classNames.root
         ]
         [ Select.Select.Input.view
             config
@@ -59,8 +58,8 @@ view config state availableItems selectedItems =
             availableItems
             selectedItems
             maybeMatchedItems
-        , div [ class classNames.underlineWrapper ]
-            [ div [ class classNames.underline ] []
+        , div [ HtmlAttr.class classNames.underlineWrapper ]
+            [ div [ HtmlAttr.class classNames.underline ] []
             ]
         , Select.Select.Menu.view
             config

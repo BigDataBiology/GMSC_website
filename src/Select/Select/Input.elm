@@ -1,12 +1,7 @@
 module Select.Select.Input exposing (view)
 
-import Html exposing (..)
-import Html.Attributes
-    exposing
-        ( class
-        , placeholder
-        , value
-        )
+import Html exposing (Html, div, input, text)
+import Html.Attributes as HtmlAttr
 import Select.Config exposing (Config)
 import Select.Messages as Msg exposing (Msg)
 import Select.Models exposing (State)
@@ -44,7 +39,7 @@ view config model availableItems selectedItems maybeMatchedItems =
                     maybeMatchedItems
     in
     div
-        ([ class classNames.inputWrapper ]
+        ([ HtmlAttr.class classNames.inputWrapper ]
             ++ config.inputWrapperAttrs
         )
         (input ++ [ maybeClear ])
@@ -52,9 +47,9 @@ view config model availableItems selectedItems maybeMatchedItems =
 
 clear config =
     div
-        ([ class classNames.clear
+        ([ HtmlAttr.class classNames.clear
          , Shared.onClickWithoutPropagation Msg.OnClear
-            |> Html.Attributes.map config.toMsg
+            |> HtmlAttr.map config.toMsg
          ]
             ++ config.clearAttrs
         )
@@ -82,6 +77,6 @@ singleInput config model availableItems selectedItems maybeMatchedItems =
                     query
     in
     [ input
-        (Shared.inputAttributes config model availableItems selectedItems maybeMatchedItems ++ [ value val, placeholder config.prompt ])
+        (Shared.inputAttributes config model availableItems selectedItems maybeMatchedItems ++ [ HtmlAttr.value val, HtmlAttr.placeholder config.prompt ])
         []
     ]

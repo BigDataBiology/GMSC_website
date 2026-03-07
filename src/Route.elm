@@ -2,7 +2,7 @@ module Route exposing (Route(..), parseUrl, pushUrl)
 
 import Browser.Navigation as Nav
 import Url exposing (Url)
-import Url.Parser as Parser exposing (..)
+import Url.Parser as Parser exposing ((</>), Parser)
 
 type Route
     = NotFound
@@ -19,7 +19,7 @@ type Route
 
 parseUrl : Url -> Route
 parseUrl url =
-    case parse matchRoute url of
+    case Parser.parse matchRoute url of
         Just route ->
             route
 
@@ -28,7 +28,7 @@ parseUrl url =
 
 matchRoute : Parser (Route -> a) a
 matchRoute =
-    oneOf
+    Parser.oneOf
         [ Parser.map HomeR Parser.top
         , Parser.map HomeR (Parser.s "home")
         , Parser.map BrowseR (Parser.s "browse")

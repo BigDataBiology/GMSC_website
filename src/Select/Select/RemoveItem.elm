@@ -2,7 +2,7 @@ module Select.Select.RemoveItem exposing (svgPath, view)
 
 import Select.Config exposing (Config)
 import Select.Shared exposing (classNames)
-import Svg exposing (..)
+import Svg exposing (Svg, path, svg)
 import Svg.Attributes as Attrs
 
 

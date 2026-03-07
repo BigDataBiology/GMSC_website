@@ -1,10 +1,8 @@
 module Sequence exposing (Model, Msg(..), initialState, update, viewModel)
 
 import Html
-import Html exposing (..)
-import Html.Events exposing (..)
+import Html exposing (Html, div, h1, h3, p, text)
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
 import Browser.Navigation as Nav
 import Browser
 import Dict
@@ -80,20 +78,20 @@ viewModel model =
                                   , thead = Table.simpleThead []
                                   , tbody = Table.tbody []
                                       [ Table.tr []
-                                          [ Table.td [] [p [id "title"] [text "Protein sequence"]  ]
-                                          , Table.td [] [p [id "detail"] [text v.aa] ]
+                                          [ Table.td [] [p [HtmlAttr.id "title"] [text "Protein sequence"]  ]
+                                          , Table.td [] [p [HtmlAttr.id "detail"] [text v.aa] ]
                                           ]
                                       , Table.tr []
-                                          [ Table.td [] [ p [id "title"] [text "Nucleotide sequence"] ]
-                                          , Table.td [] [ p [id "detail"] [text v.nuc] ]
+                                          [ Table.td [] [ p [HtmlAttr.id "title"] [text "Nucleotide sequence"] ]
+                                          , Table.td [] [ p [HtmlAttr.id "detail"] [text v.nuc] ]
                                           ]
                                       , Table.tr []
-                                          [ Table.td [] [ p [id "title"] [text "Taxonomic assignment"]  ]
-                                          , Table.td [] [ p [id "detail"] [text v.tax]  ]
+                                          [ Table.td [] [ p [HtmlAttr.id "title"] [text "Taxonomic assignment"]  ]
+                                          , Table.td [] [ p [HtmlAttr.id "detail"] [text v.tax]  ]
                                           ]
                                       , Table.tr []
-                                          [ Table.td [] [ p [id "title"] [text "Habitat"]  ]
-                                          , Table.td [] [ p [id "detail"] [text v.habitat]  ]
+                                          [ Table.td [] [ p [HtmlAttr.id "title"] [text "Habitat"]  ]
+                                          , Table.td [] [ p [HtmlAttr.id "detail"] [text v.habitat]  ]
                                           ]
                                       {-, Table.tr []
                                           [ Table.td [] [ p [id "title"] [text "Protein cluster"]  ]

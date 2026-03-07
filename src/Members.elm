@@ -1,14 +1,13 @@
 module Members exposing (MemberPost(..), ShowPost (..), APIResult(..), MultiResult(..), Model, Msg(..), initialState, update, viewModel)
 
-import Html exposing (..)
-import Html.Events exposing (..)
+import Html exposing (Html, div, h5, p, text)
+import Html.Events exposing (onClick)
 import Bootstrap.Grid as Grid
 
 import Chart as C
 import Chart.Attributes as CA
 
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
 import Browser
 import Dict
 import Markdown
@@ -281,8 +280,8 @@ viewResults r m times model = case r of
                                 [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
                               else []
                             )
-                        , div [id "position"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
-                        , div [id "member"] 
+                        , div [HtmlAttr.id "position"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
+                        , div [HtmlAttr.id "member"] 
                           [ Table.table
                             { options = [ Table.striped, Table.hover ]
                             , thead =  Table.simpleThead
@@ -295,17 +294,17 @@ viewResults r m times model = case r of
                             , tbody = Table.tbody []
                                     ( List.map (\e ->
                                                     Table.tr []
-                                                    [  Table.td [] [ p [id "identifier"] [Html.a [href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
-                                                    ,  Table.td [] [ p [id "detail"] [text e.aa ] ]
-                                                    ,  Table.td [] [ p [id "detail"] [text e.nuc ] ]
-                                                    ,  Table.td [] [ p [id "detail"] [text e.habitat ] ]
-                                                    ,  Table.td [] [ p [id "detail"] [text e.tax ] ]
+                                                    [  Table.td [] [ p [HtmlAttr.id "identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                                    ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.aa ] ]
+                                                    ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.nuc ] ]
+                                                    ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.habitat ] ]
+                                                    ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.tax ] ]
                                                     ]
                                                ) ok
                                     )
                             }
                           ]
-                        , div [class "browse"] 
+                        , div [HtmlAttr.class "browse"] 
                           [ if List.length mok.cluster > 100 then
                                 if List.length mok.cluster > (100*times) then
                                     div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (100*times) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
@@ -314,12 +313,12 @@ viewResults r m times model = case r of
                             else 
                                 div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
                             , if List.length mok.cluster > 100 then
-                                Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin mok.cluster 1), Button.attrs [ class "float-left"]] [ Html.text "<<" ]
-                              else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ], Button.attrs [ class "float-left"]] [ Html.text "<<" ]
+                                Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin mok.cluster 1), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
+                              else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ], Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
                             , if times > 1 then
                                 let other = (List.drop (100*(times-2)) mok.cluster)
-                                in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other), Button.attrs [ class "float-left"]] [ Html.text "<" ]
-                              else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.attrs [ class "float-left"]] [ Html.text "<" ]
+                                in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
+                              else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
                             {-, if List.length mok.cluster > 100 then
                                 if modBy 100 (List.length mok.cluster) /= 0 then
                                     div [] (List.map (\n -> Button.button [ Button.small, Button.outlineInfo, Button.onClick (Showselect (List.drop (100*(n-1)) mok.cluster) n) ,Button.attrs [ class "float-left"]] [text (String.fromInt n)] )(List.range 1 ((List.length mok.cluster//100)+1)))
@@ -332,7 +331,7 @@ viewResults r m times model = case r of
                                     { options = [ ]
                                     , toggleMsg = MyDrop1Msg
                                     , toggleButton =
-                                        Dropdown.toggle [ Button.small, Button.outlineInfo ,Button.attrs [ class "float-left"]] [ text "Page" ]
+                                        Dropdown.toggle [ Button.small, Button.outlineInfo ,Button.attrs [ HtmlAttr.class "float-left"]] [ text "Page" ]
                                     , items =
                                         if List.length mok.cluster > 100 then
                                             if modBy 100 (List.length mok.cluster) /= 0 then

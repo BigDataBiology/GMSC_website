@@ -1,7 +1,6 @@
 module About exposing (viewModel)
-import Html exposing (..)
+import Html exposing (Html, span)
 import Html.Attributes as HtmlAttr
-import Html.Attributes exposing (..)
 import Browser
 import Dict
 import Markdown
@@ -19,8 +18,8 @@ viewModel =
 -- main text
 
 content: Html msg
-content = 
-    span [id "introduction"]
+content =
+    span [HtmlAttr.id "introduction"]
         [Markdown.toHtml [] """
 ## The global microbial smORF catalogue (GMSC)
 

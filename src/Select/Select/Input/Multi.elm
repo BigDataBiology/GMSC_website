@@ -1,16 +1,7 @@
 module Select.Select.Input.Multi exposing (view)
 
-import Html exposing (..)
-import Html.Attributes
-    exposing
-        ( attribute
-        , autocomplete
-        , class
-        , id
-        , placeholder
-        , style
-        , value
-        )
+import Html exposing (Html, div, input, text)
+import Html.Attributes as HtmlAttr
 import Select.Config exposing (Config)
 import Select.Messages as Msg exposing (Msg)
 import Select.Models exposing (State)
@@ -35,9 +26,9 @@ view config model availableItems selected maybeMatchedItems =
         selected
     , input
         (Shared.inputAttributes config model availableItems selected maybeMatchedItems
-            ++ [ value val ]
+            ++ [ HtmlAttr.value val ]
             ++ (if List.isEmpty selected then
-                    [ placeholder config.prompt ]
+                    [ HtmlAttr.placeholder config.prompt ]
 
                 else
                     []
@@ -49,7 +40,7 @@ view config model availableItems selected maybeMatchedItems =
 
 currentSelection config selected =
     div
-        ([ class classNames.multiInputItemContainer ]
+        ([ HtmlAttr.class classNames.multiInputItemContainer ]
             ++ config.multiInputItemContainerAttrs
         )
         (List.map
@@ -60,11 +51,11 @@ currentSelection config selected =
 
 currentSelection_item config item =
     div
-        ([ class classNames.multiInputItem ]
+        ([ HtmlAttr.class classNames.multiInputItem ]
             ++ config.multiInputItemAttrs
         )
         [ div
-            [ class classNames.multiInputItemText ]
+            [ HtmlAttr.class classNames.multiInputItemText ]
             [ text (config.toLabel item) ]
         , currentSelection_item_maybeClear
             config
@@ -85,8 +76,8 @@ currentSelection_item_maybeClear config item =
 
 currentSelection_item_clear config item =
     div
-        [ class classNames.multiInputItemRemove
+        [ HtmlAttr.class classNames.multiInputItemRemove
         , Shared.onClickWithoutPropagation (Msg.OnRemoveItem item)
-            |> Html.Attributes.map config.toMsg
+            |> HtmlAttr.map config.toMsg
         ]
         [ RemoveItem.view config ]
