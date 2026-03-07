@@ -16,10 +16,9 @@ import Bootstrap.ButtonGroup as ButtonGroup
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Form.Textarea as Textarea
-import Bootstrap.Carousel as Carousel
+import Bootstrap.Carousel as Carousel exposing (defaultStateOptions)
 import Bootstrap.Popover as Popover
 import Bootstrap.Carousel.Slide as Slide
-import Bootstrap.Carousel as Carousel exposing (defaultStateOptions)
 import Bootstrap.Card as Card
 import Bootstrap.Text as Text
 import Bootstrap.Card.Block as Block
