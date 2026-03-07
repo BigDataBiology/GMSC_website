@@ -2,20 +2,14 @@ module Members exposing (MemberPost(..), ShowPost (..), APIResult(..), MultiResu
 
 import Html exposing (Html, div, h5, p, text)
 import Html.Events exposing (onClick)
-import Bootstrap.Grid as Grid
 
 import Chart as C
 import Chart.Attributes as CA
 
 import Html.Attributes as HtmlAttr
-import Browser
 import Dict
-import Markdown
-import View exposing (View)
 
 import Bootstrap.Table as Table
-import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Bootstrap.Utilities.Spacing as Spacing

@@ -6,26 +6,10 @@ import Html.Events exposing (onClick)
 import Browser
 import Browser.Navigation as Nav
 import Url exposing (Url)
-import Url.Parser as Parser exposing (Parser, (</>), custom, fragment, map, oneOf, top)
-import Dict
-import Markdown
-import View exposing (View)
 import Route exposing (Route)
 
 import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
-import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
-import Bootstrap.Button as Button
-import Bootstrap.ButtonGroup as ButtonGroup
-import Bootstrap.Form as Form
-import Bootstrap.Form.Input as Input
-import Bootstrap.Form.Textarea as Textarea
-import Bootstrap.Carousel as Carousel exposing (defaultStateOptions)
-import Bootstrap.Carousel.Slide as Slide
-import Bootstrap.Card as Card
-import Bootstrap.Text as Text
-import Bootstrap.Card.Block as Block
 
 import Home
 import Sequence

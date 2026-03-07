@@ -2,18 +2,10 @@ module Filter exposing (BrowsePost(..),ShowPost(..),APIResult(..),MultiResult(..
 
 import Html exposing (Html, div, p, text)
 import Html.Events exposing (onClick)
-import Bootstrap.CDN as CDN
-import Bootstrap.Grid as Grid
 
 import Html.Attributes as HtmlAttr
-import Browser
-import Dict
-import Markdown
-import View exposing (View)
 
 import Bootstrap.Table as Table
-import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Bootstrap.Utilities.Spacing as Spacing

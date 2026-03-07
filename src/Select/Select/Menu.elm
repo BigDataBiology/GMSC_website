@@ -3,7 +3,7 @@ module Select.Select.Menu exposing (view)
 import Html exposing (Html, div, text)
 import Html.Attributes as HtmlAttr
 import Select.Config exposing (Config)
-import Select.Models as Models exposing (State)
+import Select.Models exposing (State)
 import Select.Select.Item as Item
 import Select.Shared exposing (classNames)
 

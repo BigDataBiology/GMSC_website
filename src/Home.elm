@@ -1,15 +1,9 @@
 module Home exposing (Model, Msg(..), initialModel, update, viewModel)
+
 import Html exposing (Html, a, div, h4, img, label, p, span, text)
 import Html.Attributes as HtmlAttr
-import Browser
-import Dict
 import Markdown
-import View exposing (View)
-
-import Bootstrap.CDN as CDN
-import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
 import Bootstrap.Button as Button
 import Bootstrap.ButtonGroup as ButtonGroup
 import Bootstrap.Form as Form
@@ -20,7 +14,6 @@ import Bootstrap.Popover as Popover
 import Bootstrap.Carousel.Slide as Slide
 import Bootstrap.Card as Card
 import Bootstrap.Text as Text
-import Bootstrap.Card.Block as Block
 import Bootstrap.Alert as Alert
 
 

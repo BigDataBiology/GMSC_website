@@ -9,7 +9,6 @@ module Selectshared exposing
 import Html exposing (Html, div, p, text)
 import Html.Attributes as HtmlAttr
 import Selects
-import Shared
 import Set
 
 type alias Model item =

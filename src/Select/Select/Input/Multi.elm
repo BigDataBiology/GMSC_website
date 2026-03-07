@@ -3,7 +3,7 @@ module Select.Select.Input.Multi exposing (view)
 import Html exposing (Html, div, input, text)
 import Html.Attributes as HtmlAttr
 import Select.Config exposing (Config)
-import Select.Messages as Msg exposing (Msg)
+import Select.Messages as Msg
 import Select.Models exposing (State)
 import Select.Select.RemoveItem as RemoveItem
 import Select.Shared as Shared exposing (classNames)

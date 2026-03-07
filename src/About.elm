@@ -1,15 +1,8 @@
 module About exposing (viewModel)
+
 import Html exposing (Html, span)
 import Html.Attributes as HtmlAttr
-import Browser
-import Dict
 import Markdown
-import View exposing (View)
-
-import Bootstrap.CDN as CDN
-import Bootstrap.Grid as Grid
-import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
 
 viewModel : Html msg
 viewModel =

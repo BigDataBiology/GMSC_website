@@ -3,25 +3,15 @@ module Mapper exposing (Model, Msg(..), initialState, lookupState, update, viewM
 import Html exposing (Html, div, h2, h3, p, text)
 import Html.Attributes as HtmlAttr
 import Browser.Navigation as Nav
-import Browser
 import Dict
-import Markdown
 import Http
 
-import Bootstrap.CDN as CDN
-import Bootstrap.Grid as Grid
 import Bootstrap.Table as Table
-import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
 import Bootstrap.Button as Button
-import Bootstrap.Dropdown as Dropdown
 import Bootstrap.Alert as Alert
 import Json.Decode as D
 import Delay
 import File.Download as Download
-
-import View exposing (View)
-import Route exposing (Route)
 
 type alias QueryResult =
   { seqid : String
