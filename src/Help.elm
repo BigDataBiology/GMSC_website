@@ -39,8 +39,8 @@ Additionally, if you use GMSC in your research, please cite the above paper.
   - cellular localization prediction
 
 **Main purpose of GMSC**:
-- Expand smORFs sets of global microbiomes with comprehensive annotation
-- Analyse of ecological distribution patterns across taxonomy and global habitats
+- Expand smORF sets of global microbiomes with comprehensive annotation
+- Analysis of ecological distribution patterns across taxonomy and global habitats
 - Annotate smORFs of microbial genomes or genes with the resource
 
 ## Searching

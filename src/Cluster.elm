@@ -31,7 +31,7 @@ rnaCodeString n =
   else if n < 0.05 then
       "✔ Passed (p-value: " ++ (String.fromFloat n) ++ ")"
   else
-      "✘ Not passed (p-value" ++ (String.fromFloat n) ++ ")"
+      "✘ Not passed (p-value: " ++ (String.fromFloat n) ++ ")"
 
 passOrFail : Bool -> String
 passOrFail value =
@@ -51,7 +51,7 @@ metaTRString n =
 
 metaPString : Float -> String
 metaPString n =
-    (if n > 0.5 then "✔ Passed " else "✗ Not passed") ++ "(coverage of smORF on proteomics: " ++ (String.fromFloat (n * 100.0) |> String.left 5) ++ "%)"
+    (if n > 0.5 then "✔ Passed " else "✘ Not passed ") ++ "(coverage of smORF on proteomics: " ++ (String.fromFloat (n * 100.0) |> String.left 5) ++ "%)"
 
 qualityBadgeClass : Quality -> String
 qualityBadgeClass q =
