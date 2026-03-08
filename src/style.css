@@ -342,6 +342,104 @@ div#cluster button{
     line-height: 1.55;
 }
 
+.cluster-sequence-view {
+    width: 100%;
+}
+
+.cluster-aa-sequence {
+    padding: 0.85rem 1rem;
+    background-color: #f7fbfc;
+    border: 1px solid #d9e7eb;
+    border-radius: 12px;
+}
+
+.cluster-aa-residue {
+    display: inline-block;
+    min-width: 0.9ch;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 4px;
+    margin: 0 0.04rem 0.16rem 0;
+    padding: 0.02rem 0.12rem;
+}
+
+.cluster-aa-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.85rem;
+    margin-top: 0.85rem;
+}
+
+.cluster-aa-legend-title {
+    width: 100%;
+    margin: 0.85rem 0 0;
+    color: #4f6f79;
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.cluster-aa-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #425a63;
+    font-size: 0.9rem;
+}
+
+.cluster-aa-legend-swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-family: "Courier New", monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 999px;
+}
+
+.cluster-aa-legend-text {
+    width: auto;
+    margin: 0;
+}
+
+.aa-hydrophobic {
+    background-color: #f9e4b7;
+    color: #7a4a08;
+}
+
+.aa-aromatic {
+    background-color: #efd9ff;
+    color: #5e2b8a;
+}
+
+.aa-polar {
+    background-color: #d9efff;
+    color: #1b5f91;
+}
+
+.aa-basic {
+    background-color: #d9f5e2;
+    color: #17603a;
+}
+
+.aa-acidic {
+    background-color: #ffd9d6;
+    color: #9b3026;
+}
+
+.aa-special {
+    background-color: #e4e2ff;
+    color: #40358f;
+}
+
+.aa-other {
+    background-color: #edf1f3;
+    color: #52626a;
+}
+
 .cluster-quality-badge {
     display: inline-block;
     padding: 0.45rem 0.85rem;
