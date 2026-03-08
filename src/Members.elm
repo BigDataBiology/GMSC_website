@@ -1,4 +1,4 @@
-module Members exposing (MemberPost(..), APIResult(..), Model, Msg(..), initialState, loadingModel, update, viewModel)
+module Members exposing (MemberPost(..), MemberResults, Model, Msg(..), initialState, loadingModel, update, viewModel)
 
 import Html exposing (Html, div, h5, p, text)
 import Html.Events exposing (onClick)
@@ -35,7 +35,7 @@ type alias Model =
 type MemberPost
     = MLoading
     | MLoadError String
-    | Results APIResult
+    | Results MemberResults
 
 decodeSequenceResult : D.Decoder SequenceResult
 decodeSequenceResult =
@@ -50,24 +50,21 @@ decodeSequenceResult =
             (D.field "seq_id" D.string)
         ]
 
-type APIResult =
-        APIResultOK { cluster : List SequenceResult
-                    , status : String
-                    }
-        | APIError String
+type alias MemberResults =
+    { cluster : List SequenceResult
+    , status : String
+    }
 
 type Msg
-    = ResultsData (Result Http.Error APIResult)
+    = ResultsData (Result Http.Error MemberResults)
     | DownloadResults
     | MultiData (Result Http.Error ResultsPipeline.MultiResult)
     | ShowPage Int
     | DropdownMsg Dropdown.State
 
-decodeAPIResult : D.Decoder APIResult
+decodeAPIResult : D.Decoder MemberResults
 decodeAPIResult =
-    let
-        bAPIResultOK r s = APIResultOK { cluster = r, status = s }
-    in D.map2 bAPIResultOK
+    D.map2 MemberResults
         (D.field "cluster" (D.list decodeSequenceResult))
         (D.field "status" D.string)
 
@@ -100,23 +97,20 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ResultsData r -> case r of
-            Ok v ->
-                case v of
-                   APIResultOK ok ->
-                        let
-                            page =
-                                1
+            Ok ok ->
+                let
+                    page =
+                        1
 
-                            nextResults =
-                                ResultsPipeline.setLoadingPage page model.results
+                    nextResults =
+                        ResultsPipeline.setLoadingPage page model.results
 
-                            ids =
-                                ResultsPipeline.pageIds page sequenceId ok.cluster
-                        in
-                        ( { model | memberpost = Results v, results = nextResults }
-                        , ResultsPipeline.fetchPage MultiData ids
-                        )
-                   _ -> ( {model | memberpost = Results v}, Cmd.none)
+                    ids =
+                        ResultsPipeline.pageIds page sequenceId ok.cluster
+                in
+                ( { model | memberpost = Results ok, results = nextResults }
+                , ResultsPipeline.fetchPage MultiData ids
+                )
             Err err ->
                 ( { model | memberpost = MLoadError (ResultsPipeline.httpErrorMessage err) }, Cmd.none )
 
@@ -128,7 +122,7 @@ update msg model =
 
         ShowPage page ->
             case model.memberpost of
-                Results (APIResultOK ok) ->
+                Results ok ->
                     let
                         nextResults =
                             ResultsPipeline.setLoadingPage page model.results
@@ -173,55 +167,47 @@ viewModel model =
 
 viewResults r m model = case r of
     ResultsPipeline.MultiResultOK ok ->
-        case m of
-            APIResultOK mok ->
-                Html.div []
-                    [ viewSummary mok
-                    , Html.div []
-                        [ Html.p [HtmlAttr.style "float" "left"] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length mok.cluster) )]
-                        , Html.div []
-                            ( if anyShallow mok.cluster then
-                                [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
-                              else []
-                            )
-                        , div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
-                        , div [HtmlAttr.class "results-wrap"]
-                          [ Table.table
-                            { options = [ Table.striped, Table.hover ]
-                            , thead =  Table.simpleThead
-                                [ Table.th [] [ Html.text "100AA accession" ]
-                                , Table.th [] [ Html.text "Protein sequence" ]
-                                , Table.th [] [ Html.text "Nucleotide sequence" ]
-                                , Table.th [] [ Html.text "Habitat" ]
-                                , Table.th [] [ Html.text "Taxonomy" ]
-                                ]
-                            , tbody = Table.tbody []
-                                    ( List.map (\e ->
-                                                    Table.tr []
-                                                    [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
-                                                    ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
-                                                    ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
-                                                    ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
-                                                    ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [TaxonomyView.view e.tax ] ]
-                                                    ]
-                                               ) ok
-                                    )
-                            }
-                          ]
-                        , ResultsPipeline.viewPager
-                            { state = model.results
-                            , totalItems = List.length mok.cluster
-                            , onSelectPage = ShowPage
-                            , dropdownMsg = DropdownMsg
-                            }
+        Html.div []
+            [ viewSummary m
+            , Html.div []
+                [ Html.p [HtmlAttr.style "float" "left"] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length m.cluster) )]
+                , Html.div []
+                    ( if anyShallow m.cluster then
+                        [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
+                      else []
+                    )
+                , div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
+                , div [HtmlAttr.class "results-wrap"]
+                  [ Table.table
+                    { options = [ Table.striped, Table.hover ]
+                    , thead =  Table.simpleThead
+                        [ Table.th [] [ Html.text "100AA accession" ]
+                        , Table.th [] [ Html.text "Protein sequence" ]
+                        , Table.th [] [ Html.text "Nucleotide sequence" ]
+                        , Table.th [] [ Html.text "Habitat" ]
+                        , Table.th [] [ Html.text "Taxonomy" ]
                         ]
-                    ]
-
-            APIError berr -> div []
-                    [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
-                    , Html.blockquote []
-                        [ Html.p [] [ Html.text berr ] ]
-                    ]
+                    , tbody = Table.tbody []
+                            ( List.map (\e ->
+                                            Table.tr []
+                                            [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                            ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
+                                            ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
+                                            ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
+                                            ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [TaxonomyView.view e.tax ] ]
+                                            ]
+                                       ) ok
+                            )
+                    }
+                  ]
+                , ResultsPipeline.viewPager
+                    { state = model.results
+                    , totalItems = List.length m.cluster
+                    , onSelectPage = ShowPage
+                    , dropdownMsg = DropdownMsg
+                    }
+                ]
+            ]
     ResultsPipeline.MultiError err ->
         div []
             [ Html.p [] [ Html.text "Call to the GMSC server failed" ]

@@ -1,4 +1,4 @@
-module Filter exposing (BrowsePost(..), APIResult(..), Model, Msg(..), initialState, update, viewModel)
+module Filter exposing (BrowsePost(..), BrowseResults, Model, Msg(..), initialState, update, viewModel)
 
 import Html exposing (Html, div, p, text)
 import Html.Attributes as HtmlAttr
@@ -27,7 +27,7 @@ type alias Model =
 type BrowsePost
     = BLoading
     | BLoadError String
-    | Results APIResult
+    | Results BrowseResults
 
 decodeSequenceResult : D.Decoder SequenceResultFull
 decodeSequenceResult = 
@@ -38,24 +38,21 @@ decodeSequenceResult =
            ((D.field "seq_id" D.string))
            (D.maybe (D.field "taxonomy" D.string))
 
-type APIResult =
-        APIResultOK { results : List SequenceResultFull
-                    , status : String
-                    }
-        | APIError String
+type alias BrowseResults =
+    { results : List SequenceResultFull
+    , status : String
+    }
 
 type Msg
-    = ResultsData (Result Http.Error APIResult)
+    = ResultsData (Result Http.Error BrowseResults)
     | DownloadResults
     | MultiData (Result Http.Error ResultsPipeline.MultiResult)
     | ShowPage Int
     | DropdownMsg Dropdown.State
 
-decodeAPIResult : D.Decoder APIResult
+decodeAPIResult : D.Decoder BrowseResults
 decodeAPIResult =
-    let
-        bAPIResultOK r s = APIResultOK { results = r, status = s }
-    in D.map2 bAPIResultOK
+    D.map2 BrowseResults
         (D.field "results" (D.list decodeSequenceResult))
         (D.field "status" D.string)
 
@@ -85,23 +82,20 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ResultsData r -> case r of
-            Ok v -> 
-                case v of 
-                   APIResultOK ok ->
-                        let
-                            page =
-                                1
+            Ok ok ->
+                let
+                    page =
+                        1
 
-                            nextResults =
-                                ResultsPipeline.setLoadingPage page model.results
+                    nextResults =
+                        ResultsPipeline.setLoadingPage page model.results
 
-                            ids =
-                                ResultsPipeline.pageIds page .seqid ok.results
-                        in
-                        ( { model | browsepost = Results v, results = nextResults }
-                        , ResultsPipeline.fetchPage MultiData ids
-                        )
-                   _ -> ( {model | browsepost = Results v}, Cmd.none)
+                    ids =
+                        ResultsPipeline.pageIds page .seqid ok.results
+                in
+                ( { model | browsepost = Results ok, results = nextResults }
+                , ResultsPipeline.fetchPage MultiData ids
+                )
             Err err ->
                 ( { model | browsepost = BLoadError (ResultsPipeline.httpErrorMessage err) }, Cmd.none )
 
@@ -113,7 +107,7 @@ update msg model =
 
         ShowPage page ->
             case model.browsepost of
-                Results (APIResultOK ok) ->
+                Results ok ->
                     let
                         nextResults =
                             ResultsPipeline.setLoadingPage page model.results
@@ -159,51 +153,44 @@ viewModel model =
 
 viewResults r b model = case r of
     ResultsPipeline.MultiResultOK ok ->
-        case b of 
-            APIResultOK bok ->
-                div []
-                    [ if List.length bok.results /= 0 then
-                        div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download results" ] ]
-                      else div [] [text ""]
-                    , if List.isEmpty ok then
-                            text "No small proteins in the selected habitats and/or taxonomy. Please try another selection."
-                      else div []
-                        [ div [HtmlAttr.class "results-wrap"]
-                            [ Table.table
-                                { options = [ Table.striped, Table.hover ]
-                                , thead =  Table.simpleThead
-                                    [ Table.th [] [ Html.text "90AA accession" ]
-                                    , Table.th [] [ Html.text "Consensus protein sequence" ]
-                                    , Table.th [] [ Html.text "Consensus nucleotide sequence" ]
-                                    , Table.th [] [ Html.text "Habitat" ]
-                                    , Table.th [] [ Html.text "Taxonomy" ]
-                                    ]
-                                , tbody = Table.tbody []
-                                        (List.map (\e ->
-                                                        Table.tr []
-                                                        [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/cluster/" ++ e.seqid)] [Html.text e.seqid] ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [TaxonomyView.view e.tax ] ]
-                                                        ]
-                                                ) ok
-                                        )
-                                }
+        div []
+            [ if List.length b.results /= 0 then
+                div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download results" ] ]
+              else div [] [text ""]
+            , if List.isEmpty ok then
+                    text "No small proteins in the selected habitats and/or taxonomy. Please try another selection."
+              else div []
+                [ div [HtmlAttr.class "results-wrap"]
+                    [ Table.table
+                        { options = [ Table.striped, Table.hover ]
+                        , thead =  Table.simpleThead
+                            [ Table.th [] [ Html.text "90AA accession" ]
+                            , Table.th [] [ Html.text "Consensus protein sequence" ]
+                            , Table.th [] [ Html.text "Consensus nucleotide sequence" ]
+                            , Table.th [] [ Html.text "Habitat" ]
+                            , Table.th [] [ Html.text "Taxonomy" ]
                             ]
-                        , ResultsPipeline.viewPager
-                            { state = model.results
-                            , totalItems = List.length bok.results
-                            , onSelectPage = ShowPage
-                            , dropdownMsg = DropdownMsg
-                            }
-                        ]
+                        , tbody = Table.tbody []
+                                (List.map (\e ->
+                                                Table.tr []
+                                                [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/cluster/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                                ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
+                                                ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
+                                                ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
+                                                ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [TaxonomyView.view e.tax ] ]
+                                                ]
+                                        ) ok
+                                )
+                        }
                     ]
-            APIError berr -> div []
-                    [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
-                    , Html.blockquote []
-                        [ Html.p [] [ Html.text berr ] ]
-                    ]
+                , ResultsPipeline.viewPager
+                    { state = model.results
+                    , totalItems = List.length b.results
+                    , onSelectPage = ShowPage
+                    , dropdownMsg = DropdownMsg
+                    }
+                ]
+            ]
     ResultsPipeline.MultiError err ->
         div []
             [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
