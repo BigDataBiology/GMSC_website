@@ -13,7 +13,7 @@ content =
     span [HtmlAttr.id "help"]
         [Markdown.toHtml [] """
 ## Overview
-The global microbial smORFs catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining 63,410 publicly available metagenomes from the [SPIRE database](http://spire.embl.de) and 87,920 high-quality isolated microbial genomes from the [ProGenomes2 database](https://progenomes.embl.de/).
+The global microbial smORFs catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining 63,410 publicly available metagenomes from the [SPIRE database](https://spire.embl.de) and 87,920 high-quality isolated microbial genomes from the [ProGenomes2 database](https://progenomes.embl.de/).
 
 A total of 4.5 billion smORFs were predicted to build the catalogue. After removing redundancy with 100% amino acid identity, we obtained a 100AA non-redundant catalogue with 964,970,496 sequences. Further, the smORFs were clustered at 90% amino acid identity resulting in 287,926,875 90AA smORFs catalogue.
 
@@ -85,7 +85,7 @@ The results are 90AA smORF families spanning the selected habitats and taxonomy.
 
 
 ## Data acquisition
-63,410 assembled metagenomes were used from the [SPIRE database](http://spire.embl.de)
+63,410 assembled metagenomes were used from the [SPIRE database](https://spire.embl.de)
 
 87,920 high-quality microbial genomes were downloaded from the [ProGenomes v2 database](https://progenomes.embl.de/).
 
@@ -102,7 +102,7 @@ All predicted smORFs were removed redundancy with 100% amino acid identity. Then
   - The taxonomy of assembled contigs encoding the small proteins was annotated using [MMSeqs2](https://github.com/soedinglab/MMseqs2) against the [GTDB database](https://gtdb.ecogenomic.org/). 
   - We recorded the taxonomy of smORFs based on the taxonomy of the contigs of metagenomes or genomes of [Progenome v2 database](https://progenomes.embl.de/) from which the smORFs were predicted. Subsequently, we assign taxonomy for 100AA and 90AA smORFs using the lowest common ancestor (LCA), ignoring the un-assigned rank to make it more specific.
 - **Habitat annotation:**
-  - We recorded the habitats of smORFs according to their source samples using the habitat microontology introduced in the [SPIRE database](http://spire.embl.de). We further grouped the habitats into 8 broad categories: mammal gut, anthropogenic, other-human, other-animal, aquatic, human gut, soil/plant, and other.
+  - We recorded the habitats of smORFs according to their source samples using the habitat microontology introduced in the [SPIRE database](https://spire.embl.de). We further grouped the habitats into 8 broad categories: mammal gut, anthropogenic, other-human, other-animal, aquatic, human gut, soil/plant, and other.
 
 ##### Conserved domain annotation
 The representative sequences of 90AA smORF families were searched against the [NCBI CDD database](https://www.ncbi.nlm.nih.gov/cdd/) by RPS-blast. Hits with a maximum e-value of 0.01 and at least 80% coverage of the PSSM length were retained and considered significant.
