@@ -61,7 +61,7 @@ qualityBadgeClass q =
     else
         "cluster-quality-badge is-standard"
 
-type alias Quality = 
+type alias Quality =
     { antifam: Bool
     , metap: Float
     , metat: Int
@@ -79,7 +79,7 @@ type alias Cluster =
     , quality: Quality
     }
 
-type ClusterPost = 
+type ClusterPost =
     Loading
     | LoadError String
     | Loaded Cluster
@@ -118,7 +118,7 @@ type Msg
     | PopoverMsg1 Popover.State
 
 decodeQuality : D.Decoder Quality
-decodeQuality = 
+decodeQuality =
     D.map6 Quality
         (D.field "antifam" D.bool)
         (D.field "metap" D.float)
@@ -172,17 +172,17 @@ update msg model =
                 Http.NetworkError -> ({ model | clusterpost = LoadError ("Network error!") }, Cmd.none)
                 Http.BadStatus s -> ({ model | clusterpost = LoadError (("Bad status: " ++ String.fromInt s)) } , Cmd.none)
                 Http.BadBody s -> ({ model | clusterpost = LoadError (("Bad body: " ++ s)) }  , Cmd.none)
-        
-        Showmember -> 
+
+        Showmember ->
             case model.clusterpost of
               Loaded hm->
                 let
                   (sm, cmd) = Members.initialState hm.seqid
                 in ( { model | memberpost = sm, ask=True }, Cmd.map MembersMsg cmd )
-              _ -> 
+              _ ->
                 (model,Cmd.none)
-        
-        ShowQuality -> 
+
+        ShowQuality ->
             ( {model | showQualityDetails = not model.showQualityDetails}, Cmd.none )
 
         CopyProtein ->
@@ -191,7 +191,7 @@ update msg model =
         CopyNucleotide ->
             ( { model | copiedField = Just NucleotideSequence }, Cmd.none )
 
-        MembersMsg m -> 
+        MembersMsg m ->
             let
                 (nqm, cmd) = Members.update m model.memberpost
             in
@@ -361,7 +361,7 @@ viewMembersSection model =
         ]
 
 viewQualityDetails : Cluster -> Html Msg
-viewQualityDetails v =  
+viewQualityDetails v =
   div [ HtmlAttr.class "cluster-quality-grid" ]
       [ viewField "Antifam" "" (passOrFail v.quality.antifam)
       , viewField "Terminal checking" "" (passOrFail v.quality.terminal)

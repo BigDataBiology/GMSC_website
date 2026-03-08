@@ -67,7 +67,7 @@ decodeSequenceResult =
         ]
 
 decodeMultItemResult : D.Decoder MultiResultItem
-decodeMultItemResult = 
+decodeMultItemResult =
     D.map5 MultiResultItem
            (D.field "aminoacid" D.string)
            (D.field "habitat" D.string)
@@ -118,7 +118,7 @@ multi ids =
         ]
 
 initialState : String -> (Model, Cmd Msg)
-initialState seq_id = 
+initialState seq_id =
     ( { memberpost = MLoading
       , showpost = SLoading
       , page = 1
@@ -134,11 +134,11 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ResultsData r -> case r of
-            Ok v -> 
-                case v of 
+            Ok v ->
+                case v of
                    APIResultOK ok ->
-                        let ids = ((List.take 100 ok.cluster) |> List.map(\seq -> 
-                                                                            case seq of 
+                        let ids = ((List.take 100 ok.cluster) |> List.map(\seq ->
+                                                                            case seq of
                                                                                 SequenceResultFull full -> full.seqid
                                                                                 SequenceResultShallow shallow -> shallow.seqid))
                         in  ( {model | memberpost = Results v, showpost = SLoading}
@@ -155,10 +155,10 @@ update msg model =
                 Http.NetworkError -> ({model | memberpost = MLoadError ("Network error!")}, Cmd.none)
                 Http.BadStatus s -> ({model | memberpost = MLoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
                 Http.BadBody s -> ({model | memberpost = MLoadError (("Bad body: " ++ s))}, Cmd.none)
-                
+
         DownloadResults -> case model.showpost of
             MultiResults r -> case r of
-                MultiResultOK v -> 
+                MultiResultOK v ->
                     let allresults = v |> List.map (\seq -> String.join "\t" [seq.seqid, seq.aa, seq.nuc, seq.habitat, seq.tax])
                                             |> String.join "\n"
                     in ( model, Download.string "cluster.members.tsv" "text/plain" allresults)
@@ -173,9 +173,9 @@ update msg model =
                 Http.NetworkError -> ({model | showpost = SLoadError ("Network error!")}, Cmd.none)
                 Http.BadStatus s -> ({model | showpost = SLoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
                 Http.BadBody s -> ({model | showpost = SLoadError (("Bad body: " ++ s))}, Cmd.none)
-        
-        Showlast l -> let ids = ((List.take 100 l)|> List.map(\seq -> 
-                                                                case seq of 
+
+        Showlast l -> let ids = ((List.take 100 l)|> List.map(\seq ->
+                                                                case seq of
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
                       in  ( {model | showpost = SLoading, page = (model.page-1)}
@@ -185,9 +185,9 @@ update msg model =
                           , expect = Http.expectJson MultiData decodeMultiResult
                           }
                           )
-        
-        Shownext o -> let ids = ((List.take 100 o)|> List.map(\seq -> 
-                                                                case seq of 
+
+        Shownext o -> let ids = ((List.take 100 o)|> List.map(\seq ->
+                                                                case seq of
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
                       in  ( {model | showpost = SLoading, page = (model.page+1)}
@@ -198,8 +198,8 @@ update msg model =
                           }
                           )
 
-        Showfinal o all -> let ids = ((List.take 100 o)|> List.map(\seq -> 
-                                                                case seq of 
+        Showfinal o all -> let ids = ((List.take 100 o)|> List.map(\seq ->
+                                                                case seq of
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
                       in  ( {model | showpost = SLoading, page = all}
@@ -210,8 +210,8 @@ update msg model =
                           }
                           )
 
-        Showbegin o all -> let ids = ((List.take 100 o)|> List.map(\seq -> 
-                                                                case seq of 
+        Showbegin o all -> let ids = ((List.take 100 o)|> List.map(\seq ->
+                                                                case seq of
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
                       in  ( {model | showpost = SLoading, page = all}
@@ -222,8 +222,8 @@ update msg model =
                           }
                           )
 
-        Showselect o all -> let ids = ((List.take 100 o)|> List.map(\seq -> 
-                                                                case seq of 
+        Showselect o all -> let ids = ((List.take 100 o)|> List.map(\seq ->
+                                                                case seq of
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
                       in  ( {model | showpost = SLoading, page = all}
@@ -255,8 +255,8 @@ viewModel model =
                     [ text "Error "
                     , text e
                     ]
-        MultiResults r -> 
-            case model.memberpost of 
+        MultiResults r ->
+            case model.memberpost of
                 Results m ->
                     viewResults r m model.page model
                 _ ->
@@ -266,19 +266,19 @@ viewModel model =
 
 viewResults r m page model = case r of
     MultiResultOK ok ->
-        case m of 
+        case m of
             APIResultOK mok ->
                 Html.div []
                     [ viewSummary mok
                     , Html.div []
                         [ Html.p [HtmlAttr.style "float" "left"] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length mok.cluster) )]
                         , Html.div []
-                            ( if anyShallow mok.cluster then 
+                            ( if anyShallow mok.cluster then
                                 [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
                               else []
                             )
                         , div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
-                        , div [HtmlAttr.class "results-wrap"] 
+                        , div [HtmlAttr.class "results-wrap"]
                           [ Table.table
                             { options = [ Table.striped, Table.hover ]
                             , thead =  Table.simpleThead
@@ -301,13 +301,13 @@ viewResults r m page model = case r of
                                     )
                             }
                           ]
-                        , div [HtmlAttr.class "browse"] 
+                        , div [HtmlAttr.class "browse"]
                           [ if List.length mok.cluster > 100 then
                                 if List.length mok.cluster > (100*page) then
                                     div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (100*page) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
                                 else
                                     div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
-                            else 
+                            else
                                 div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
                             , if List.length mok.cluster > 100 then
                                 Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin mok.cluster 1), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
@@ -319,7 +319,7 @@ viewResults r m page model = case r of
                             {-, if List.length mok.cluster > 100 then
                                 if modBy 100 (List.length mok.cluster) /= 0 then
                                     div [] (List.map (\n -> Button.button [ Button.small, Button.outlineInfo, Button.onClick (Showselect (List.drop (100*(n-1)) mok.cluster) n) ,Button.attrs [ class "float-left"]] [text (String.fromInt n)] )(List.range 1 ((List.length mok.cluster//100)+1)))
-                                else 
+                                else
                                     div [] (List.map (\n -> Button.button [ Button.small, Button.outlineInfo, Button.onClick (Showselect (List.drop (100*(n-1)) mok.cluster) n) ] [text (String.fromInt n)] )(List.range 1 ((List.length mok.cluster//100))))
                               else Button.button [ Button.small, Button.outlineInfo ] [text "1"]-}
                             , div [HtmlAttr.style "float" "left"]
@@ -344,7 +344,7 @@ viewResults r m page model = case r of
                                 in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
                               else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
                             , if List.length mok.cluster > 100 then
-                                let 
+                                let
                                     (other,all) = if modBy 100 (List.length mok.cluster) /= 0 then
                                                     ((List.drop (100* (List.length mok.cluster//100)) mok.cluster),((List.length mok.cluster//100) + 1))
                                                   else
@@ -354,7 +354,7 @@ viewResults r m page model = case r of
                           ]
                         ]
                     ]
-                    
+
             APIError berr -> div []
                     [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
                     , Html.blockquote []
@@ -380,7 +380,7 @@ viewSummary ok =
         datahabitat = summaryForhabitat ok.cluster
         datatax = summaryFortax ok.cluster
     in Html.div []
-        [ Html.div 
+        [ Html.div
           [ HtmlAttr.style "width" "460px"
           , HtmlAttr.style "margin-left" "4em"
           , HtmlAttr.style "float" "left"
@@ -448,12 +448,12 @@ summaryFortax seqs =
     in
         List.foldl (\e acc -> case e of
                                 SequenceResultShallow _ -> acc
-                                SequenceResultFull f -> 
+                                SequenceResultFull f ->
                                     let taxlist = List.reverse (String.split ";" f.tax)
                                         species = if List.length taxlist == 7 then
                                                     String.join "" (List.take 1 taxlist)
                                                   else
-                                                    "Unknown"                                                    
+                                                    "Unknown"
                                     in Dict.update species add1 acc) Dict.empty seqs
         |> Dict.toList
         |> List.map (\(tax, count) -> { tax = tax, count = count })
