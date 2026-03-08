@@ -1,8 +1,9 @@
 module Sequence exposing (Model, Msg(..), initialState, update, viewModel)
 
 import Html
-import Html exposing (Html, div, h1, h3, h4, p, span, text)
+import Html exposing (Html, button, div, h1, h3, h4, p, span, text)
 import Html.Attributes as HtmlAttr
+import Html.Events exposing (onClick)
 import Browser.Navigation as Nav
 import Char
 import Http
@@ -22,7 +23,12 @@ type alias Post =
 type alias Model =
     { navKey : Nav.Key
     , post : WebData Post
+    , copiedField : Maybe CopyTarget
     }
+
+type CopyTarget
+    = ProteinSequence
+    | NucleotideSequence
 
 postDecoder : D.Decoder Post
 postDecoder =
@@ -37,6 +43,7 @@ initialState : String -> Nav.Key -> (Model, Cmd Msg)
 initialState seq_id navkey =
     ( { navKey = navkey
       , post = RemoteData.Loading
+      , copiedField = Nothing
       }
     , Http.get
     { url = ("https://gmsc-api.big-data-biology.org/v1/seq-info/" ++ seq_id)
@@ -47,12 +54,20 @@ initialState seq_id navkey =
 
 type Msg
     = PostReceived (WebData Post)
+    | CopyProtein
+    | CopyNucleotide
 
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
         PostReceived post ->
-            ( { model | post = post }, Cmd.none )
+            ( { model | post = post, copiedField = Nothing }, Cmd.none )
+
+        CopyProtein ->
+            ( { model | copiedField = Just ProteinSequence }, Cmd.none )
+
+        CopyNucleotide ->
+            ( { model | copiedField = Just NucleotideSequence }, Cmd.none )
 
 viewModel : Model-> Html.Html Msg
 viewModel model =
@@ -64,24 +79,24 @@ viewModel model =
                 "Loading smORF record"
                 "Fetching the selected 100AA entry, including its sequence and annotation."
         RemoteData.Success v ->
-            viewSequencePage v
+            viewSequencePage model v
         RemoteData.Failure httpError ->
             viewFetchError (buildErrorMessage httpError)
 
-viewSequencePage : Post -> Html Msg
-viewSequencePage v =
+viewSequencePage : Model -> Post -> Html Msg
+viewSequencePage model v =
     div [ HtmlAttr.class "sequence-page" ]
         [ h1 [] [ text v.seqid ]
         , p [ HtmlAttr.class "sequence-subtitle" ]
             [ text "Summary of this 100AA smORF, including its amino acid sequence, nucleotide sequence, and ecological annotation." ]
         , div [ HtmlAttr.class "sequence-summary-grid" ]
             [ viewSequenceCard "Sequences"
-                [ viewAminoAcidField "Protein sequence" v.aa
-                , viewSequenceField "Nucleotide sequence" "cluster-sequence" v.nuc
+                [ viewAminoAcidField "Protein sequence" v.aa (model.copiedField == Just ProteinSequence)
+                , viewSequenceField "Nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (model.copiedField == Just NucleotideSequence)
                 ]
             , viewSequenceCard "Annotation"
-                [ viewSequenceField "Taxonomic assignment" "" v.tax
-                , viewSequenceField "Habitat" "" v.habitat
+                [ viewReadOnlyField "Taxonomic assignment" "" v.tax
+                , viewReadOnlyField "Habitat" "" v.habitat
                 ]
             ]
         ]
@@ -91,8 +106,8 @@ viewSequenceCard heading children =
     div [ HtmlAttr.class "cluster-card" ]
         (h4 [ HtmlAttr.class "cluster-card-title" ] [ text heading ] :: children)
 
-viewSequenceField : String -> String -> String -> Html Msg
-viewSequenceField label extraClass value =
+viewReadOnlyField : String -> String -> String -> Html Msg
+viewReadOnlyField label extraClass value =
     let
         valueClasses =
             String.join " " <| List.filter (\c -> c /= "") [ "cluster-value", extraClass ]
@@ -102,16 +117,65 @@ viewSequenceField label extraClass value =
         , p [ HtmlAttr.class valueClasses ] [ text value ]
         ]
 
-viewAminoAcidField : String -> String -> Html Msg
-viewAminoAcidField label sequence =
+viewSequenceField : String -> String -> String -> Msg -> Bool -> Html Msg
+viewSequenceField label extraClass value copyMsg copied =
+    let
+        valueClasses =
+            String.join " " <| List.filter (\c -> c /= "") [ "cluster-value", extraClass ]
+    in
     div [ HtmlAttr.class "cluster-field" ]
-        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
+        [ viewFieldHeader label copyMsg copied
+        , p [ HtmlAttr.class valueClasses ] [ text value ]
+        ]
+
+viewAminoAcidField : String -> String -> Bool -> Html Msg
+viewAminoAcidField label sequence copied =
+    div [ HtmlAttr.class "cluster-field" ]
+        [ viewFieldHeader label CopyProtein copied
         , div [ HtmlAttr.class "cluster-sequence-view" ]
             [ div [ HtmlAttr.class "cluster-value cluster-sequence cluster-aa-sequence" ]
                 (List.map viewAminoAcidResidue (String.toList sequence))
             , p [ HtmlAttr.class "cluster-aa-legend-title" ] [ text "Legend" ]
             , div [ HtmlAttr.class "cluster-aa-legend" ]
                 (List.map viewAminoAcidLegendItem aminoAcidLegend)
+            ]
+        ]
+
+viewFieldHeader : String -> Msg -> Bool -> Html Msg
+viewFieldHeader label copyMsg copied =
+    div [ HtmlAttr.class "sequence-field-header" ]
+        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
+        , button
+            [ HtmlAttr.class
+                (if copied then
+                    "sequence-copy-button is-copied"
+                 else
+                    "sequence-copy-button"
+                )
+            , HtmlAttr.type_ "button"
+            , HtmlAttr.title
+                (if copied then
+                    "Copied"
+                 else
+                    "Copy sequence"
+                )
+            , HtmlAttr.attribute "aria-label"
+                (if copied then
+                    "Copied to clipboard"
+                 else
+                    "Copy sequence to clipboard"
+                )
+            , onClick copyMsg
+            ]
+            [ span
+                [ HtmlAttr.class
+                    (if copied then
+                        "fa fa-check"
+                     else
+                        "fa fa-copy"
+                    )
+                ]
+                []
             ]
         ]
 

@@ -8,6 +8,7 @@ fi
 rm -rf dist/
 mkdir dist
 
-elm make --optimize src/Main.elm --output=dist/index.html
+elm make --optimize src/Main.elm --output=dist/elm.js
+cp src/index.html dist/
 cp src/style.css dist/
 cp -r src/assets dist/ && cp _redirects dist/

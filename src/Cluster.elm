@@ -1,8 +1,9 @@
-module Cluster exposing (Model, Msg(..), initialState, update, viewModel)
+module Cluster exposing (ClusterPost(..), Model, Msg(..), initialState, update, viewModel)
 
 import Html
-import Html exposing (Html, div, h1, h4, p, span, text)
+import Html exposing (Html, button, div, h1, h4, p, span, text)
 import Html.Attributes as HtmlAttr
+import Html.Events exposing (onClick)
 import Browser.Navigation as Nav
 import Char
 import Http
@@ -87,9 +88,14 @@ type alias Model =
     , memberpost : Members.Model
     , ask: Bool
     , showQualityDetails : Bool
+    , copiedField : Maybe CopyTarget
     , navKey : Nav.Key
     , popoverState1 : Popover.State
     }
+
+type CopyTarget
+    = ProteinSequence
+    | NucleotideSequence
 
 type APIResult =
     APIError String
@@ -105,6 +111,8 @@ type Msg
     = ResultsData ( Result Http.Error APIResult )
     | Showmember
     | ShowQuality
+    | CopyProtein
+    | CopyNucleotide
     | MembersMsg Members.Msg
     | PopoverMsg1 Popover.State
 
@@ -141,6 +149,7 @@ initialState seq_id navkey =
                    }
     , ask = False
     , showQualityDetails = False
+    , copiedField = Nothing
     , navKey = navkey
     , popoverState1 = Popover.initialState
     }
@@ -154,7 +163,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ResultsData r -> case r of
-            Ok (APIResultOK v) -> ( { model | clusterpost = Loaded v }, Cmd.none )
+            Ok (APIResultOK v) -> ( { model | clusterpost = Loaded v, copiedField = Nothing }, Cmd.none )
             Ok (APIError e) -> ( { model | clusterpost = LoadError e}, Cmd.none )
             Err err -> case err of
                 Http.BadUrl s -> ({ model | clusterpost = LoadError ("Bad URL: "++ s)}, Cmd.none)
@@ -174,6 +183,12 @@ update msg model =
         
         ShowQuality -> 
             ( {model | showQualityDetails = not model.showQualityDetails}, Cmd.none )
+
+        CopyProtein ->
+            ( { model | copiedField = Just ProteinSequence }, Cmd.none )
+
+        CopyNucleotide ->
+            ( { model | copiedField = Just NucleotideSequence }, Cmd.none )
 
         MembersMsg m -> 
             let
@@ -207,8 +222,8 @@ viewClusterPage model v =
             [ text "Summary of this 90AA cluster, including consensus sequences, ecological annotation, quality evidence, and linked 100AA members." ]
         , div [ HtmlAttr.class "cluster-summary-grid" ]
             [ viewCard "Consensus sequences"
-                [ viewAminoAcidField "Consensus protein sequence" v.aa
-                , viewField "Consensus nucleotide sequence" "cluster-sequence" v.nuc
+                [ viewAminoAcidField "Consensus protein sequence" v.aa (model.copiedField == Just ProteinSequence)
+                , viewSequenceField "Consensus nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (model.copiedField == Just NucleotideSequence)
                 ]
             , viewCard "Annotations"
                 [ viewField "Taxonomic assignment" "" v.tax
@@ -236,16 +251,65 @@ viewField label extraClass value =
         , p [ HtmlAttr.class valueClasses ] [ text value ]
         ]
 
-viewAminoAcidField : String -> String -> Html Msg
-viewAminoAcidField label sequence =
+viewSequenceField : String -> String -> String -> Msg -> Bool -> Html Msg
+viewSequenceField label extraClass value copyMsg copied =
+    let
+        valueClasses =
+            String.join " " <| List.filter (\c -> c /= "") [ "cluster-value", extraClass ]
+    in
     div [ HtmlAttr.class "cluster-field" ]
-        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
+        [ viewFieldHeader label copyMsg copied
+        , p [ HtmlAttr.class valueClasses ] [ text value ]
+        ]
+
+viewAminoAcidField : String -> String -> Bool -> Html Msg
+viewAminoAcidField label sequence copied =
+    div [ HtmlAttr.class "cluster-field" ]
+        [ viewFieldHeader label CopyProtein copied
         , div [ HtmlAttr.class "cluster-sequence-view" ]
             [ div [ HtmlAttr.class "cluster-value cluster-sequence cluster-aa-sequence" ]
                 (List.map viewAminoAcidResidue (String.toList sequence))
             , p [ HtmlAttr.class "cluster-aa-legend-title" ] [ text "Legend" ]
             , div [ HtmlAttr.class "cluster-aa-legend" ]
                 (List.map viewAminoAcidLegendItem aminoAcidLegend)
+            ]
+        ]
+
+viewFieldHeader : String -> Msg -> Bool -> Html Msg
+viewFieldHeader label copyMsg copied =
+    div [ HtmlAttr.class "sequence-field-header" ]
+        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
+        , button
+            [ HtmlAttr.class
+                (if copied then
+                    "sequence-copy-button is-copied"
+                 else
+                    "sequence-copy-button"
+                )
+            , HtmlAttr.type_ "button"
+            , HtmlAttr.title
+                (if copied then
+                    "Copied"
+                 else
+                    "Copy sequence"
+                )
+            , HtmlAttr.attribute "aria-label"
+                (if copied then
+                    "Copied to clipboard"
+                 else
+                    "Copy sequence to clipboard"
+                )
+            , onClick copyMsg
+            ]
+            [ span
+                [ HtmlAttr.class
+                    (if copied then
+                        "fa fa-check"
+                     else
+                        "fa fa-copy"
+                    )
+                ]
+                []
             ]
         ]
 

@@ -402,6 +402,15 @@ div#cluster button{
     margin-bottom: 0;
 }
 
+.sequence-field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    margin-bottom: 0.35rem;
+}
+
 .cluster-label,
 .cluster-value {
     width: 100%;
@@ -420,6 +429,33 @@ div#cluster button{
 .cluster-value {
     color: #24363c;
     word-break: break-word;
+}
+
+.sequence-copy-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+    border: 1px solid #bfd8e1;
+    border-radius: 999px;
+    background-color: #f5fbfd;
+    color: #0d607b;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.sequence-copy-button:hover {
+    background-color: #e6f4f8;
+    border-color: #7cb8ca;
+    color: #0b445a;
+    transform: translateY(-1px);
+}
+
+.sequence-copy-button.is-copied {
+    background-color: #e5f6ea;
+    border-color: #8cc9a0;
+    color: #187a3d;
 }
 
 .cluster-sequence {

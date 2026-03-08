@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GMSC</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="elm"></div>
+  <script src="/elm.js"></script>
+  <script>
+    (function () {
+      var app = Elm.Main.init({ node: document.getElementById("elm") });
+
+      function fallbackCopy(text) {
+        var textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+          document.execCommand("copy");
+        } catch (_error) {
+        }
+
+        document.body.removeChild(textarea);
+      }
+
+      if (app.ports && app.ports.copyToClipboard) {
+        app.ports.copyToClipboard.subscribe(function (text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).catch(function () {
+              fallbackCopy(text);
+            });
+          } else {
+            fallbackCopy(text);
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Html exposing (Html, div, h3, p, text)
 import Html.Attributes as HtmlAttr
@@ -8,7 +8,6 @@ import Browser.Navigation as Nav
 import Url exposing (Url)
 import Route exposing (Route)
 
-import Bootstrap.CDN as CDN
 import Bootstrap.Grid as Grid
 
 import Home
@@ -19,6 +18,9 @@ import Browse
 import Download
 import Help
 import About
+import RemoteData
+
+port copyToClipboard : String -> Cmd msg
 
 type alias Model =
   { key : Nav.Key
@@ -234,16 +236,58 @@ update msg model = case msg of
         Sequence sm ->
             let
                 (nqm, cmd) = Sequence.update m sm
+
+                copyCmd =
+                    case m of
+                        Sequence.CopyProtein ->
+                            case sm.post of
+                                RemoteData.Success post ->
+                                    copyToClipboard post.aa
+
+                                _ ->
+                                    Cmd.none
+
+                        Sequence.CopyNucleotide ->
+                            case sm.post of
+                                RemoteData.Success post ->
+                                    copyToClipboard post.nuc
+
+                                _ ->
+                                    Cmd.none
+
+                        _ ->
+                            Cmd.none
             in
-                ( { model | page = Sequence nqm }, Cmd.map SequenceMsg cmd )
+                ( { model | page = Sequence nqm }, Cmd.batch [ Cmd.map SequenceMsg cmd, copyCmd ] )
         _ -> ( model, Cmd.none )
 
     ClusterMsg m -> case model.page of
         Cluster sm ->
             let
                 (nqm, cmd) = Cluster.update m sm
+
+                copyCmd =
+                    case m of
+                        Cluster.CopyProtein ->
+                            case sm.clusterpost of
+                                Cluster.Loaded post ->
+                                    copyToClipboard post.aa
+
+                                _ ->
+                                    Cmd.none
+
+                        Cluster.CopyNucleotide ->
+                            case sm.clusterpost of
+                                Cluster.Loaded post ->
+                                    copyToClipboard post.nuc
+
+                                _ ->
+                                    Cmd.none
+
+                        _ ->
+                            Cmd.none
             in
-                ( { model | page = Cluster nqm } , Cmd.map ClusterMsg cmd )
+                ( { model | page = Cluster nqm } , Cmd.batch [ Cmd.map ClusterMsg cmd, copyCmd ] )
         _ -> ( model, Cmd.none )
 
     MapperMsg m -> case model.page of
@@ -295,14 +339,7 @@ view : Model -> Browser.Document Msg
 view model =
         { title = titleFor model
         , body =
-            [ CDN.stylesheet
-            , CDN.fontAwesome
-            , Html.node "link"
-                [ HtmlAttr.rel "stylesheet"
-                , HtmlAttr.href "/style.css"
-                ]
-                []
-            , Grid.containerFluid []
+            [ Grid.containerFluid []
                 [ Grid.simpleRow
                     [ Grid.col []
                         [ header
