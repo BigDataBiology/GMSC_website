@@ -106,7 +106,7 @@ viewSequencePage model v =
             ]
         , div [ HtmlAttr.class "sequence-summary-grid" ]
             [ viewSequenceCard "Sequences"
-                [ viewAminoAcidField "Protein sequence" v.aa (Copy.copyTargetIsActive ProteinSequence model.copiedField)
+                [ viewAminoAcidField ("Protein sequence ("++String.fromInt (String.length v.aa)++" amino acids)") v.aa (Copy.copyTargetIsActive ProteinSequence model.copiedField)
                 , viewSequenceField "Nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (Copy.copyTargetIsActive NucleotideSequence model.copiedField)
                 ]
             , viewSequenceCard "Annotation"

@@ -232,7 +232,9 @@ viewClusterPage model v =
             ]
         , div [ HtmlAttr.class "cluster-summary-grid" ]
             [ viewCard "Consensus sequences"
-                [ viewAminoAcidField "Consensus protein sequence" v.aa (Copy.copyTargetIsActive ProteinSequence model.copiedField)
+                [ viewAminoAcidField ("Representative protein sequence ("++String.fromInt (String.length v.aa)++ " amino acids)")
+                                    v.aa
+                                    (Copy.copyTargetIsActive ProteinSequence model.copiedField)
                 , viewSequenceField "Consensus nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (Copy.copyTargetIsActive NucleotideSequence model.copiedField)
                 ]
             , viewCard "Annotations"
