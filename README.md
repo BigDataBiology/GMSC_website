@@ -2,11 +2,21 @@
 
 Website for the **Global Microbial smORFs Catalogue (GMSC)** — an integrated, consistently-processed catalogue of ~965 million small open reading frames (smORFs) from microbial metagenomes and high-quality isolated genomes.
 
-Live at: https://gmsc.big-data-biology.org/
+Live website: [gmsc.big-data-biology.org](https://gmsc.big-data-biology.org/)
+
+## Functionality
+
+The website provides:
+
+- identifier lookup for individual 100AA sequences and 90AA clusters
+- sequence search through GMSC-mapper for protein or contig FASTA input
+- browse and filtering by habitat, taxonomy, and quality criteria
+- downloads, help, and project/about pages
+- result views for sequence details, cluster members, and mapper hits
 
 ## Citation
 
-> Duan, Y., Qi, C., Lawley, T.D. *et al.* A catalogue of small proteins from the global microbiome. *Nat Commun* **15**, 7394 (2024). https://doi.org/10.1038/s41467-024-51894-6
+> Duan, Y., Santos-Júnior, C. D., Schmidt, T. S., Fullam, A., de Almeida, B. L. S., Zhu, C., Kuhn, M., Zhao, X.-M., Bork, P. & Coelho, L. P. A catalog of small proteins from the global microbiome. *Nature Communications* **15**, 7563 (2024). https://doi.org/10.1038/s41467-024-51894-6
 
 ## Building
 
