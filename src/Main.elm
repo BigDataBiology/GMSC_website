@@ -19,8 +19,13 @@ import Download
 import Help
 import About
 import RemoteData
+import Utils.Copy as Copy
 
 port copyToClipboard : String -> Cmd msg
+
+copyCmdForTarget : Copy.CopyTarget -> { record | aa : String, nuc : String } -> Cmd Msg
+copyCmdForTarget target value =
+    copyToClipboard (Copy.copyTextForTarget target value)
 
 type alias Model =
   { key : Nav.Key
@@ -238,22 +243,9 @@ update msg model = case msg of
                 (nqm, cmd) = Sequence.update m sm
 
                 copyCmd =
-                    case m of
-                        Sequence.CopyProtein ->
-                            case sm.post of
-                                RemoteData.Success post ->
-                                    copyToClipboard post.aa
-
-                                _ ->
-                                    Cmd.none
-
-                        Sequence.CopyNucleotide ->
-                            case sm.post of
-                                RemoteData.Success post ->
-                                    copyToClipboard post.nuc
-
-                                _ ->
-                                    Cmd.none
+                    case ( Sequence.copyTargetForMsg m, sm.post ) of
+                        ( Just target, RemoteData.Success post ) ->
+                            copyCmdForTarget target post
 
                         _ ->
                             Cmd.none
@@ -267,22 +259,9 @@ update msg model = case msg of
                 (nqm, cmd) = Cluster.update m sm
 
                 copyCmd =
-                    case m of
-                        Cluster.CopyProtein ->
-                            case sm.clusterpost of
-                                Cluster.Loaded post ->
-                                    copyToClipboard post.aa
-
-                                _ ->
-                                    Cmd.none
-
-                        Cluster.CopyNucleotide ->
-                            case sm.clusterpost of
-                                Cluster.Loaded post ->
-                                    copyToClipboard post.nuc
-
-                                _ ->
-                                    Cmd.none
+                    case ( Cluster.copyTargetForMsg m, sm.clusterpost ) of
+                        ( Just target, Cluster.Loaded post ) ->
+                            copyCmdForTarget target post
 
                         _ ->
                             Cmd.none

@@ -1,9 +1,8 @@
-module Cluster exposing (ClusterPost(..), Model, Msg(..), initialState, update, viewModel)
+module Cluster exposing (ClusterPost(..), Model, Msg(..), copyTargetForMsg, initialState, update, viewModel)
 
 import Html
-import Html exposing (Html, button, div, h1, h4, p, span, text)
+import Html exposing (Html, div, h1, h4, p, span, text)
 import Html.Attributes as HtmlAttr
-import Html.Events exposing (onClick)
 import Browser.Navigation as Nav
 import Http
 
@@ -15,6 +14,7 @@ import Json.Decode as D
 import Members
 import Status
 import TaxonomyView
+import Utils.Copy as Copy exposing (CopyTarget(..))
 import Utils.Sequences
 
 
@@ -94,10 +94,6 @@ type alias Model =
     , popoverState1 : Popover.State
     }
 
-type CopyTarget
-    = ProteinSequence
-    | NucleotideSequence
-
 type APIResult =
     APIError String
     | APIResultOK { aa: String
@@ -110,7 +106,7 @@ type APIResult =
 
 type Msg
     = ResultsData ( Result Http.Error APIResult )
-    | Showmember
+    | ShowMembers
     | ShowQuality
     | CopyProtein
     | CopyNucleotide
@@ -164,7 +160,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ResultsData r -> case r of
-            Ok (APIResultOK v) -> ( { model | clusterpost = Loaded v, copiedField = Nothing }, Cmd.none )
+            Ok (APIResultOK v) -> ( Copy.resetCopiedField { model | clusterpost = Loaded v }, Cmd.none )
             Ok (APIError e) -> ( { model | clusterpost = LoadError e}, Cmd.none )
             Err err -> case err of
                 Http.BadUrl s -> ({ model | clusterpost = LoadError ("Bad URL: "++ s)}, Cmd.none)
@@ -173,7 +169,7 @@ update msg model =
                 Http.BadStatus s -> ({ model | clusterpost = LoadError (("Bad status: " ++ String.fromInt s)) } , Cmd.none)
                 Http.BadBody s -> ({ model | clusterpost = LoadError (("Bad body: " ++ s)) }  , Cmd.none)
 
-        Showmember ->
+        ShowMembers ->
             case model.clusterpost of
               Loaded hm->
                 let
@@ -186,10 +182,10 @@ update msg model =
             ( {model | showQualityDetails = not model.showQualityDetails}, Cmd.none )
 
         CopyProtein ->
-            ( { model | copiedField = Just ProteinSequence }, Cmd.none )
+            ( Copy.markCopied ProteinSequence model, Cmd.none )
 
         CopyNucleotide ->
-            ( { model | copiedField = Just NucleotideSequence }, Cmd.none )
+            ( Copy.markCopied NucleotideSequence model, Cmd.none )
 
         MembersMsg m ->
             let
@@ -199,6 +195,18 @@ update msg model =
 
         PopoverMsg1 state ->
             ( { model | popoverState1 = state }, Cmd.none )
+
+copyTargetForMsg : Msg -> Maybe CopyTarget
+copyTargetForMsg msg =
+    case msg of
+        CopyProtein ->
+            Just ProteinSequence
+
+        CopyNucleotide ->
+            Just NucleotideSequence
+
+        _ ->
+            Nothing
 
 viewModel : Model -> Html Msg
 viewModel model =
@@ -223,8 +231,8 @@ viewClusterPage model v =
             [ text "Summary of this 90AA cluster, including consensus sequences, ecological annotation, quality evidence, and linked 100AA members." ]
         , div [ HtmlAttr.class "cluster-summary-grid" ]
             [ viewCard "Consensus sequences"
-                [ viewAminoAcidField "Consensus protein sequence" v.aa (model.copiedField == Just ProteinSequence)
-                , viewSequenceField "Consensus nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (model.copiedField == Just NucleotideSequence)
+                [ viewAminoAcidField "Consensus protein sequence" v.aa (Copy.copyTargetIsActive ProteinSequence model.copiedField)
+                , viewSequenceField "Consensus nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (Copy.copyTargetIsActive NucleotideSequence model.copiedField)
                 ]
             , viewCard "Annotations"
                 [ viewTaxonomyField "Taxonomic assignment" v.tax
@@ -266,53 +274,15 @@ viewSequenceField label extraClass value copyMsg copied =
             String.join " " <| List.filter (\c -> c /= "") [ "cluster-value", extraClass ]
     in
     div [ HtmlAttr.class "cluster-field" ]
-        [ viewFieldHeader label copyMsg copied
+        [ Copy.viewCopyFieldHeader label copyMsg copied
         , p [ HtmlAttr.class valueClasses ] [ text value ]
         ]
 
 viewAminoAcidField : String -> String -> Bool -> Html Msg
 viewAminoAcidField label sequence copied =
     div [ HtmlAttr.class "cluster-field" ]
-        [ viewFieldHeader label CopyProtein copied
+        [ Copy.viewCopyFieldHeader label CopyProtein copied
         , Utils.Sequences.viewAminoAcidSequence sequence
-        ]
-
-viewFieldHeader : String -> Msg -> Bool -> Html Msg
-viewFieldHeader label copyMsg copied =
-    div [ HtmlAttr.class "sequence-field-header" ]
-        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
-        , button
-            [ HtmlAttr.class
-                (if copied then
-                    "sequence-copy-button is-copied"
-                 else
-                    "sequence-copy-button"
-                )
-            , HtmlAttr.type_ "button"
-            , HtmlAttr.title
-                (if copied then
-                    "Copied"
-                 else
-                    "Copy sequence"
-                )
-            , HtmlAttr.attribute "aria-label"
-                (if copied then
-                    "Copied to clipboard"
-                 else
-                    "Copy sequence to clipboard"
-                )
-            , onClick copyMsg
-            ]
-            [ span
-                [ HtmlAttr.class
-                    (if copied then
-                        "fa fa-check"
-                     else
-                        "fa fa-copy"
-                    )
-                ]
-                []
-            ]
         ]
 
 viewQualityCard : Cluster -> Bool -> Popover.State -> Html Msg
@@ -357,7 +327,7 @@ viewMembersSection model =
                 |> Html.map MembersMsg
           else
             div [ HtmlAttr.class "cluster-actions" ]
-                [ Button.button [ Button.info, Button.onClick Showmember ] [ text "Load cluster members" ] ]
+                [ Button.button [ Button.info, Button.onClick ShowMembers ] [ text "Load cluster members" ] ]
         ]
 
 viewQualityDetails : Cluster -> Html Msg

@@ -1,9 +1,8 @@
-module Sequence exposing (Model, Msg(..), initialState, update, viewModel)
+module Sequence exposing (Model, Msg(..), copyTargetForMsg, initialState, update, viewModel)
 
 import Html
-import Html exposing (Html, button, div, h1, h3, h4, p, span, text)
+import Html exposing (Html, div, h1, h3, h4, p, text)
 import Html.Attributes as HtmlAttr
-import Html.Events exposing (onClick)
 import Browser.Navigation as Nav
 import Http
 
@@ -11,6 +10,7 @@ import Json.Decode as D
 import RemoteData exposing (WebData)
 import Status
 import TaxonomyView
+import Utils.Copy as Copy exposing (CopyTarget(..))
 import Utils.Sequences
 
 type alias Post = 
@@ -26,10 +26,6 @@ type alias Model =
     , post : WebData Post
     , copiedField : Maybe CopyTarget
     }
-
-type CopyTarget
-    = ProteinSequence
-    | NucleotideSequence
 
 postDecoder : D.Decoder Post
 postDecoder =
@@ -62,13 +58,25 @@ update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
         PostReceived post ->
-            ( { model | post = post, copiedField = Nothing }, Cmd.none )
+            ( Copy.resetCopiedField { model | post = post }, Cmd.none )
 
         CopyProtein ->
-            ( { model | copiedField = Just ProteinSequence }, Cmd.none )
+            ( Copy.markCopied ProteinSequence model, Cmd.none )
 
         CopyNucleotide ->
-            ( { model | copiedField = Just NucleotideSequence }, Cmd.none )
+            ( Copy.markCopied NucleotideSequence model, Cmd.none )
+
+copyTargetForMsg : Msg -> Maybe CopyTarget
+copyTargetForMsg msg =
+    case msg of
+        CopyProtein ->
+            Just ProteinSequence
+
+        CopyNucleotide ->
+            Just NucleotideSequence
+
+        _ ->
+            Nothing
 
 viewModel : Model-> Html.Html Msg
 viewModel model =
@@ -92,8 +100,8 @@ viewSequencePage model v =
             [ text "Summary of this 100AA smORF, including its amino acid sequence, nucleotide sequence, and ecological annotation." ]
         , div [ HtmlAttr.class "sequence-summary-grid" ]
             [ viewSequenceCard "Sequences"
-                [ viewAminoAcidField "Protein sequence" v.aa (model.copiedField == Just ProteinSequence)
-                , viewSequenceField "Nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (model.copiedField == Just NucleotideSequence)
+                [ viewAminoAcidField "Protein sequence" v.aa (Copy.copyTargetIsActive ProteinSequence model.copiedField)
+                , viewSequenceField "Nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (Copy.copyTargetIsActive NucleotideSequence model.copiedField)
                 ]
             , viewSequenceCard "Annotation"
                 [ viewTaxonomyField "Taxonomic assignment" v.tax
@@ -125,7 +133,7 @@ viewSequenceField label extraClass value copyMsg copied =
             String.join " " <| List.filter (\c -> c /= "") [ "cluster-value", extraClass ]
     in
     div [ HtmlAttr.class "cluster-field" ]
-        [ viewFieldHeader label copyMsg copied
+        [ Copy.viewCopyFieldHeader label copyMsg copied
         , p [ HtmlAttr.class valueClasses ] [ text value ]
         ]
 
@@ -139,46 +147,8 @@ viewTaxonomyField label taxonomy =
 viewAminoAcidField : String -> String -> Bool -> Html Msg
 viewAminoAcidField label sequence copied =
     div [ HtmlAttr.class "cluster-field" ]
-        [ viewFieldHeader label CopyProtein copied
+        [ Copy.viewCopyFieldHeader label CopyProtein copied
         , Utils.Sequences.viewAminoAcidSequence sequence
-        ]
-
-viewFieldHeader : String -> Msg -> Bool -> Html Msg
-viewFieldHeader label copyMsg copied =
-    div [ HtmlAttr.class "sequence-field-header" ]
-        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
-        , button
-            [ HtmlAttr.class
-                (if copied then
-                    "sequence-copy-button is-copied"
-                 else
-                    "sequence-copy-button"
-                )
-            , HtmlAttr.type_ "button"
-            , HtmlAttr.title
-                (if copied then
-                    "Copied"
-                 else
-                    "Copy sequence"
-                )
-            , HtmlAttr.attribute "aria-label"
-                (if copied then
-                    "Copied to clipboard"
-                 else
-                    "Copy sequence to clipboard"
-                )
-            , onClick copyMsg
-            ]
-            [ span
-                [ HtmlAttr.class
-                    (if copied then
-                        "fa fa-check"
-                     else
-                        "fa fa-copy"
-                    )
-                ]
-                []
-            ]
         ]
 
 buildErrorMessage : Http.Error -> String
