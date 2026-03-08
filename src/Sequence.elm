@@ -11,6 +11,7 @@ import RemoteData exposing (WebData)
 import Status
 import TaxonomyView
 import Utils.Copy as Copy exposing (CopyTarget(..))
+import Utils.ResultsPipeline exposing (httpErrorMessage)
 import Utils.Sequences
 
 type alias Post = 
@@ -90,7 +91,7 @@ viewModel model =
         RemoteData.Success v ->
             viewSequencePage model v
         RemoteData.Failure httpError ->
-            viewFetchError (buildErrorMessage httpError)
+            viewFetchError (httpErrorMessage httpError)
 
 viewSequencePage : Model -> Post -> Html Msg
 viewSequencePage model v =
@@ -157,24 +158,6 @@ viewAminoAcidField label sequence copied =
         , Utils.Sequences.viewAminoAcidSequence sequence
         ]
 
-buildErrorMessage : Http.Error -> String
-buildErrorMessage httpError =
-    case httpError of
-        Http.BadUrl message ->
-            message
-
-        Http.Timeout ->
-            "Server is taking too long to respond. Please try again later."
-
-        Http.NetworkError ->
-            "Unable to reach server."
-
-        Http.BadStatus statusCode ->
-            "Request failed with status code: " ++ String.fromInt statusCode
-
-        Http.BadBody message ->
-            message
-            
 viewFetchError : String -> Html Msg
 viewFetchError errorMessage =
     let

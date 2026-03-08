@@ -14,6 +14,7 @@ import Delay
 import File.Download as Download
 import Status
 import TaxonomyView
+import Utils.ResultsPipeline exposing (httpErrorMessage)
 
 type alias QueryResult =
   { seqid : String
@@ -136,12 +137,7 @@ update msg model =
                             else reload
                 in ({model | mapperpost = Search v}, cmds)
             Ok (SearchResultError e) -> ({model | mapperpost = SearchError e}, Cmd.none)
-            Err err -> case err of
-                Http.BadUrl s -> ({model | mapperpost = LoadError ("Bad URL: "++ s)}, Cmd.none)
-                Http.Timeout  -> ({model | mapperpost = LoadError ("Timeout")}, Cmd.none)
-                Http.NetworkError -> ({model | mapperpost = LoadError ("Network error!")}, Cmd.none)
-                Http.BadStatus s -> ({model | mapperpost = LoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
-                Http.BadBody s -> ({model | mapperpost = LoadError (("Bad body: " ++ s))}, Cmd.none)
+            Err err -> ({model | mapperpost = LoadError (httpErrorMessage err)}, Cmd.none)
 
         Getresults id ->
                 ( {model | mapperpost = Loading}

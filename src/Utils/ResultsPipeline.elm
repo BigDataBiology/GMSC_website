@@ -106,16 +106,16 @@ httpErrorMessage err =
             "Bad URL: " ++ url
 
         Http.Timeout ->
-            "Timeout"
+            "Server is taking too long to respond. Please try again later."
 
         Http.NetworkError ->
-            "Network error!"
+            "Unable to reach server."
 
         Http.BadStatus status ->
-            "Bad status: " ++ String.fromInt status
+            "Request failed with status code: " ++ String.fromInt status
 
         Http.BadBody body ->
-            "Bad body: " ++ body
+            body
 
 
 {-| Update the second-stage loading state from a completed HTTP result. -}

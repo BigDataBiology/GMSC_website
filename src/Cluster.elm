@@ -14,6 +14,7 @@ import Members
 import Status
 import TaxonomyView
 import Utils.Copy as Copy exposing (CopyTarget(..))
+import Utils.ResultsPipeline exposing (httpErrorMessage)
 import Utils.Sequences
 
 
@@ -157,12 +158,7 @@ update msg model =
         ResultsData r -> case r of
             Ok (APIResultOK v) -> ( Copy.resetCopiedField { model | clusterpost = Loaded v }, Cmd.none )
             Ok (APIError e) -> ( { model | clusterpost = LoadError e}, Cmd.none )
-            Err err -> case err of
-                Http.BadUrl s -> ({ model | clusterpost = LoadError ("Bad URL: "++ s)}, Cmd.none)
-                Http.Timeout  -> ({ model | clusterpost = LoadError ("Timeout")} , Cmd.none)
-                Http.NetworkError -> ({ model | clusterpost = LoadError ("Network error!") }, Cmd.none)
-                Http.BadStatus s -> ({ model | clusterpost = LoadError (("Bad status: " ++ String.fromInt s)) } , Cmd.none)
-                Http.BadBody s -> ({ model | clusterpost = LoadError (("Bad body: " ++ s)) }  , Cmd.none)
+            Err err -> ({ model | clusterpost = LoadError (httpErrorMessage err)}, Cmd.none)
 
         ShowMembers ->
             case model.clusterpost of
