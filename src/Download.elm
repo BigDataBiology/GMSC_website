@@ -47,7 +47,7 @@ Columns:
 
 ### Annotations
 
-TSV table containing the annotations of 100AA smORF catalogue. The position in the file indicates which smORF the annotation refers to (e.g., the line with index 1,621 refers to GMSC10.100AA.000_001_621 — index starting at 0/GMSC10.100AA.000_000_000). Two column are:
+TSV table containing the annotations of the 100AA smORF catalogue. The position in the file indicates which smORF the annotation refers to (e.g., the line with index 1,621 refers to GMSC10.100AA.000_001_621 — index starting at 0/GMSC10.100AA.000_000_000). Two columns are provided:
 
 Columns:
 
@@ -75,7 +75,7 @@ Columns:
 
 - `AntiFam`: 'T' represents that smORF does not belong to the Antifam family. 'F' is the opposite.
 - `Terminal checking`: 'T' represents that the upstream of smORF contains an in-frame STOP codon to rule out the possibility that the smORF is part of a broken gene due to contig fragmentation. 'F' is the opposite. 'NA' represents the checking was not performed on smORFs from Progenomes2 database.
-- `RNAcode`: P-value from RNAcode. 'NA' represents the checking was not performed on smORFs families (8 members) or no reports in the results.
+- `RNAcode`: P-value from RNAcode. 'NA' represents that the check was not performed on smORF families with fewer than 8 members or that no result was reported.
 - `MetaTranscriptome`: The number of samples that smORFs are mapped.
 - `Ribo-Seq`: The number of samples that smORFs are mapped.
 - `MetaProteome`: The total k-mer coverage of peptides on smORFs.
@@ -85,15 +85,15 @@ Columns:
 **90AA smORF families:**&emsp;[GMSC10.90AA.quality_test.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.90AA.quality_test.tsv.xz?download=1)
 
 ### Metadata
-TSV table relating the metadata of GMSC.
+TSV table containing GMSC metadata.
 
-The position in the file indicates which line each row refers to
+The position in the file indicates which smORF each row refers to.
 
 Columns:
 
 - `samples`: separated by comma
 
-**100AA smORF catalogue:**&emsp;[GMSC10.100AA.sample.tsv.xz](https://zenodo.org/records/11206513/files/GMSC10.100AA.sample.txt.xz?download=1)
+**100AA smORF catalogue:**&emsp;[GMSC10.100AA.sample.txt.xz](https://zenodo.org/records/11206513/files/GMSC10.100AA.sample.txt.xz?download=1)
 
 TSV table relating to metadata of samples used in GMSC.
 

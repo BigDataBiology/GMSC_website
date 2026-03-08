@@ -35,10 +35,10 @@ A total of 4.5 billion smORFs were predicted to build the catalogue. After remov
 
 ## Searching
 
-##### Search from identifier
+##### Search by identifier
 smORFs in the catalogue are identified with the scheme `GMSC10.100AA.XXX_XXX_XXX` or `GMSC10.90AA.XXX_XXX_XXX`. The initial `GMSC10` indicates the version of the catalogue (Global Microbial smORFs Catalogue 1.0). The `100AA` or `90AA` indicates the amino acid identity of the catalogue. The `XXX_XXX_XXX` is a unique numerical identifier (starting at zero). Numbers were assigned in order of increasing number of copies. So that the greater the number, the greater number of copies of that peptide were present in the raw data. 
 
-On the 100AA Sequence page, the below information will be displayed for each sequence.
+On the 100AA Sequence page, the following information is displayed for each sequence.
 
 - Protein sequence
 - Nucleotide sequence
@@ -47,7 +47,7 @@ On the 100AA Sequence page, the below information will be displayed for each seq
 - Protein cluster
 - Quality
 
-On the 90AA Cluster page, the below information will be displayed for each cluster. And the 100AA members of the cluster will be displayed by pressing the `show` button. 
+On the 90AA Cluster page, the following information is displayed for each cluster. The 100AA members of the cluster can be displayed by pressing the `show` button. 
 
 - Consensus protein sequence
 - Consensus nucleotide sequence
@@ -58,20 +58,20 @@ On the 90AA Cluster page, the below information will be displayed for each clust
 
 ##### Find homologues by sequence (GMSC-mapper)
 
-GMSC-mapper is provided as a search tool to query sequences. Users can provide contigs or protein sequences and it will return a set of smORFs with complete annotations that match the 90AA smORFs in GMSC.
+GMSC-mapper is provided as a search tool for querying sequences. Users can provide contigs or protein sequences, and it will return a set of smORFs with complete annotations that match the 90AA smORFs in GMSC.
 
-The searching will take ~15 min. A search id will be provided for each query task. Search ID are of the form `#-xxxx` where `#` is just an index counting up and `xxxx` is a random string. 
+The search will take ~15 minutes. A search ID will be provided for each query. Search IDs are of the form `#-xxxx`, where `#` is an incrementing index and `xxxx` is a random string. 
 
-Users can wait results at the Mapper page or look up results by the search id from the Home page later.
+Users can wait for results on the Mapper page or look them up later from the Home page using the search ID.
 
-GMSC-mapper can also be downloaded and run locally, please see details in [Github page](https://github.com/BigDataBiology/GMSC-mapper)
+GMSC-mapper can also be downloaded and run locally; see details on the [GitHub page](https://github.com/BigDataBiology/GMSC-mapper).
 
 ![GMSC-mapper](assets/help_tool.png)
 
 ## Browse
-Users can browse by habitats and taxonomy. (e.g., passing marine will match freshwater,marine,human gut). Multiple habitats can be selected.
+Users can browse by habitats and taxonomy. For example, searching for `marine` will match entries such as `freshwater,marine,human gut`. Multiple habitats can be selected.
 
-The results are 90AA smORFs families span in selected habitats and taxonomy.
+The results are 90AA smORF families spanning the selected habitats and taxonomy.
 
 
 ## Data acquisition
@@ -88,18 +88,18 @@ The results are 90AA smORFs families span in selected habitats and taxonomy.
 All predicted smORFs were removed redundancy with 100% amino acid identity. Then they were clustered with 90% amino acid identity and 90% coverage using [Linclust](https://github.com/soedinglab/MMseqs2).
 
 ##### Taxonomy & Habitat annotation
-- ** Taxonomy annotation:**
+- **Taxonomy annotation:**
   - The taxonomy of assembled contigs encoding the small proteins was annotated using [MMSeqs2](https://github.com/soedinglab/MMseqs2) against the [GTDB database](https://gtdb.ecogenomic.org/). 
   - We recorded the taxonomy of smORFs based on the taxonomy of the contigs of metagenomes or genomes of [Progenome v2 database](https://progenomes.embl.de/) from which the smORFs were predicted. Subsequently, we assign taxonomy for 100AA and 90AA smORFs using the lowest common ancestor (LCA), ignoring the un-assigned rank to make it more specific.
 - **Habitat annotation:**
   - We recorded the habitats of smORFs according to their source samples using the habitat microontology introduced in the [SPIRE database](http://spire.embl.de). We further grouped the habitats into 8 broad categories: mammal gut, anthropogenic, other-human, other-animal, aquatic, human gut, soil/plant, and other.
 
 ##### Conserved domain annotation
-The representative sequences of 90AA smORFs families were searched against [NCBI CDD database](https://www.ncbi.nlm.nih.gov/cdd/) by RPS-blast. Hits with an e-value maximum of 0.01 and at least 80% of coverage of PSSM's length were retained and considered significant.
+The representative sequences of 90AA smORF families were searched against the [NCBI CDD database](https://www.ncbi.nlm.nih.gov/cdd/) by RPS-blast. Hits with a maximum e-value of 0.01 and at least 80% coverage of the PSSM length were retained and considered significant.
 
 ##### Cellular localization prediction
-- [TMHMM2](https://services.healthtech.dtu.dk/services/TMHMM-2.0/) was run on the representative sequences of 90AA smORFs families. 
-- [SignalP-5.0](https://services.healthtech.dtu.dk/services/SignalP-5.0/) was run on the representative sequences of 90AA smORFs families both with '-org gram+' and '-org gram-' , and '-org arch' modes.
+- [TMHMM2](https://services.healthtech.dtu.dk/services/TMHMM-2.0/) was run on the representative sequences of 90AA smORF families. 
+- [SignalP-5.0](https://services.healthtech.dtu.dk/services/SignalP-5.0/) was run on the representative sequences of 90AA smORF families in `-org gram+`, `-org gram-`, and `-org arch` modes.
 
 ##### Quality assessment
 - **Terminal check:** We checked for the presence of an in-frame STOP upstream of smORFs. As a smORF predicted at the start of a contig that is not preceded by an in-frame STOP codon risks being a false positive originating from an interrupted fragment.

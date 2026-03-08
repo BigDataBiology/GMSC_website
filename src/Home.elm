@@ -136,7 +136,7 @@ intro =
 
 The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes.
 A total of non-redundant ~965 million 100AA ORFs were predicted from 63,410 metagenomes across global habitats from the [SPIRE database](http://spire.embl.de) and 87,920 high-quality isolated microbial genomes from the [ProGenomes2 database](https://progenomes.embl.de/).
-The smORFs were clustered at 90% amino acid identity resulting in ~288 million 90AA smORFs families.
+The smORFs were clustered at 90% amino acid identity, resulting in ~288 million 90AA smORF families.
 
 - The annotation of GMSC contains:
   - taxonomy classification
@@ -160,7 +160,7 @@ viewSearch model =
             , Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ Form.label [HtmlAttr.id "browse"] [ text "Search from Identifier" ]
+                        [ Form.label [HtmlAttr.id "browse"] [ text "Search by identifier" ]
                         , Input.text
                             [ Input.value model.idcontent
                             , Input.attrs
@@ -187,7 +187,7 @@ viewSearch model =
             [ Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ label [ HtmlAttr.id "browse"] [ text "Input an amino acid / nucleotide sequence in FASTA format"]
+                        [ label [ HtmlAttr.id "browse"] [ text "Enter an amino acid / nucleotide sequence in FASTA format"]
                         , Textarea.textarea
                             [ Textarea.id "myarea"
                             , Textarea.value model.seqcontent
@@ -210,7 +210,7 @@ viewSearch model =
             [ Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ Form.label [HtmlAttr.id "browse"] [ text "Lookup a sequence search result" ]
+                        [ Form.label [HtmlAttr.id "browse"] [ text "Look up a sequence search result" ]
                         , Input.text
                             [ Input.value model.lookupIDContent
                             , Input.attrs
@@ -231,7 +231,7 @@ viewSearch model =
                     [ Alert.simpleInfo [] [ p [] [ text "This webserver allows you to use GMSC-mapper for short jobs. For larger jobs, you can download and use the "
                                                  , a [HtmlAttr.href "https://github.com/BigDataBiology/GMSC-mapper"] [text "command line version of the tool."]
                                                  ]
-                                          , p [] [text "The searching will take a few minutes. To lookup the sequence search results, please type your search ID above that automatically generated when submitting."]
+                                          , p [] [text "The search will take a few minutes. To look up sequence search results later, enter the search ID that was generated when you submitted the job."]
                                           ] 
                     ]
                 ]

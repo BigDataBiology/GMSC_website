@@ -359,7 +359,7 @@ viewModel model = case model.page of
 indexView : Html msg
 indexView =
     div []
-        [ p [] [Html.text "DB	{\"id\": \"gmsc\",\"title\": \"GMSC\",\"url\": \"https://gmsc.big-data-biology.org/\",\"description\": \"The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes.\",\"basicInfo\": \"The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes.A total of non-redundant ~965 million 100AA ORFs were predicted from 63,410 metagenomes from global habitats and 87,920 high-quality isolated microbial genomes from the ProGenomes database. The smORFs were clustered at 90% amino acid identity resulting in ~288 million 90AA smORFs families.\",\"categories\": [\"Sequences\"],\"species\": [\"bacteria\",\"archaea\"],\"updatedAt\": \"2024-03-24 12:00:00\"}"]
+        [ p [] [Html.text "DB	{\"id\": \"gmsc\",\"title\": \"GMSC\",\"url\": \"https://gmsc.big-data-biology.org/\",\"description\": \"The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes.\",\"basicInfo\": \"The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes. A total of non-redundant ~965 million 100AA ORFs were predicted from 63,410 metagenomes from global habitats and 87,920 high-quality isolated microbial genomes from the ProGenomes database. The smORFs were clustered at 90% amino acid identity, resulting in ~288 million 90AA smORF families.\",\"categories\": [\"Sequences\"],\"species\": [\"bacteria\",\"archaea\"],\"updatedAt\": \"2024-03-24 12:00:00\"}"]
         , p [] [Html.text "ENTRY	{\"id\": \"GMSC10.90AA.000_000_000\",\"type\": \"gene\",\"title\": \"GMSC10.90AA.000_000_000\",\"url\": \"https://gmsc.big-data-biology.org/cluster/GMSC10.90AA.000_000_000\",\"dbId\": \"gmsc\",\"updatedAt\": \"2024-03-24 12:00:00\",\"description\": \"\",\"basicInfo\": \"\",\"species\": [\"\"],\"attrs\": {\"\":\"\"}}"]
         ]
 
@@ -379,7 +379,7 @@ header =
             , Grid.col [] [ Html.a [HtmlAttr.href "/browse", onClick GoToBrowse] [Html.text "Browse"]] 
             , Grid.col [] [ Html.a [HtmlAttr.href "/downloads", onClick GoToDownload] [Html.text "Downloads"]]
             , Grid.col [] [ Html.a [HtmlAttr.href "/help", onClick GoToHelp] [Html.text "Help"]]
-            , Grid.col [] [ Html.a [HtmlAttr.href "/about", onClick GoToAbout] [Html.text "About&Contact"]]
+            , Grid.col [] [ Html.a [HtmlAttr.href "/about", onClick GoToAbout] [Html.text "About & Contact"]]
             ]
         ]
 
