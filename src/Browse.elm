@@ -16,12 +16,6 @@ import Selectshared
 import Shared
 import Selectitem
 
-stringFromBool : Bool -> String
-stringFromBool value =
-  if value then
-    "True"
-  else
-    "False"
 
 trueFromPass : String -> String
 trueFromPass value = 
@@ -35,7 +29,7 @@ trueFromPass value =
 habitatItem : Model -> String
 habitatItem model =
   String.join "," <| List.sort (Set.toList ( Set.fromList ( List.map model.selectpost.habitatSearch.itemToLabel model.selectpost.habitatSearch.selected )))
-  
+
 taxItem : Model -> String
 taxItem model =
   String.join "," <| List.map model.selectpost.taxonomySearch.itemToLabel model.selectpost.taxonomySearch.selected
