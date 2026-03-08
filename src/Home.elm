@@ -265,7 +265,7 @@ viewFig model =
                     , Card.align Text.alignSmCenter
                     ]
                     |> Card.headerH4 []
-                        [ img [ HtmlAttr.src "assets/home_geo.svg" ] []
+                        [ img [ HtmlAttr.src "assets/home_geo.svg", HtmlAttr.alt "Geographical distribution of smORFs" ] []
                         , p [] [text " Geographical distribution"]
                         ]
                     |> Card.view
@@ -280,7 +280,7 @@ viewFig model =
                     , Card.align Text.alignSmCenter
                     ]
                     |> Card.headerH4 []
-                        [ img [ HtmlAttr.src "assets/home_taxonomy.svg" ] []
+                        [ img [ HtmlAttr.src "assets/home_taxonomy.svg", HtmlAttr.alt "Taxonomy distribution of smORFs" ] []
                         , p [] [text " Taxonomy distribution"]
                         ]
                     |> Card.view
@@ -295,7 +295,7 @@ viewFig model =
                     , Card.align Text.alignSmCenter
                     ]
                     |> Card.headerH4 []
-                        [ img [ HtmlAttr.src "assets/home_habitat_single.png" ] []
+                        [ img [ HtmlAttr.src "assets/home_habitat_single.png", HtmlAttr.alt "Habitat distribution of smORFs" ] []
                         , p [] [text " Habitat distribution"]
                         ]
                     |> Card.view
