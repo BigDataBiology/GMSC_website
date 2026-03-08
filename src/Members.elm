@@ -467,6 +467,7 @@ summaryForhabitat seqs =
         Dict.empty
         seqs
         |> Dict.toList
+        |> limitSummaryCategories
         |> List.map (\( habitat, count ) -> { habitat = habitat, count = count })
 
 
@@ -504,4 +505,28 @@ summaryFortax seqs =
         Dict.empty
         seqs
         |> Dict.toList
+        |> limitSummaryCategories
         |> List.map (\( tax, count ) -> { tax = tax, count = count })
+
+
+limitSummaryCategories : List ( String, Float ) -> List ( String, Float )
+limitSummaryCategories counts =
+    let
+        sortedCounts =
+            List.sortBy (\( label, count ) -> ( -count, label )) counts
+
+        topCategories =
+            List.take 7 sortedCounts
+
+        remainingCategories =
+            List.drop 7 sortedCounts
+
+        otherCount =
+            remainingCategories
+                |> List.map Tuple.second
+                |> List.sum
+    in
+    if List.isEmpty remainingCategories then
+        topCategories
+    else
+        topCategories ++ [ ( "Other", otherCount ) ]
