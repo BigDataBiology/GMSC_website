@@ -13,6 +13,7 @@ import Json.Decode as D
 import Json.Encode as Encode
 import File.Download as Download
 import Http
+import Status
 
 type alias SequenceResultFull =
     { aa: Maybe String
@@ -233,9 +234,9 @@ viewModel : Model-> Html Msg
 viewModel model =
     case model.showpost of
         SLoading ->
-                div []
-                    [ text "Loading..."
-                    ]
+                Status.loading
+                    "Loading browse results"
+                    "Fetching the selected clusters and their annotations."
         SLoadError e ->
                 div []
                     [ text "Error "
@@ -245,9 +246,10 @@ viewModel model =
             case model.browsepost of 
                 Results b ->
                     viewResults r b model.page model
-                _ -> div []
-                    [ text "Loading..."
-                    ]
+                _ ->
+                    Status.loading
+                        "Preparing browse results"
+                        "The site is still collecting the selected cluster identifiers."
 
 
 viewResults r b page model = case r of

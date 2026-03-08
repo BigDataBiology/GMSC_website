@@ -17,6 +17,7 @@ import Json.Decode as D
 import Json.Encode as Encode
 import File.Download as Download
 import Http
+import Status
 
 type SequenceResult =
     SequenceResultFull
@@ -245,9 +246,9 @@ viewModel : Model-> Html Msg
 viewModel model =
     case model.showpost of
         SLoading ->
-                div []
-                    [ p [] [text "Loading..."]
-                    ]
+                Status.loading
+                    "Loading cluster members"
+                    "Fetching the 100AA smORFs assigned to this 90AA cluster."
         SLoadError e ->
                 div []
                     [ text "Error "
@@ -257,9 +258,10 @@ viewModel model =
             case model.memberpost of 
                 Results m ->
                     viewResults r m model.page model
-                _ -> div []
-                    [ p [] [text "Loading..."]
-                    ]
+                _ ->
+                    Status.loading
+                        "Preparing cluster members"
+                        "The site is still resolving the member accessions for this cluster."
 
 viewResults r m page model = case r of
     MultiResultOK ok ->

@@ -12,6 +12,7 @@ import Bootstrap.Alert as Alert
 import Json.Decode as D
 import Delay
 import File.Download as Download
+import Status
 
 type alias QueryResult =
   { seqid : String
@@ -184,13 +185,13 @@ viewModel : Model-> Html Msg
 viewModel model =
     case model.mapperpost of
         InitialQuery ->
-                div []
-                    [ text "Submitting query..."
-                    ]
+                Status.loading
+                    "Submitting sequence search"
+                    "Your query has been sent to GMSC-mapper. The result page will refresh automatically when the search starts."
         Loading ->
-                div []
-                    [ text "Loading..."
-                    ]
+                Status.loading
+                    "Processing mapper results"
+                    "The server is annotating your query sequences and comparing them against GMSC."
         LoadError e ->
                 div []
                     [ text "Error "

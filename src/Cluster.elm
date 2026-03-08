@@ -13,6 +13,7 @@ import Bootstrap.Dropdown as Dropdown
 import Bootstrap.Popover as Popover
 import Json.Decode as D
 import Members
+import Status
 
 
 qualityString : Quality -> String
@@ -187,8 +188,9 @@ viewModel : Model -> Html Msg
 viewModel model =
     case model.clusterpost of
         Loading ->
-            div []
-                [ text "Loading..."]
+            Status.loading
+                "Loading cluster summary"
+                "Fetching the selected 90AA cluster, including consensus sequences, annotations, and quality evidence."
         LoadError e ->
             div []
                 [ text "Error "

@@ -9,6 +9,7 @@ import Http
 import Bootstrap.Table as Table
 import Json.Decode as D
 import RemoteData exposing (WebData)
+import Status
 
 type alias Post = 
     { aa: String
@@ -59,7 +60,9 @@ viewModel model =
         RemoteData.NotAsked ->
             text ""
         RemoteData.Loading ->
-            div [] [ text "Loading ..." ]
+            Status.loading
+                "Loading smORF record"
+                "Fetching the selected 100AA entry, including its sequence and annotation."
         RemoteData.Success v ->
             div []
                     [ h1 [] [text v.seqid]
