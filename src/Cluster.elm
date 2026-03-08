@@ -224,6 +224,12 @@ viewClusterPage model v =
         [ h1 [] [ text v.seqid ]
         , p [ HtmlAttr.class "cluster-subtitle" ]
             [ text "Summary of this 90AA cluster, including consensus sequences, ecological annotation, quality evidence, and linked 100AA members." ]
+        , div [ HtmlAttr.class "context-callout" ]
+            [ p [ HtmlAttr.class "context-copy" ]
+                [ text "This is a 90AA family-level cluster. In GMSC, 90AA and 100AA refer to catalogue identity thresholds rather than sequence length: 90AA groups related smORFs at 90% amino acid identity, while 100AA accessions are non-redundant sequence entries." ]
+            , p [ HtmlAttr.class "context-copy" ]
+                [ text "The linked 100AA members let you inspect the individual non-redundant sequences assigned to this family, while the taxonomy and habitat summarise the ecological context of the cluster." ]
+            ]
         , div [ HtmlAttr.class "cluster-summary-grid" ]
             [ viewCard "Consensus sequences"
                 [ viewAminoAcidField "Consensus protein sequence" v.aa (Copy.copyTargetIsActive ProteinSequence model.copiedField)
@@ -316,7 +322,7 @@ viewMembersSection : Model -> Html Msg
 viewMembersSection model =
     div [ HtmlAttr.class "cluster-members-section" ]
         [ h4 [ HtmlAttr.class "cluster-section-title" ] [ text "Cluster members" ]
-        , p [ HtmlAttr.class "cluster-section-copy" ] [ text "Load the 100AA smORFs assigned to this 90AA cluster to inspect their sequences, habitats, and taxonomy." ]
+        , p [ HtmlAttr.class "cluster-section-copy" ] [ text "Load the 100AA non-redundant smORF accessions assigned to this 90AA family to inspect their sequences, habitats, and taxonomy." ]
         , if model.membersRequested then
             Members.viewModel model.memberpost
                 |> Html.map MembersMsg

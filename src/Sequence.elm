@@ -98,6 +98,12 @@ viewSequencePage model v =
         [ h1 [] [ text v.seqid ]
         , p [ HtmlAttr.class "sequence-subtitle" ]
             [ text "Summary of this 100AA smORF, including its amino acid sequence, nucleotide sequence, and ecological annotation." ]
+        , div [ HtmlAttr.class "context-callout" ]
+            [ p [ HtmlAttr.class "context-copy" ]
+                [ text "This is a 100AA catalogue entry: a non-redundant smORF accession after collapsing exact amino acid duplicates. Here, 100AA refers to the identity threshold used to build the catalogue, not to sequence length." ]
+            , p [ HtmlAttr.class "context-copy" ]
+                [ text "Taxonomy and habitat summarise the source contigs, metagenomes, or isolate genomes used to annotate this smORF in GMSC." ]
+            ]
         , div [ HtmlAttr.class "sequence-summary-grid" ]
             [ viewSequenceCard "Sequences"
                 [ viewAminoAcidField "Protein sequence" v.aa (Copy.copyTargetIsActive ProteinSequence model.copiedField)

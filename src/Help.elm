@@ -17,6 +17,8 @@ The global microbial smORFs catalogue (GMSC) is an integrated, consistently-proc
 
 A total of 4.5 billion smORFs were predicted to build the catalogue. After removing redundancy with 100% amino acid identity, we obtained a 100AA non-redundant catalogue with 964,970,496 sequences. Further, the smORFs were clustered at 90% amino acid identity resulting in 287,926,875 90AA smORFs catalogue.
 
+In GMSC, `100AA` and `90AA` refer to catalogue identity thresholds rather than peptide length. `100AA` is the non-redundant catalogue after collapsing exact amino acid duplicates, while `90AA` groups related smORFs into family-level clusters at 90% amino acid identity.
+
 ## Citation
 
 For more details about the GMSC, please see:
@@ -46,7 +48,7 @@ Additionally, if you use GMSC in your research, please cite the above paper.
 ##### Search by identifier
 smORFs in the catalogue are identified with the scheme `GMSC10.100AA.XXX_XXX_XXX` or `GMSC10.90AA.XXX_XXX_XXX`. The initial `GMSC10` indicates the version of the catalogue (Global Microbial smORFs Catalogue 1.0). The `100AA` or `90AA` indicates the amino acid identity of the catalogue. The `XXX_XXX_XXX` is a unique numerical identifier (starting at zero). Numbers were assigned in order of increasing number of copies. So that the greater the number, the greater number of copies of that peptide were present in the raw data. 
 
-On the 100AA Sequence page, the following information is displayed for each sequence.
+On the 100AA Sequence page, the following information is displayed for each non-redundant smORF accession.
 
 - Protein sequence
 - Nucleotide sequence
@@ -55,7 +57,7 @@ On the 100AA Sequence page, the following information is displayed for each sequ
 - Protein cluster
 - Quality
 
-On the 90AA Cluster page, the following information is displayed for each cluster. The 100AA members of the cluster can be displayed by pressing the `show` button. 
+On the 90AA Cluster page, the following information is displayed for each family-level cluster. The 100AA members of the cluster can be displayed by pressing the `show` button. 
 
 - Consensus protein sequence
 - Consensus nucleotide sequence
@@ -66,7 +68,7 @@ On the 90AA Cluster page, the following information is displayed for each cluste
 
 ##### Find homologues by sequence (GMSC-mapper)
 
-GMSC-mapper is provided as a search tool for querying sequences. Users can provide contigs or protein sequences, and it will return a set of smORFs with complete annotations that match the 90AA smORFs in GMSC.
+GMSC-mapper is provided as a search tool for querying sequences. Users can provide contigs or protein sequences, and it will return a set of smORFs with complete annotations that match the 90AA smORF families in GMSC.
 
 The search will take ~15 minutes. A search ID will be provided for each query. Search IDs are of the form `#-xxxx`, where `#` is an incrementing index and `xxxx` is a random string. 
 
@@ -79,7 +81,7 @@ GMSC-mapper can also be downloaded and run locally; see details on the [GitHub p
 ## Browse
 Users can browse by habitats and taxonomy. For example, searching for `marine` will match entries such as `freshwater,marine,human gut`. Multiple habitats can be selected.
 
-The results are 90AA smORF families spanning the selected habitats and taxonomy.
+The results are 90AA smORF families spanning the selected habitats and taxonomy. Each row represents a family-level cluster rather than an individual non-redundant 100AA sequence.
 
 
 ## Data acquisition
@@ -93,7 +95,7 @@ The results are 90AA smORF families spanning the selected habitats and taxonomy.
 - We used a modified version of [Prodigal](https://github.com/hyattpd/Prodigal) to predict ORFs &gt;= 15 bps.  The ORFs that &lt;= 300 bps were considered smORFs.
 
 ##### Cluster generation
-All predicted smORFs were removed redundancy with 100% amino acid identity. Then they were clustered with 90% amino acid identity and 90% coverage using [Linclust](https://github.com/soedinglab/MMseqs2).
+All predicted smORFs were removed redundancy with 100% amino acid identity. Then they were clustered with 90% amino acid identity and 90% coverage using [Linclust](https://github.com/soedinglab/MMseqs2). As a result, the 100AA catalogue stores non-redundant sequences, while the 90AA catalogue stores family-level clusters.
 
 ##### Taxonomy & Habitat annotation
 - **Taxonomy annotation:**

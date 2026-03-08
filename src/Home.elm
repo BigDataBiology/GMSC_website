@@ -137,6 +137,7 @@ intro =
 The global microbial smORF catalogue (GMSC) is an integrated, consistently-processed, smORFs catalogue of the microbial world, combining publicly available metagenomes and high-quality isolated microbial genomes.
 A total of non-redundant ~965 million 100AA ORFs were predicted from 63,410 metagenomes across global habitats from the [SPIRE database](http://spire.embl.de) and 87,920 high-quality isolated microbial genomes from the [ProGenomes2 database](https://progenomes.embl.de/).
 The smORFs were clustered at 90% amino acid identity, resulting in ~288 million 90AA smORF families.
+Here, `100AA` and `90AA` refer to catalogue identity thresholds rather than peptide length: `100AA` is the non-redundant catalogue after collapsing exact amino acid duplicates, while `90AA` groups related smORFs into family-level clusters at 90% amino acid identity.
 
 - The annotation of GMSC contains:
   - taxonomy classification
@@ -167,7 +168,7 @@ viewSearch model =
                                 [ HtmlAttr.placeholder "GMSC10.100AA.XXX_XXX_XXX   or   GMSC10.90AA.XXX_XXX_XXX" ]
                             , Input.onInput SetIdentifier
                             ]
-                        , Form.help [] [ text "The maximum 100AA identifier is GMSC10.100AA.964_970_495. The maximum 90AA identifier is GMSC10.90AA.287_926_874" ]
+                        , Form.help [] [ text "100AA identifiers are non-redundant smORF accessions at 100% amino acid identity; 90AA identifiers are family-level cluster accessions at 90% amino acid identity. The maximum 100AA identifier is GMSC10.100AA.964_970_495. The maximum 90AA identifier is GMSC10.90AA.287_926_874." ]
                         , Button.button [ Button.info, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick SubmitIdentifier ] [ text "Submit" ] 
                         , Button.button[ Button.light, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick ClearId ] [ text "Clear" ]
                         , Button.button [ Button.outlineSecondary, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick SetIdentifierExample ] [ text "Example" ] 
@@ -198,6 +199,14 @@ viewSearch model =
                                     ">contigID\n AATACTACATGTCA..."
                                 else
                                     ">proteinID\n MTIISR..."]
+                            ]
+                        , Form.help []
+                            [ text
+                                (if model.optype == Contigs then
+                                    "Contig searches predict smORFs from nucleotide input and report matching 90AA GMSC families."
+                                 else
+                                    "Protein searches compare your amino acid sequences against 90AA GMSC families and return the matched family annotations."
+                                )
                             ]
                         , Button.button [ Button.info, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick SubmitSequence] [ text "Submit" ]
                         , Button.button [ Button.light, Button.attrs [ HtmlAttr.class "float-right"], Button.onClick ClearSeq] [ text "Clear" ]

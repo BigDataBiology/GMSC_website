@@ -251,6 +251,10 @@ viewMembersSummary : MemberResults -> Html Msg
 viewMembersSummary m =
     Html.div []
         [ viewSummary m
+        , div [ HtmlAttr.class "context-callout" ]
+            [ p [ HtmlAttr.class "context-copy" ]
+                [ text "This member list shows the 100AA non-redundant smORF accessions assigned to the current 90AA family. Full rows display the individual annotations already available in GMSC." ]
+            ]
         , Html.div []
             [ Html.p [HtmlAttr.style "float" "left"] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length m.cluster) )]
             , Html.div []

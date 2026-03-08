@@ -15,6 +15,8 @@ See also the [Zenodo repository](https://zenodo.org/records/11206513) for files 
 
 We provide the 964,970,496 non-redundant smORFs catalogue at 100% amino acid identity and 287,926,875 smORF families at 90% amino acid identity.
 
+In GMSC, `100AA` and `90AA` refer to catalogue identity thresholds rather than peptide length. The 100AA catalogue stores non-redundant smORF sequences after collapsing exact amino acid duplicates, while the 90AA catalogue stores family-level clusters of related smORFs.
+
 - The download files contain:
   - protein / nucleotide fasta file
   - cluster table
@@ -36,7 +38,7 @@ Fasta file of 100AA / 90AA nucleotide sequences.
 **90AA smORF families:**&emsp;[GMSC10.90AA.fna.xz](https://gmsc-api.big-data-biology.org/files/GMSC10.90AA.fna.xz)
 
 ### Clusters
-TSV table relating 100AA smORF accession and the hierarchically obtained families at 90% amino acid identity (which represent sequences with the same function).
+TSV table relating 100AA smORF accessions to their family assignments at 90% amino acid identity.
 
 Columns:
 

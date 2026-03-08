@@ -208,10 +208,15 @@ viewSearch s  =
           Just r ->
             div []
                 [ h2 [] [ text ("Search id: " ++ s.search_id) ]
+                , div [ HtmlAttr.class "context-callout" ]
+                    [ p [ HtmlAttr.class "context-copy" ]
+                        [ text "GMSC-mapper reports matches at the 90AA family level used by the catalogue. The annotation table summarises the matched family for each query, and the hit table links to the corresponding 90AA cluster pages in GMSC." ]
+                    ]
                 , h3 [] [ text "Annotation of query sequences" ]
                 , if List.length (Dict.toList r) /=0 then
                     div []
-                    [ div [HtmlAttr.class "action-row"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotations" ] ]
+                    [ p [ HtmlAttr.class "cluster-section-copy" ] [ text "Quality refers to the matched GMSC family and indicates whether that family passed the integrated quality checks and has supporting experimental evidence." ]
+                    , div [HtmlAttr.class "action-row"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotations" ] ]
                     , div [HtmlAttr.class "results-wrap"]
                       [ Table.table
                         { options = [ Table.striped, Table.hover ]
@@ -240,6 +245,7 @@ viewSearch s  =
                         }
                       ]
                     , h3 [] [ text "Hits in GMSC" ]
+                    , p [ HtmlAttr.class "cluster-section-copy" ] [ text "Each hit is a 90AA family accession. Identity and E-value describe the match between your query sequence and that family-level GMSC entry." ]
                     , div [HtmlAttr.class "action-row"] [ Button.button [ Button.info, Button.onClick DownloadHits, Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "Download hits" ] ]
                     , div [HtmlAttr.class "results-wrap"]
                       [ Table.table

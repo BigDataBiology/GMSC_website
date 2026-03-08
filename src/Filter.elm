@@ -154,7 +154,11 @@ viewModel model =
 viewResults r b model = case r of
     ResultsPipeline.MultiResultOK ok ->
         div []
-            [ if List.length b.results /= 0 then
+            [ div [ HtmlAttr.class "context-callout" ]
+                [ p [ HtmlAttr.class "context-copy" ]
+                    [ text "Browse results are 90AA family-level clusters. Each row links to a cluster page, where you can inspect the family summary and load the linked 100AA non-redundant members." ]
+                ]
+            , if List.length b.results /= 0 then
                 div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download results" ] ]
               else div [] [text ""]
             , if List.isEmpty ok then

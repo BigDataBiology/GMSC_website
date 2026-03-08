@@ -363,6 +363,26 @@ div#cluster button{
     color: #4c6670;
 }
 
+.context-callout {
+    width: 100%;
+    margin: 0 0 1.25rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #d9e6ea;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f7fbfd 0%, #eef6f9 100%);
+}
+
+.context-copy {
+    width: 100%;
+    margin: 0;
+    color: #40606c;
+    line-height: 1.55;
+}
+
+.context-copy + .context-copy {
+    margin-top: 0.5rem;
+}
+
 .sequence-summary-grid,
 .cluster-summary-grid {
     display: grid;
