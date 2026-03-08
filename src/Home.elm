@@ -139,6 +139,8 @@ A total of non-redundant ~965 million 100AA ORFs were predicted from 63,410 meta
 The smORFs were clustered at 90% amino acid identity, resulting in ~288 million 90AA smORF families.
 Here, `100AA` and `90AA` refer to catalogue identity thresholds rather than peptide length: `100AA` is the non-redundant catalogue after collapsing exact amino acid duplicates, while `90AA` groups related smORFs into family-level clusters at 90% amino acid identity.
 
+Reference: [Duan, Y., Santos-Júnior, C. D., Schmidt, T. S., Fullam, A., de Almeida, B. L. S., Zhu, C., Kuhn, M., Zhao, X.-M., Bork, P. & Coelho, L. P. A catalog of small proteins from the global microbiome. *Nature Communications* **15**, 7563 (2024).](https://doi.org/10.1038/s41467-024-51894-6)
+
 - The annotation of GMSC contains:
   - taxonomy classification
   - habitat assignment
