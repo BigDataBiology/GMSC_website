@@ -86,7 +86,7 @@ type ClusterPost =
 type alias Model =
     { clusterpost : ClusterPost
     , memberpost : Members.Model
-    , ask: Bool
+    , membersRequested : Bool
     , showQualityDetails : Bool
     , copiedField : Maybe CopyTarget
     , navKey : Nav.Key
@@ -122,8 +122,8 @@ decodeQuality =
         (D.field "rnacode" D.float)
         (D.field "terminal" D.bool)
 
-decodeAPIResult : D.Decoder APIResult
-decodeAPIResult =
+decodeSeqInfo : D.Decoder APIResult
+decodeSeqInfo =
     let
         bAPIResultOK a h n s t q = APIResultOK { aa = a, habitat = h, nuc = n, seqid = s, tax = t, quality = q}
     in D.map6 bAPIResultOK
@@ -139,7 +139,7 @@ initialState : String -> Nav.Key -> (Model, Cmd Msg)
 initialState seq_id navkey =
     ( { clusterpost = Loading
     , memberpost = Members.loadingModel
-    , ask = False
+    , membersRequested = False
     , showQualityDetails = False
     , copiedField = Nothing
     , navKey = navkey
@@ -147,7 +147,7 @@ initialState seq_id navkey =
     }
     , Http.get
     { url = ("https://gmsc-api.big-data-biology.org/v1/seq-info/" ++ seq_id)
-    , expect = Http.expectJson ResultsData decodeAPIResult
+    , expect = Http.expectJson ResultsData decodeSeqInfo
     }
     )
 
@@ -169,7 +169,7 @@ update msg model =
               Loaded hm->
                 let
                   (sm, cmd) = Members.initialState hm.seqid
-                in ( { model | memberpost = sm, ask=True }, Cmd.map MembersMsg cmd )
+                in ( { model | memberpost = sm, membersRequested = True }, Cmd.map MembersMsg cmd )
               _ ->
                 (model,Cmd.none)
 
@@ -317,7 +317,7 @@ viewMembersSection model =
     div [ HtmlAttr.class "cluster-members-section" ]
         [ h4 [ HtmlAttr.class "cluster-section-title" ] [ text "Cluster members" ]
         , p [ HtmlAttr.class "cluster-section-copy" ] [ text "Load the 100AA smORFs assigned to this 90AA cluster to inspect their sequences, habitats, and taxonomy." ]
-        , if model.ask then
+        , if model.membersRequested then
             Members.viewModel model.memberpost
                 |> Html.map MembersMsg
           else

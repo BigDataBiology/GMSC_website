@@ -62,8 +62,8 @@ type Msg
     | ShowPage Int
     | DropdownMsg Dropdown.State
 
-decodeAPIResult : D.Decoder MemberResults
-decodeAPIResult =
+decodeClusterInfo : D.Decoder MemberResults
+decodeClusterInfo =
     D.map2 MemberResults
         (D.field "cluster" (D.list decodeSequenceResult))
         (D.field "status" D.string)
@@ -89,7 +89,7 @@ initialState seq_id =
     ( loadingModel
     , Http.get
     { url = ("https://gmsc-api.big-data-biology.org/v1/cluster-info/" ++ seq_id)
-    , expect = Http.expectJson ResultsData decodeAPIResult
+    , expect = Http.expectJson ResultsData decodeClusterInfo
     }
     )
 
