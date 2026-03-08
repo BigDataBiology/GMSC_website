@@ -15,6 +15,7 @@ import Selects
 import Selectshared
 import Shared
 import Selectitem
+import Utils.ResultsPipeline as ResultsPipeline
 
 
 trueFromPass : String -> String
@@ -284,8 +285,8 @@ subscriptions model =
 
 viewModel : Model -> Html Msg
 viewModel model =
-    case model.filterpost.showpost of
-    Filter.SLoading ->
+    case model.filterpost.results.showpost of
+    ResultsPipeline.SLoading ->
         if model.ask then
             div []
                 [ viewSearch model
@@ -297,7 +298,7 @@ viewModel model =
             div []
                 [ viewSearch model
                 ]
-    Filter.MultiResults r ->
+    ResultsPipeline.MultiResults _ ->
         div []
             [ viewSearch model
             , Html.hr [] []

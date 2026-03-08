@@ -1,20 +1,16 @@
-module Filter exposing (BrowsePost(..),ShowPost(..),APIResult(..),MultiResult(..), Model, Msg(..), initialState, update, viewModel)
+module Filter exposing (BrowsePost(..), APIResult(..), Model, Msg(..), initialState, update, viewModel)
 
 import Html exposing (Html, div, p, text)
-import Html.Events exposing (onClick)
-
 import Html.Attributes as HtmlAttr
 
 import Bootstrap.Table as Table
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Bootstrap.Utilities.Spacing as Spacing
 import Json.Decode as D
-import Json.Encode as Encode
-import File.Download as Download
 import Http
 import Status
 import TaxonomyView
+import Utils.ResultsPipeline as ResultsPipeline
 
 type alias SequenceResultFull =
     { aa: Maybe String
@@ -23,29 +19,15 @@ type alias SequenceResultFull =
     , seqid: String
     , tax: Maybe String  }
 
-type alias MultiResultItem =
-    { aa: String
-    , habitat: String
-    , nuc: String
-    , seqid: String
-    , tax: String  }
-
 type alias Model =
     { browsepost : BrowsePost
-    , showpost : ShowPost
-    , page : Int
-    , myDrop1State : Dropdown.State
+    , results : ResultsPipeline.State
     }
 
 type BrowsePost
     = BLoading
     | BLoadError String
     | Results APIResult
-
-type ShowPost
-    = SLoading
-    | SLoadError String
-    | MultiResults MultiResult
 
 decodeSequenceResult : D.Decoder SequenceResultFull
 decodeSequenceResult = 
@@ -56,35 +38,18 @@ decodeSequenceResult =
            ((D.field "seq_id" D.string))
            (D.maybe (D.field "taxonomy" D.string))
 
-decodeMultItemResult : D.Decoder MultiResultItem
-decodeMultItemResult = 
-    D.map5 MultiResultItem
-           (D.field "aminoacid" D.string)
-           (D.field "habitat" D.string)
-           (D.field "nucleotide" D.string)
-           (D.field "seq_id" D.string)
-           (D.field "taxonomy" D.string)
-
 type APIResult =
         APIResultOK { results : List SequenceResultFull
                     , status : String
                     }
         | APIError String
 
-type MultiResult =
-        MultiResultOK (List MultiResultItem)
-        | MultiError String
-
 type Msg
     = ResultsData (Result Http.Error APIResult)
     | DownloadResults
-    | MultiData (Result Http.Error MultiResult)
-    | Shownext (List SequenceResultFull)
-    | Showlast (List SequenceResultFull)
-    | Showfinal (List SequenceResultFull) Int
-    | Showbegin (List SequenceResultFull) Int
-    | Showselect (List SequenceResultFull) Int
-    | MyDrop1Msg Dropdown.State
+    | MultiData (Result Http.Error ResultsPipeline.MultiResult)
+    | ShowPage Int
+    | DropdownMsg Dropdown.State
 
 decodeAPIResult : D.Decoder APIResult
 decodeAPIResult =
@@ -94,25 +59,10 @@ decodeAPIResult =
         (D.field "results" (D.list decodeSequenceResult))
         (D.field "status" D.string)
 
-decodeMultiResult : D.Decoder MultiResult
-decodeMultiResult =
-    let
-        bMultiResultOK r = MultiResultOK r
-    in D.map bMultiResultOK
-        (D.list decodeMultItemResult)
-
-multi : List String -> Encode.Value
-multi ids =
-    Encode.object
-        [  ("seq_ids", Encode.list Encode.string ids)
-        ]
-
 initialState : String -> String -> String -> String -> String -> String -> String -> String -> String -> (Model, Cmd Msg)
 initialState habitat taxonomy antifam terminal rnacode metat riboseq metap hq=
     ( { browsepost = BLoading
-      , showpost = SLoading
-      , page = 1
-      , myDrop1State = Dropdown.initialState
+      , results = ResultsPipeline.initialState
       }
     , Http.post
     { url = "https://gmsc-api.big-data-biology.org/v1/seq-filter/"
@@ -138,123 +88,77 @@ update msg model =
             Ok v -> 
                 case v of 
                    APIResultOK ok ->
-                        let ids = ((List.take 100 ok.results) |> List.map(\seq -> seq.seqid))
-                        in  ( {model | browsepost = Results v, showpost = SLoading}
-                            , Http.post
-                              { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                              , body = Http.jsonBody (multi ids)
-                              , expect = Http.expectJson MultiData decodeMultiResult
-                              }
-                            )
+                        let
+                            page =
+                                1
+
+                            nextResults =
+                                ResultsPipeline.setLoadingPage page model.results
+
+                            ids =
+                                ResultsPipeline.pageIds page .seqid ok.results
+                        in
+                        ( { model | browsepost = Results v, results = nextResults }
+                        , ResultsPipeline.fetchPage MultiData ids
+                        )
                    _ -> ( {model | browsepost = Results v}, Cmd.none)
-            Err err -> case err of
-                Http.BadUrl s -> ({model | browsepost = BLoadError ("Bad URL: "++ s)}, Cmd.none)
-                Http.Timeout  -> ({model | browsepost = BLoadError ("Timeout")}, Cmd.none)
-                Http.NetworkError -> ({model | browsepost = BLoadError ("Network error!")}, Cmd.none)
-                Http.BadStatus s -> ({model | browsepost = BLoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
-                Http.BadBody s -> ({model | browsepost = BLoadError (("Bad body: " ++ s))}, Cmd.none)
+            Err err ->
+                ( { model | browsepost = BLoadError (ResultsPipeline.httpErrorMessage err) }, Cmd.none )
 
-        DownloadResults -> case model.showpost of
-            MultiResults r -> case r of
-                MultiResultOK v -> 
-                    let allresults = String.join "\n" 
-                            (v 
-                                |> (List.map 
-                                        (\seq -> 
-                                            String.join "\t" [seq.seqid,seq.aa,seq.nuc,seq.habitat,seq.tax]
-                                        )
-                                    )
-                            )
-                    in ( model, Download.string "result.tsv" "text/plain" allresults)
-                _ -> ( model, Cmd.none )
-            _ -> ( model, Cmd.none )
+        DownloadResults ->
+            ( model, ResultsPipeline.downloadResults "result.tsv" model.results )
 
-        MultiData r -> case r of
-            Ok m -> ( {model | showpost = MultiResults m}, Cmd.none )
-            Err err -> case err of
-                Http.BadUrl s -> ({model | showpost = SLoadError ("Bad URL: "++ s)}, Cmd.none)
-                Http.Timeout  -> ({model | showpost = SLoadError ("Timeout")}, Cmd.none)
-                Http.NetworkError -> ({model | showpost = SLoadError ("Network error!")}, Cmd.none)
-                Http.BadStatus s -> ({model | showpost = SLoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
-                Http.BadBody s -> ({model | showpost = SLoadError (("Bad body: " ++ s))}, Cmd.none)
-        
-        Showlast l -> let ids = ((List.take 100 l)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, page = (model.page-1)}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
-        
-        Shownext o -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, page = (model.page+1)}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
+        MultiData r ->
+            ( { model | results = ResultsPipeline.updateShowPost r model.results }, Cmd.none )
 
-        Showfinal o all -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, page = all}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
+        ShowPage page ->
+            case model.browsepost of
+                Results (APIResultOK ok) ->
+                    let
+                        nextResults =
+                            ResultsPipeline.setLoadingPage page model.results
 
-        Showbegin o all -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, page = all}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )        
-        Showselect o all -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, page = all}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
-        MyDrop1Msg state ->
-            ( { model | myDrop1State = state }
-            , Cmd.none
-            )
+                        ids =
+                            ResultsPipeline.pageIds page .seqid ok.results
+                    in
+                    ( { model | results = nextResults }
+                    , ResultsPipeline.fetchPage MultiData ids
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        DropdownMsg state ->
+            ( { model | results = ResultsPipeline.updateDropdownState state model.results }, Cmd.none )
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
-        [ Dropdown.subscriptions model.myDrop1State MyDrop1Msg ]
+    ResultsPipeline.subscriptions model.results DropdownMsg
 
 viewModel : Model-> Html Msg
 viewModel model =
-    case model.showpost of
-        SLoading ->
+    case model.results.showpost of
+        ResultsPipeline.SLoading ->
                 Status.loading
                     "Loading browse results"
                     "Fetching the selected clusters and their annotations."
-        SLoadError e ->
+        ResultsPipeline.SLoadError e ->
                 div []
                     [ text "Error "
                     , text e
                     ]
-        MultiResults r -> 
+        ResultsPipeline.MultiResults r -> 
             case model.browsepost of 
                 Results b ->
-                    viewResults r b model.page model
+                    viewResults r b model
                 _ ->
                     Status.loading
                         "Preparing browse results"
                         "The site is still collecting the selected cluster identifiers."
 
 
-viewResults r b page model = case r of
-    MultiResultOK ok ->
+viewResults r b model = case r of
+    ResultsPipeline.MultiResultOK ok ->
         case b of 
             APIResultOK bok ->
                 div []
@@ -287,60 +191,12 @@ viewResults r b page model = case r of
                                         )
                                 }
                             ]
-                           
-                        , div [HtmlAttr.class "browse"] 
-                            [ if List.length bok.results > 100 then
-                                    if List.length bok.results > (100*page) then
-                                        div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (100*page) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
-                                    else
-                                        div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
-                                else if List.length bok.results /= 0 then
-                                            div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
-                                    else 
-                                            div [] [ text "" ]
-                                , if List.length bok.results > 100 then
-                                        Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin bok.results 1), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
-                                    else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ], Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
-                                , if page > 1 then
-                                    let other = (List.drop (100*(page-2)) bok.results)
-                                    in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
-                                else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ], Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
-                                {-, if List.length bok.results > 100 then
-                                    if modBy 100 (List.length bok.results) /= 0 then
-                                        div [] (List.map (\n -> Button.button [ Button.small, Button.outlineInfo, Button.onClick (Showselect (List.drop (100*(n-1)) bok.results) n) ] [text (String.fromInt n)] )(List.range 1 ((List.length bok.results//100)+1)))
-                                    else 
-                                        div [] (List.map (\n -> Button.button [ Button.small, Button.outlineInfo, Button.onClick (Showselect (List.drop (100*(n-1)) bok.results) n) ] [text (String.fromInt n)] )(List.range 1 ((List.length bok.results//100))))
-                                  else Button.button [ Button.small, Button.outlineInfo ] [text "1"]-}
-                                , div [HtmlAttr.style "float" "left"]
-                                    [ Dropdown.dropdown
-                                        model.myDrop1State
-                                        { options = [ ]
-                                        , toggleMsg = MyDrop1Msg
-                                        , toggleButton =
-                                            Dropdown.toggle [ Button.small, Button.outlineInfo ,Button.attrs [ HtmlAttr.class "float-left"]] [ text "Page" ]
-                                        , items =
-                                            if List.length bok.results > 100 then
-                                                if modBy 100 (List.length bok.results) /= 0 then
-                                                    (List.map (\n -> Dropdown.buttonItem [ onClick (Showselect (List.drop (100*(n-1)) bok.results) n) ] [text (String.fromInt n)] )(List.range 1 ((List.length bok.results//100)+1)))
-                                                else
-                                                    (List.map (\n -> Dropdown.buttonItem [ onClick (Showselect (List.drop (100*(n-1)) bok.results) n) ] [text (String.fromInt n)] )(List.range 1 ((List.length bok.results//100))))
-                                            else
-                                                [ Dropdown.buttonItem [] [ text "1" ] ]
-                                        }
-                                ]
-                                , if List.length bok.results >(100*page) then
-                                    let other = (List.drop (100*page) bok.results)
-                                    in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
-                                else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
-                                , if List.length bok.results > 100 then
-                                        let 
-                                            (other,all) = if modBy 100 (List.length bok.results) /= 0 then
-                                                            ((List.drop (100* (List.length bok.results//100)) bok.results),((List.length bok.results//100) + 1))
-                                                        else
-                                                            ((List.drop (100* ((List.length bok.results//100)-1)) bok.results), (List.length bok.results//100))
-                                        in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showfinal other all)] [ Html.text ">>" ]
-                                    else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">>" ]
-                            ]                    
+                        , ResultsPipeline.viewPager
+                            { state = model.results
+                            , totalItems = List.length bok.results
+                            , onSelectPage = ShowPage
+                            , dropdownMsg = DropdownMsg
+                            }
                         ]
                     ]
             APIError berr -> div []
@@ -348,7 +204,7 @@ viewResults r b page model = case r of
                     , Html.blockquote []
                         [ Html.p [] [ Html.text berr ] ]
                     ]
-    MultiError err ->
+    ResultsPipeline.MultiError err ->
         div []
             [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
             , Html.blockquote []

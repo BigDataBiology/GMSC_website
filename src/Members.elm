@@ -1,4 +1,4 @@
-module Members exposing (MemberPost(..), ShowPost (..), APIResult(..), MultiResult(..), Model, Msg(..), initialState, update, viewModel)
+module Members exposing (MemberPost(..), APIResult(..), Model, Msg(..), initialState, loadingModel, update, viewModel)
 
 import Html exposing (Html, div, h5, p, text)
 import Html.Events exposing (onClick)
@@ -12,13 +12,11 @@ import Dict
 import Bootstrap.Table as Table
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Bootstrap.Utilities.Spacing as Spacing
 import Json.Decode as D
-import Json.Encode as Encode
-import File.Download as Download
 import Http
 import Status
 import TaxonomyView
+import Utils.ResultsPipeline as ResultsPipeline
 
 type SequenceResult =
     SequenceResultFull
@@ -29,29 +27,15 @@ type SequenceResult =
         , tax: String  }
     | SequenceResultShallow { seqid: String }
 
-type alias MultiResultItem =
-    { aa: String
-    , habitat: String
-    , nuc: String
-    , seqid: String
-    , tax: String  }
-
 type alias Model =
     { memberpost : MemberPost
-    , showpost : ShowPost
-    , page : Int
-    , myDrop1State : Dropdown.State
+    , results : ResultsPipeline.State
     }
 
 type MemberPost
     = MLoading
     | MLoadError String
     | Results APIResult
-
-type ShowPost
-    = SLoading
-    | SLoadError String
-    | MultiResults MultiResult
 
 decodeSequenceResult : D.Decoder SequenceResult
 decodeSequenceResult =
@@ -66,35 +50,18 @@ decodeSequenceResult =
             (D.field "seq_id" D.string)
         ]
 
-decodeMultItemResult : D.Decoder MultiResultItem
-decodeMultItemResult =
-    D.map5 MultiResultItem
-           (D.field "aminoacid" D.string)
-           (D.field "habitat" D.string)
-           (D.field "nucleotide" D.string)
-           (D.field "seq_id" D.string)
-           (D.field "taxonomy" D.string)
-
 type APIResult =
         APIResultOK { cluster : List SequenceResult
                     , status : String
                     }
         | APIError String
 
-type MultiResult =
-        MultiResultOK (List MultiResultItem)
-        | MultiError String
-
 type Msg
     = ResultsData (Result Http.Error APIResult)
     | DownloadResults
-    | MultiData (Result Http.Error MultiResult)
-    | Shownext (List SequenceResult)
-    | Showlast (List SequenceResult)
-    | Showfinal (List SequenceResult) Int
-    | Showbegin (List SequenceResult) Int
-    | Showselect (List SequenceResult) Int
-    | MyDrop1Msg Dropdown.State
+    | MultiData (Result Http.Error ResultsPipeline.MultiResult)
+    | ShowPage Int
+    | DropdownMsg Dropdown.State
 
 decodeAPIResult : D.Decoder APIResult
 decodeAPIResult =
@@ -104,26 +71,25 @@ decodeAPIResult =
         (D.field "cluster" (D.list decodeSequenceResult))
         (D.field "status" D.string)
 
-decodeMultiResult : D.Decoder MultiResult
-decodeMultiResult =
-    let
-        bMultiResultOK r = MultiResultOK r
-    in D.map bMultiResultOK
-        (D.list decodeMultItemResult)
+sequenceId : SequenceResult -> String
+sequenceId seq =
+    case seq of
+        SequenceResultFull full ->
+            full.seqid
 
-multi : List String -> Encode.Value
-multi ids =
-    Encode.object
-        [  ("seq_ids", Encode.list Encode.string ids)
-        ]
+        SequenceResultShallow shallow ->
+            shallow.seqid
+
+
+loadingModel : Model
+loadingModel =
+    { memberpost = MLoading
+    , results = ResultsPipeline.initialState
+    }
 
 initialState : String -> (Model, Cmd Msg)
 initialState seq_id =
-    ( { memberpost = MLoading
-      , showpost = SLoading
-      , page = 1
-      , myDrop1State = Dropdown.initialState
-      }
+    ( loadingModel
     , Http.get
     { url = ("https://gmsc-api.big-data-biology.org/v1/cluster-info/" ++ seq_id)
     , expect = Http.expectJson ResultsData decodeAPIResult
@@ -137,135 +103,76 @@ update msg model =
             Ok v ->
                 case v of
                    APIResultOK ok ->
-                        let ids = ((List.take 100 ok.cluster) |> List.map(\seq ->
-                                                                            case seq of
-                                                                                SequenceResultFull full -> full.seqid
-                                                                                SequenceResultShallow shallow -> shallow.seqid))
-                        in  ( {model | memberpost = Results v, showpost = SLoading}
-                            , Http.post
-                              { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                              , body = Http.jsonBody (multi ids)
-                              , expect = Http.expectJson MultiData decodeMultiResult
-                              }
-                            )
+                        let
+                            page =
+                                1
+
+                            nextResults =
+                                ResultsPipeline.setLoadingPage page model.results
+
+                            ids =
+                                ResultsPipeline.pageIds page sequenceId ok.cluster
+                        in
+                        ( { model | memberpost = Results v, results = nextResults }
+                        , ResultsPipeline.fetchPage MultiData ids
+                        )
                    _ -> ( {model | memberpost = Results v}, Cmd.none)
-            Err err -> case err of
-                Http.BadUrl s -> ({model | memberpost = MLoadError ("Bad URL: "++ s)}, Cmd.none)
-                Http.Timeout  -> ({model | memberpost = MLoadError ("Timeout")}, Cmd.none)
-                Http.NetworkError -> ({model | memberpost = MLoadError ("Network error!")}, Cmd.none)
-                Http.BadStatus s -> ({model | memberpost = MLoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
-                Http.BadBody s -> ({model | memberpost = MLoadError (("Bad body: " ++ s))}, Cmd.none)
+            Err err ->
+                ( { model | memberpost = MLoadError (ResultsPipeline.httpErrorMessage err) }, Cmd.none )
 
-        DownloadResults -> case model.showpost of
-            MultiResults r -> case r of
-                MultiResultOK v ->
-                    let allresults = v |> List.map (\seq -> String.join "\t" [seq.seqid, seq.aa, seq.nuc, seq.habitat, seq.tax])
-                                            |> String.join "\n"
-                    in ( model, Download.string "cluster.members.tsv" "text/plain" allresults)
-                _ -> ( model, Cmd.none )
-            _ -> ( model, Cmd.none )
+        DownloadResults ->
+            ( model, ResultsPipeline.downloadResults "cluster.members.tsv" model.results )
 
-        MultiData r -> case r of
-            Ok m -> ( {model | showpost = MultiResults m}, Cmd.none )
-            Err err -> case err of
-                Http.BadUrl s -> ({model | showpost = SLoadError ("Bad URL: "++ s)}, Cmd.none)
-                Http.Timeout  -> ({model | showpost = SLoadError ("Timeout")}, Cmd.none)
-                Http.NetworkError -> ({model | showpost = SLoadError ("Network error!")}, Cmd.none)
-                Http.BadStatus s -> ({model | showpost = SLoadError (("Bad status: " ++ String.fromInt s))}, Cmd.none)
-                Http.BadBody s -> ({model | showpost = SLoadError (("Bad body: " ++ s))}, Cmd.none)
+        MultiData r ->
+            ( { model | results = ResultsPipeline.updateShowPost r model.results }, Cmd.none )
 
-        Showlast l -> let ids = ((List.take 100 l)|> List.map(\seq ->
-                                                                case seq of
-                                                                    SequenceResultFull full -> full.seqid
-                                                                    SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, page = (model.page-1)}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
+        ShowPage page ->
+            case model.memberpost of
+                Results (APIResultOK ok) ->
+                    let
+                        nextResults =
+                            ResultsPipeline.setLoadingPage page model.results
 
-        Shownext o -> let ids = ((List.take 100 o)|> List.map(\seq ->
-                                                                case seq of
-                                                                    SequenceResultFull full -> full.seqid
-                                                                    SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, page = (model.page+1)}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
+                        ids =
+                            ResultsPipeline.pageIds page sequenceId ok.cluster
+                    in
+                    ( { model | results = nextResults }
+                    , ResultsPipeline.fetchPage MultiData ids
+                    )
 
-        Showfinal o all -> let ids = ((List.take 100 o)|> List.map(\seq ->
-                                                                case seq of
-                                                                    SequenceResultFull full -> full.seqid
-                                                                    SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, page = all}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
+                _ ->
+                    ( model, Cmd.none )
 
-        Showbegin o all -> let ids = ((List.take 100 o)|> List.map(\seq ->
-                                                                case seq of
-                                                                    SequenceResultFull full -> full.seqid
-                                                                    SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, page = all}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
-
-        Showselect o all -> let ids = ((List.take 100 o)|> List.map(\seq ->
-                                                                case seq of
-                                                                    SequenceResultFull full -> full.seqid
-                                                                    SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, page = all}
-                          , Http.post
-                          { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
-                          , body = Http.jsonBody (multi ids)
-                          , expect = Http.expectJson MultiData decodeMultiResult
-                          }
-                          )
-        MyDrop1Msg state ->
-            ( { model | myDrop1State = state }
-            , Cmd.none
-            )
+        DropdownMsg state ->
+            ( { model | results = ResultsPipeline.updateDropdownState state model.results }, Cmd.none )
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
-        [ Dropdown.subscriptions model.myDrop1State MyDrop1Msg ]
+    ResultsPipeline.subscriptions model.results DropdownMsg
 
 viewModel : Model-> Html Msg
 viewModel model =
-    case model.showpost of
-        SLoading ->
+    case model.results.showpost of
+        ResultsPipeline.SLoading ->
                 Status.loading
                     "Loading cluster members"
                     "Fetching the 100AA smORFs assigned to this 90AA cluster."
-        SLoadError e ->
+        ResultsPipeline.SLoadError e ->
                 div []
                     [ text "Error "
                     , text e
                     ]
-        MultiResults r ->
+        ResultsPipeline.MultiResults r ->
             case model.memberpost of
                 Results m ->
-                    viewResults r m model.page model
+                    viewResults r m model
                 _ ->
                     Status.loading
                         "Preparing cluster members"
                         "The site is still resolving the member accessions for this cluster."
 
-viewResults r m page model = case r of
-    MultiResultOK ok ->
+viewResults r m model = case r of
+    ResultsPipeline.MultiResultOK ok ->
         case m of
             APIResultOK mok ->
                 Html.div []
@@ -301,57 +208,12 @@ viewResults r m page model = case r of
                                     )
                             }
                           ]
-                        , div [HtmlAttr.class "browse"]
-                          [ if List.length mok.cluster > 100 then
-                                if List.length mok.cluster > (100*page) then
-                                    div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (100*page) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
-                                else
-                                    div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
-                            else
-                                div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
-                            , if List.length mok.cluster > 100 then
-                                Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin mok.cluster 1), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
-                              else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ], Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
-                            , if page > 1 then
-                                let other = (List.drop (100*(page-2)) mok.cluster)
-                                in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
-                              else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
-                            {-, if List.length mok.cluster > 100 then
-                                if modBy 100 (List.length mok.cluster) /= 0 then
-                                    div [] (List.map (\n -> Button.button [ Button.small, Button.outlineInfo, Button.onClick (Showselect (List.drop (100*(n-1)) mok.cluster) n) ,Button.attrs [ class "float-left"]] [text (String.fromInt n)] )(List.range 1 ((List.length mok.cluster//100)+1)))
-                                else
-                                    div [] (List.map (\n -> Button.button [ Button.small, Button.outlineInfo, Button.onClick (Showselect (List.drop (100*(n-1)) mok.cluster) n) ] [text (String.fromInt n)] )(List.range 1 ((List.length mok.cluster//100))))
-                              else Button.button [ Button.small, Button.outlineInfo ] [text "1"]-}
-                            , div [HtmlAttr.style "float" "left"]
-                                [ Dropdown.dropdown
-                                    model.myDrop1State
-                                    { options = [ ]
-                                    , toggleMsg = MyDrop1Msg
-                                    , toggleButton =
-                                        Dropdown.toggle [ Button.small, Button.outlineInfo ,Button.attrs [ HtmlAttr.class "float-left"]] [ text "Page" ]
-                                    , items =
-                                        if List.length mok.cluster > 100 then
-                                            if modBy 100 (List.length mok.cluster) /= 0 then
-                                                (List.map (\n -> Dropdown.buttonItem [ onClick (Showselect (List.drop (100*(n-1)) mok.cluster) n) ] [text (String.fromInt n)] )(List.range 1 ((List.length mok.cluster//100)+1)))
-                                            else
-                                                (List.map (\n -> Dropdown.buttonItem [ onClick (Showselect (List.drop (100*(n-1)) mok.cluster) n) ] [text (String.fromInt n)] )(List.range 1 ((List.length mok.cluster//100))))
-                                        else
-                                            [ Dropdown.buttonItem [] [ text "1" ] ]
-                                    }
-                                ]
-                            , if List.length mok.cluster >(100*page) then
-                                let other = (List.drop (100*page) mok.cluster)
-                                in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
-                              else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
-                            , if List.length mok.cluster > 100 then
-                                let
-                                    (other,all) = if modBy 100 (List.length mok.cluster) /= 0 then
-                                                    ((List.drop (100* (List.length mok.cluster//100)) mok.cluster),((List.length mok.cluster//100) + 1))
-                                                  else
-                                                    ((List.drop (100* ((List.length mok.cluster//100)-1)) mok.cluster), (List.length mok.cluster//100))
-                                in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showfinal other all)] [ Html.text ">>" ]
-                              else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">>" ]
-                          ]
+                        , ResultsPipeline.viewPager
+                            { state = model.results
+                            , totalItems = List.length mok.cluster
+                            , onSelectPage = ShowPage
+                            , dropdownMsg = DropdownMsg
+                            }
                         ]
                     ]
 
@@ -360,7 +222,7 @@ viewResults r m page model = case r of
                     , Html.blockquote []
                         [ Html.p [] [ Html.text berr ] ]
                     ]
-    MultiError err ->
+    ResultsPipeline.MultiError err ->
         div []
             [ Html.p [] [ Html.text "Call to the GMSC server failed" ]
             , Html.blockquote []

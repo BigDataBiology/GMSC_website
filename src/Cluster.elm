@@ -8,7 +8,6 @@ import Http
 
 import Bootstrap.Table as Table
 import Bootstrap.Button as Button
-import Bootstrap.Dropdown as Dropdown
 import Bootstrap.Popover as Popover
 import Json.Decode as D
 import Members
@@ -139,11 +138,7 @@ decodeAPIResult =
 initialState : String -> Nav.Key -> (Model, Cmd Msg)
 initialState seq_id navkey =
     ( { clusterpost = Loading
-    , memberpost = { memberpost = Members.MLoading
-                   , showpost = Members.SLoading
-                   , page = 1
-                   , myDrop1State = Dropdown.initialState
-                   }
+    , memberpost = Members.loadingModel
     , ask = False
     , showQualityDetails = False
     , copiedField = Nothing
