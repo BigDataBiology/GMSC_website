@@ -149,7 +149,7 @@ initialModel =
                         , terminalSearch = Selectshared.initialModel 
                                { id = "exampleEmptySearch"
                                , available = Selectitem.terminal
-                               , itemToLabel = Selectitem.terminaltoLabel
+                               , itemToLabel = .label
                                , selected = [ ]
                                , selectConfig = selectConfigTerminalSearch
                                }
