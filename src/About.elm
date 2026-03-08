@@ -16,7 +16,9 @@ content =
         [Markdown.toHtml [] """
 ## The global microbial smORF catalogue (GMSC)
 
-For more information see [(Duan et al., 2024)](https://www.nature.com/articles/s41467-024-51894-6).
+**Citation:** Duan, Y., Santos-Júnior, C. D., Schmidt, T. S., Fullam, A., de Almeida, B. L. S., Zhu, C., Kuhn, M., Zhao, X.-M., Bork, P. & Coelho, L. P. A catalog of small proteins from the global microbiome. *Nature Communications* **15**, 7563 (2024). https://doi.org/10.1038/s41467-024-51894-6
+
+For more information, see the [published article](https://www.nature.com/articles/s41467-024-51894-6).
 
 GMSC was developed by the [Big Data Biology Research Group](https://www.big-data-biology.org/).
 ___

@@ -17,6 +17,14 @@ The global microbial smORFs catalogue (GMSC) is an integrated, consistently-proc
 
 A total of 4.5 billion smORFs were predicted to build the catalogue. After removing redundancy with 100% amino acid identity, we obtained a 100AA non-redundant catalogue with 964,970,496 sequences. Further, the smORFs were clustered at 90% amino acid identity resulting in 287,926,875 90AA smORFs catalogue.
 
+## Citation
+
+For more details about the GMSC, please see:
+
+> Duan, Y., Santos-Júnior, C. D., Schmidt, T. S., Fullam, A., de Almeida, B. L. S., Zhu, C., Kuhn, M., Zhao, X.-M., Bork, P. & Coelho, L. P. A catalog of small proteins from the global microbiome. *Nature Communications* **15**, 7563 (2024). [DOI:10.1038/s41467-024-51894-6](https://doi.org/10.1038/s41467-024-51894-6)
+
+Additionally, if you use GMSC in your research, please cite the above paper.
+
 ## Benefits and Features
 **Integration:**
 
