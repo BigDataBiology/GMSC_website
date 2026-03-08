@@ -169,8 +169,16 @@ update msg model = case msg of
         Home hm ->
             if hm.seqcontent /= "" && String.startsWith ">" hm.seqcontent then
                 let
-                    (mm, cmd) = Mapper.initialState hm.seqcontent hm.is_contigs model.key
-                in  ( { model | page = Mapper mm } 
+                    isContigs =
+                        case hm.optype of
+                            Home.Contigs ->
+                                "True"
+
+                            Home.Proteins ->
+                                "False"
+
+                    (mm, cmd) = Mapper.initialState hm.seqcontent isContigs model.key
+                in  ( { model | page = Mapper mm }
                     , Cmd.batch
                         [ Nav.pushUrl model.key ("/mapper")
                         , Cmd.map MapperMsg cmd

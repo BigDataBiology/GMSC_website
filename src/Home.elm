@@ -1,4 +1,4 @@
-module Home exposing (Model, Msg(..), initialModel, update, viewModel)
+module Home exposing (Model, Msg(..), OperationType(..), initialModel, update, viewModel)
 
 import Html exposing (Html, a, div, h4, img, label, p, span, text)
 import Html.Attributes as HtmlAttr
@@ -21,7 +21,6 @@ type OperationType = Contigs | Proteins
 
 type alias Model =
     { optype : OperationType
-    , is_contigs : String
     , idcontent : String
     , seqcontent: String
     , lookupIDContent : String
@@ -60,7 +59,6 @@ myOptions =
 initialModel :  Model
 initialModel =
         { optype = Proteins
-        , is_contigs = "False"
         , idcontent = ""
         , seqcontent = ""
         , lookupIDContent = ""
@@ -78,9 +76,9 @@ update msg qmodel =
                 if qmodel.optype == Contigs && p == Proteins then
                     ( { qmodel | optype = Proteins, seqcontent = "" }, Cmd.none )
                 else if qmodel.optype == Proteins && p == Contigs then
-                    ( { qmodel | optype = Contigs, is_contigs = "True", seqcontent = "" }, Cmd.none )
+                    ( { qmodel | optype = Contigs, seqcontent = "" }, Cmd.none )
                 else
-                    ( { qmodel | optype = p, seqcontent = ""}, Cmd.none )
+                    ( { qmodel | optype = p, seqcontent = "" }, Cmd.none )
 
         SetIdentifierExample ->
             ( { qmodel | idcontent = identifierExample }, Cmd.none )
