@@ -110,9 +110,9 @@ type Msg
     | PopoverMsg1 Popover.State
     | PopoverMsg2 Popover.State
     | SetRnacode String
-    | SetmetaT String
+    | SetMetaT String
     | SetRiboseq String
-    | SetmetaP String
+    | SetMetaP String
     | SelectOp OperationType
 
 initialModel : (Model, Cmd Msg)
@@ -223,13 +223,13 @@ update msg model =
         SetRnacode p ->
             ( { model | rnacodecontent = p }, Cmd.none )
 
-        SetmetaT number ->
+        SetMetaT number ->
             ( { model | metatcontent = number }, Cmd.none )
 
         SetRiboseq number ->
             ( { model | riboseqcontent = number }, Cmd.none )
 
-        SetmetaP cov ->
+        SetMetaP cov ->
             ( { model | metapcontent = cov}, Cmd.none )
 
         Search ->
@@ -464,7 +464,7 @@ viewSpecific model =
                             , HtmlAttr.min "0"
                             , HtmlAttr.max "221"
                             , HtmlAttr.step "1"
-                            , onInput SetmetaT
+                            , onInput SetMetaT
                             ] []
                         , text <| " (" ++ model.metatcontent ++ ")"
                         ]
@@ -496,7 +496,7 @@ viewSpecific model =
                             , HtmlAttr.min "0"
                             , HtmlAttr.max "100"
                             , HtmlAttr.step "1"
-                            , onInput SetmetaP
+                            , onInput SetMetaP
                             ] []
                         , text <| " (" ++ model.metapcontent ++ "%)"
                         ]
