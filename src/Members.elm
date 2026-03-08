@@ -37,7 +37,7 @@ type alias MultiResultItem =
 type alias Model =
     { memberpost : MemberPost
     , showpost : ShowPost
-    , times : Int
+    , page : Int
     , myDrop1State : Dropdown.State
     }
 
@@ -119,7 +119,7 @@ initialState : String -> (Model, Cmd Msg)
 initialState seq_id = 
     ( { memberpost = MLoading
       , showpost = SLoading
-      , times = 1
+      , page = 1
       , myDrop1State = Dropdown.initialState
       }
     , Http.get
@@ -176,7 +176,7 @@ update msg model =
                                                                 case seq of 
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, times = (model.times-1)}
+                      in  ( {model | showpost = SLoading, page = (model.page-1)}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -188,7 +188,7 @@ update msg model =
                                                                 case seq of 
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, times = (model.times+1)}
+                      in  ( {model | showpost = SLoading, page = (model.page+1)}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -200,7 +200,7 @@ update msg model =
                                                                 case seq of 
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, times = all}
+                      in  ( {model | showpost = SLoading, page = all}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -212,7 +212,7 @@ update msg model =
                                                                 case seq of 
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, times = all}
+                      in  ( {model | showpost = SLoading, page = all}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -224,7 +224,7 @@ update msg model =
                                                                 case seq of 
                                                                     SequenceResultFull full -> full.seqid
                                                                     SequenceResultShallow shallow -> shallow.seqid))
-                      in  ( {model | showpost = SLoading, times = all}
+                      in  ( {model | showpost = SLoading, page = all}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -256,12 +256,12 @@ viewModel model =
         MultiResults r -> 
             case model.memberpost of 
                 Results m ->
-                    viewResults r m model.times model
+                    viewResults r m model.page model
                 _ -> div []
                     [ p [] [text "Loading..."]
                     ]
 
-viewResults r m times model = case r of
+viewResults r m page model = case r of
     MultiResultOK ok ->
         case m of 
             APIResultOK mok ->
@@ -300,17 +300,17 @@ viewResults r m times model = case r of
                           ]
                         , div [HtmlAttr.class "browse"] 
                           [ if List.length mok.cluster > 100 then
-                                if List.length mok.cluster > (100*times) then
-                                    div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (100*times) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
+                                if List.length mok.cluster > (100*page) then
+                                    div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (100*page) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
                                 else
-                                    div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
+                                    div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
                             else 
                                 div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length mok.cluster) ++ " of " ++ String.fromInt (List.length mok.cluster) ++ " items.") ] ]
                             , if List.length mok.cluster > 100 then
                                 Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin mok.cluster 1), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
                               else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ], Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
-                            , if times > 1 then
-                                let other = (List.drop (100*(times-2)) mok.cluster)
+                            , if page > 1 then
+                                let other = (List.drop (100*(page-2)) mok.cluster)
                                 in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
                               else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
                             {-, if List.length mok.cluster > 100 then
@@ -336,8 +336,8 @@ viewResults r m times model = case r of
                                             [ Dropdown.buttonItem [] [ text "1" ] ]
                                     }
                                 ]
-                            , if List.length mok.cluster >(100*times) then
-                                let other = (List.drop (100*times) mok.cluster)
+                            , if List.length mok.cluster >(100*page) then
+                                let other = (List.drop (100*page) mok.cluster)
                                 in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
                               else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
                             , if List.length mok.cluster > 100 then

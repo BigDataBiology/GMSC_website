@@ -31,7 +31,7 @@ type alias MultiResultItem =
 type alias Model =
     { browsepost : BrowsePost
     , showpost : ShowPost
-    , times : Int
+    , page : Int
     , myDrop1State : Dropdown.State
     }
 
@@ -109,7 +109,7 @@ initialState : String -> String -> String -> String -> String -> String -> Strin
 initialState habitat taxonomy antifam terminal rnacode metat riboseq metap hq=
     ( { browsepost = BLoading
       , showpost = SLoading
-      , times = 1
+      , page = 1
       , myDrop1State = Dropdown.initialState
       }
     , Http.post
@@ -177,7 +177,7 @@ update msg model =
                 Http.BadBody s -> ({model | showpost = SLoadError (("Bad body: " ++ s))}, Cmd.none)
         
         Showlast l -> let ids = ((List.take 100 l)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, times = (model.times-1)}
+                      in  ( {model | showpost = SLoading, page = (model.page-1)}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -186,7 +186,7 @@ update msg model =
                           )
         
         Shownext o -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, times = (model.times+1)}
+                      in  ( {model | showpost = SLoading, page = (model.page+1)}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -195,7 +195,7 @@ update msg model =
                           )
 
         Showfinal o all -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, times = all}
+                      in  ( {model | showpost = SLoading, page = all}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -204,7 +204,7 @@ update msg model =
                           )
 
         Showbegin o all -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, times = all}
+                      in  ( {model | showpost = SLoading, page = all}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -212,7 +212,7 @@ update msg model =
                           }
                           )        
         Showselect o all -> let ids = ((List.take 100 o)|> List.map(\seq -> seq.seqid))
-                      in  ( {model | showpost = SLoading, times = all}
+                      in  ( {model | showpost = SLoading, page = all}
                           , Http.post
                           { url = "https://gmsc-api.big-data-biology.org/v1/seq-info-multi/"
                           , body = Http.jsonBody (multi ids)
@@ -244,13 +244,13 @@ viewModel model =
         MultiResults r -> 
             case model.browsepost of 
                 Results b ->
-                    viewResults r b model.times model
+                    viewResults r b model.page model
                 _ -> div []
                     [ text "Loading..."
                     ]
 
 
-viewResults r b times model = case r of
+viewResults r b page model = case r of
     MultiResultOK ok ->
         case b of 
             APIResultOK bok ->
@@ -287,10 +287,10 @@ viewResults r b times model = case r of
                            
                         , div [HtmlAttr.class "browse"] 
                             [ if List.length bok.results > 100 then
-                                    if List.length bok.results > (100*times) then
-                                        div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (100*times) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
+                                    if List.length bok.results > (100*page) then
+                                        div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (100*page) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
                                     else
-                                        div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*times-99) ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
+                                        div [] [ p [] [ text ("Displaying " ++ String.fromInt (100*page-99) ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
                                 else if List.length bok.results /= 0 then
                                             div [] [ p [] [ text ("Displaying " ++ String.fromInt 1 ++ " to " ++ String.fromInt (List.length bok.results) ++ " of " ++ String.fromInt (List.length bok.results) ++ " items.") ] ]
                                     else 
@@ -298,8 +298,8 @@ viewResults r b times model = case r of
                                 , if List.length bok.results > 100 then
                                         Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showbegin bok.results 1), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
                                     else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ], Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<<" ]
-                                , if times > 1 then
-                                    let other = (List.drop (100*(times-2)) bok.results)
+                                , if page > 1 then
+                                    let other = (List.drop (100*(page-2)) bok.results)
                                     in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Showlast other), Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
                                 else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ], Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "<" ]
                                 {-, if List.length bok.results > 100 then
@@ -325,8 +325,8 @@ viewResults r b times model = case r of
                                                 [ Dropdown.buttonItem [] [ text "1" ] ]
                                         }
                                 ]
-                                , if List.length bok.results >(100*times) then
-                                    let other = (List.drop (100*times) bok.results)
+                                , if List.length bok.results >(100*page) then
+                                    let other = (List.drop (100*page) bok.results)
                                     in Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ] , Button.onClick (Shownext other)] [ Html.text ">" ]
                                 else Button.button [ Button.small, Button.outlineInfo, Button.attrs [ Spacing.ml1 ]] [ Html.text ">" ]
                                 , if List.length bok.results > 100 then

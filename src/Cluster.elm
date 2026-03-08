@@ -127,7 +127,7 @@ initialState seq_id navkey =
     ( { clusterpost = Loading
     , memberpost = { memberpost = Members.MLoading
                    , showpost = Members.SLoading
-                   , times = 1
+                   , page = 1
                    , myDrop1State = Dropdown.initialState
                    }
     , ask = False
