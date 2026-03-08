@@ -15,6 +15,7 @@ import Bootstrap.Popover as Popover
 import Json.Decode as D
 import Members
 import Status
+import TaxonomyView
 
 
 qualityString : Quality -> String
@@ -226,7 +227,7 @@ viewClusterPage model v =
                 , viewSequenceField "Consensus nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (model.copiedField == Just NucleotideSequence)
                 ]
             , viewCard "Annotations"
-                [ viewField "Taxonomic assignment" "" v.tax
+                [ viewTaxonomyField "Taxonomic assignment" v.tax
                 , viewField "Habitat" "" v.habitat
                 ]
             , viewQualityCard v model.showQualityDetails model.popoverState1
@@ -249,6 +250,13 @@ viewField label extraClass value =
     div [ HtmlAttr.class "cluster-field" ]
         [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
         , p [ HtmlAttr.class valueClasses ] [ text value ]
+        ]
+
+viewTaxonomyField : String -> String -> Html Msg
+viewTaxonomyField label taxonomy =
+    div [ HtmlAttr.class "cluster-field" ]
+        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
+        , div [ HtmlAttr.class "cluster-value" ] [ TaxonomyView.view taxonomy ]
         ]
 
 viewSequenceField : String -> String -> String -> Msg -> Bool -> Html Msg

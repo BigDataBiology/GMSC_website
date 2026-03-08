@@ -11,6 +11,7 @@ import Http
 import Json.Decode as D
 import RemoteData exposing (WebData)
 import Status
+import TaxonomyView
 
 type alias Post = 
     { aa: String
@@ -95,7 +96,7 @@ viewSequencePage model v =
                 , viewSequenceField "Nucleotide sequence" "cluster-sequence" v.nuc CopyNucleotide (model.copiedField == Just NucleotideSequence)
                 ]
             , viewSequenceCard "Annotation"
-                [ viewReadOnlyField "Taxonomic assignment" "" v.tax
+                [ viewTaxonomyField "Taxonomic assignment" v.tax
                 , viewReadOnlyField "Habitat" "" v.habitat
                 ]
             ]
@@ -126,6 +127,13 @@ viewSequenceField label extraClass value copyMsg copied =
     div [ HtmlAttr.class "cluster-field" ]
         [ viewFieldHeader label copyMsg copied
         , p [ HtmlAttr.class valueClasses ] [ text value ]
+        ]
+
+viewTaxonomyField : String -> String -> Html Msg
+viewTaxonomyField label taxonomy =
+    div [ HtmlAttr.class "cluster-field" ]
+        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
+        , div [ HtmlAttr.class "cluster-value" ] [ TaxonomyView.view taxonomy ]
         ]
 
 viewAminoAcidField : String -> String -> Bool -> Html Msg

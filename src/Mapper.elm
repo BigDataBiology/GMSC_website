@@ -13,6 +13,7 @@ import Json.Decode as D
 import Delay
 import File.Download as Download
 import Status
+import TaxonomyView
 
 type alias QueryResult =
   { seqid : String
@@ -228,7 +229,7 @@ viewSearch s  =
                                 [ Table.td [] [ p [HtmlAttr.class "table-detail"] [ text k ] ]
                                 , Table.td [] [ p [HtmlAttr.class "table-detail"] [ text v.aa ] ]
                                 , Table.td [] [ p [HtmlAttr.class "table-detail"] [ text v.habitat ] ]
-                                , Table.td [] [ p [HtmlAttr.class "table-detail"] [ text v.tax ] ]
+                                , Table.td [] [ p [HtmlAttr.class "table-detail"] [ TaxonomyView.view v.tax ] ]
                                 , if v.quality == "high quality"  then
                                     Table.td [] [ p [HtmlAttr.class "table-detail"] [ text "pass all quality tests & show experimental evidence" ] ]
                                 else 

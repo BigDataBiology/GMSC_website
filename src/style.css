@@ -458,6 +458,30 @@ div#cluster button{
     color: #187a3d;
 }
 
+.taxonomy-display {
+    width: auto;
+    margin: 0;
+    color: inherit;
+}
+
+.taxonomy-segment {
+    display: inline;
+}
+
+.taxonomy-name {
+    color: inherit;
+}
+
+.taxonomy-class {
+    color: #5b6468;
+    font-size: 0.82em;
+    font-weight: normal;
+}
+
+.taxonomy-separator {
+    color: #87959a;
+ }
+
 .cluster-sequence {
     font-family: "Courier New", monospace;
     font-size: 0.95rem;

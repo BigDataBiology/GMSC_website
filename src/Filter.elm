@@ -14,6 +14,7 @@ import Json.Encode as Encode
 import File.Download as Download
 import Http
 import Status
+import TaxonomyView
 
 type alias SequenceResultFull =
     { aa: Maybe String
@@ -280,7 +281,7 @@ viewResults r b page model = case r of
                                                         ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
                                                         ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
                                                         ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.tax ] ]
+                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [TaxonomyView.view e.tax ] ]
                                                         ]
                                                 ) ok
                                         )
