@@ -146,67 +146,98 @@ subscriptions model =
 
 viewModel : Model-> Html Msg
 viewModel model =
-    case model.results.showpost of
-        ResultsPipeline.SLoading ->
-                Status.loading
-                    "Loading cluster members"
-                    "Fetching the 100AA smORFs assigned to this 90AA cluster."
-        ResultsPipeline.SLoadError e ->
-                div []
-                    [ text "Error "
-                    , text e
-                    ]
-        ResultsPipeline.MultiResults r ->
-            case model.memberpost of
-                Results m ->
+    case model.memberpost of
+        MLoading ->
+            Status.loading
+                "Loading cluster members"
+                "Fetching the 100AA smORFs assigned to this 90AA cluster."
+
+        MLoadError e ->
+            div []
+                [ text "Error "
+                , text e
+                ]
+
+        Results m ->
+            case model.results.showpost of
+                ResultsPipeline.SLoading ->
+                    viewPartialResults m model
+
+                ResultsPipeline.SLoadError e ->
+                    viewPartialResultsWithError m model e
+
+                ResultsPipeline.MultiResults r ->
                     viewResults r m model
-                _ ->
-                    Status.loading
-                        "Preparing cluster members"
-                        "The site is still resolving the member accessions for this cluster."
+
+
+viewPartialResults : MemberResults -> Model -> Html Msg
+viewPartialResults m model =
+    Html.div []
+        [ viewMembersSummary m
+        , Status.loading
+            "Loading member annotations"
+            "Detailed annotations for this page are still being fetched."
+        , viewPartialMembersTable m model
+        , ResultsPipeline.viewPager
+            { state = model.results
+            , totalItems = List.length m.cluster
+            , onSelectPage = ShowPage
+            , dropdownMsg = DropdownMsg
+            }
+        ]
+
+
+viewPartialResultsWithError : MemberResults -> Model -> String -> Html Msg
+viewPartialResultsWithError m model errorMessage =
+    Html.div []
+        [ viewMembersSummary m
+        , div []
+            [ text "Error "
+            , text errorMessage
+            ]
+        , viewPartialMembersTable m model
+        , ResultsPipeline.viewPager
+            { state = model.results
+            , totalItems = List.length m.cluster
+            , onSelectPage = ShowPage
+            , dropdownMsg = DropdownMsg
+            }
+        ]
 
 viewResults r m model = case r of
     ResultsPipeline.MultiResultOK ok ->
         Html.div []
-            [ viewSummary m
-            , Html.div []
-                [ Html.p [HtmlAttr.style "float" "left"] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length m.cluster) )]
-                , Html.div []
-                    ( if anyShallow m.cluster then
-                        [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
-                      else []
-                    )
-                , div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
-                , div [HtmlAttr.class "results-wrap"]
-                  [ Table.table
-                    { options = [ Table.striped, Table.hover ]
-                    , thead =  Table.simpleThead
-                        [ Table.th [] [ Html.text "100AA accession" ]
-                        , Table.th [] [ Html.text "Protein sequence" ]
-                        , Table.th [] [ Html.text "Nucleotide sequence" ]
-                        , Table.th [] [ Html.text "Habitat" ]
-                        , Table.th [] [ Html.text "Taxonomy" ]
-                        ]
-                    , tbody = Table.tbody []
-                            ( List.map (\e ->
-                                            Table.tr []
-                                            [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
-                                            ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
-                                            ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
-                                            ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
-                                            ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [TaxonomyView.view e.tax ] ]
-                                            ]
-                                       ) ok
-                            )
-                    }
-                  ]
-                , ResultsPipeline.viewPager
-                    { state = model.results
-                    , totalItems = List.length m.cluster
-                    , onSelectPage = ShowPage
-                    , dropdownMsg = DropdownMsg
-                    }
-                ]
+            [ viewMembersSummary m
+            , div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
+            , div [HtmlAttr.class "results-wrap"]
+              [ Table.table
+                { options = [ Table.striped, Table.hover ]
+                , thead =  Table.simpleThead
+                    [ Table.th [] [ Html.text "100AA accession" ]
+                    , Table.th [] [ Html.text "Protein sequence" ]
+                    , Table.th [] [ Html.text "Nucleotide sequence" ]
+                    , Table.th [] [ Html.text "Habitat" ]
+                    , Table.th [] [ Html.text "Taxonomy" ]
+                    ]
+                , tbody = Table.tbody []
+                        ( List.map (\e ->
+                                        Table.tr []
+                                        [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
+                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
+                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
+                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [TaxonomyView.view e.tax ] ]
+                                        ]
+                                   ) ok
+                        )
+                }
+              ]
+            , ResultsPipeline.viewPager
+                { state = model.results
+                , totalItems = List.length m.cluster
+                , onSelectPage = ShowPage
+                , dropdownMsg = DropdownMsg
+                }
             ]
     ResultsPipeline.MultiError err ->
         div []
@@ -214,6 +245,62 @@ viewResults r m model = case r of
             , Html.blockquote []
                 [ Html.p [] [ Html.text err ] ]
             ]
+
+
+viewMembersSummary : MemberResults -> Html Msg
+viewMembersSummary m =
+    Html.div []
+        [ viewSummary m
+        , Html.div []
+            [ Html.p [HtmlAttr.style "float" "left"] [ Html.text ("Number of smORFs in cluster: " ++ String.fromInt (List.length m.cluster) )]
+            , Html.div []
+                (if anyShallow m.cluster then
+                    [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
+                 else
+                    []
+                )
+            ]
+        ]
+
+
+viewPartialMembersTable : MemberResults -> Model -> Html Msg
+viewPartialMembersTable m model =
+    div [HtmlAttr.class "results-wrap"]
+        [ Table.table
+            { options = [ Table.striped, Table.hover ]
+            , thead = Table.simpleThead
+                [ Table.th [] [ Html.text "100AA accession" ]
+                , Table.th [] [ Html.text "Protein sequence" ]
+                , Table.th [] [ Html.text "Nucleotide sequence" ]
+                , Table.th [] [ Html.text "Habitat" ]
+                , Table.th [] [ Html.text "Taxonomy" ]
+                ]
+            , tbody = Table.tbody []
+                (ResultsPipeline.pageItems model.results.page m.cluster
+                    |> List.map
+                        (\entry ->
+                            case entry of
+                                SequenceResultFull full ->
+                                    Table.tr []
+                                        [ Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ full.seqid)] [Html.text full.seqid] ] ]
+                                        , Table.td [] [ p [HtmlAttr.class "table-detail"] [text full.aa ] ]
+                                        , Table.td [] [ p [HtmlAttr.class "table-detail"] [text full.nuc ] ]
+                                        , Table.td [] [ p [HtmlAttr.class "table-detail"] [text full.habitat ] ]
+                                        , Table.td [] [ p [HtmlAttr.class "table-detail"] [TaxonomyView.view full.tax ] ]
+                                        ]
+
+                                SequenceResultShallow shallow ->
+                                    Table.tr []
+                                        [ Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ shallow.seqid)] [Html.text shallow.seqid] ] ]
+                                        , Table.td [] [ p [HtmlAttr.class "table-detail table-detail-pending"] [text "Pending"] ]
+                                        , Table.td [] [ p [HtmlAttr.class "table-detail table-detail-pending"] [text "Pending"] ]
+                                        , Table.td [] [ p [HtmlAttr.class "table-detail table-detail-pending"] [text "Pending"] ]
+                                        , Table.td [] [ p [HtmlAttr.class "table-detail table-detail-pending"] [text "Pending"] ]
+                                        ]
+                        )
+                )
+            }
+        ]
 
 
 anyShallow : List SequenceResult -> Bool

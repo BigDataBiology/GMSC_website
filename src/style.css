@@ -315,6 +315,9 @@ td p.table-detail{
     word-wrap: break-word;
     word-break: normal;
 }
+td p.table-detail-pending{
+    color:#7a858a;
+}
 .results-wrap
 { width: min(var(--content-wide), calc(100% - (2 * var(--content-padding))));
   margin: 0 auto 1.5rem;
