@@ -18,6 +18,13 @@ module Utils.ResultsPipeline exposing
     , viewPager
     )
 
+{-| Shared helpers for the two-stage results pages (`Filter` and `Members`).
+
+This module owns the common `seq-info-multi` request/decoder, pagination state,
+download formatting, and pager UI so that the page modules only need to keep
+their first request and page-specific rendering logic.
+-}
+
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Bootstrap.Utilities.Spacing as Spacing
@@ -35,6 +42,7 @@ pageSize =
     100
 
 
+{-| A single detailed row returned by `/v1/seq-info-multi/`. -}
 type alias MultiResultItem =
     { aa : String
     , habitat : String
@@ -44,17 +52,20 @@ type alias MultiResultItem =
     }
 
 
+{-| The decoded payload for the detail fetch. -}
 type MultiResult
     = MultiResultOK (List MultiResultItem)
     | MultiError String
 
 
+{-| Loading state for the second-stage detail fetch. -}
 type ShowPost
     = SLoading
     | SLoadError String
     | MultiResults MultiResult
 
 
+{-| Shared pagination and second-stage request state. -}
 type alias State =
     { showpost : ShowPost
     , page : Int
@@ -72,11 +83,13 @@ decodeMultiResultItem =
         (D.field "taxonomy" D.string)
 
 
+{-| Decoder for the detail batch returned by `/v1/seq-info-multi/`. -}
 decodeMultiResult : D.Decoder MultiResult
 decodeMultiResult =
     D.map MultiResultOK (D.list decodeMultiResultItem)
 
 
+{-| Default state for a new paginated results view. -}
 initialState : State
 initialState =
     { showpost = SLoading
@@ -85,6 +98,7 @@ initialState =
     }
 
 
+{-| Convert an `Http.Error` into the short user-facing messages used by the app. -}
 httpErrorMessage : Http.Error -> String
 httpErrorMessage err =
     case err of
@@ -104,6 +118,7 @@ httpErrorMessage err =
             "Bad body: " ++ body
 
 
+{-| Update the second-stage loading state from a completed HTTP result. -}
 updateShowPost : Result Http.Error MultiResult -> State -> State
 updateShowPost result state =
     case result of
@@ -114,16 +129,19 @@ updateShowPost result state =
             { state | showpost = SLoadError (httpErrorMessage err) }
 
 
+{-| Switch to a specific page and mark the detail fetch as loading. -}
 setLoadingPage : Int -> State -> State
 setLoadingPage page state =
     { state | showpost = SLoading, page = page }
 
 
+{-| Store the latest Bootstrap dropdown state for the pager menu. -}
 updateDropdownState : Dropdown.State -> State -> State
 updateDropdownState dropdownState state =
     { state | dropdownState = dropdownState }
 
 
+{-| Wire the pager dropdown subscriptions into the parent module. -}
 subscriptions : State -> (Dropdown.State -> msg) -> Sub msg
 subscriptions state toMsg =
     Dropdown.subscriptions state.dropdownState toMsg
@@ -135,6 +153,7 @@ multi ids =
         [ ( "seq_ids", Encode.list Encode.string ids ) ]
 
 
+{-| Fetch one page of detailed rows from `/v1/seq-info-multi/`. -}
 fetchPage : (Result Http.Error MultiResult -> msg) -> List String -> Cmd msg
 fetchPage toMsg ids =
     Http.post
@@ -144,6 +163,7 @@ fetchPage toMsg ids =
         }
 
 
+{-| Take the items that belong to a given 1-based page. -}
 pageItems : Int -> List a -> List a
 pageItems page items =
     items
@@ -151,11 +171,13 @@ pageItems page items =
         |> List.take pageSize
 
 
+{-| Extract the identifiers for a given 1-based page. -}
 pageIds : Int -> (a -> String) -> List a -> List String
 pageIds page toId items =
     pageItems page items |> List.map toId
 
 
+{-| Number of pages needed for `totalItems`, using the shared page size. -}
 pageCount : Int -> Int
 pageCount totalItems =
     if totalItems <= 0 then
@@ -166,6 +188,7 @@ pageCount totalItems =
         (totalItems // pageSize) + 1
 
 
+{-| Download the currently loaded detail rows as a TSV file. -}
 downloadResults : String -> State -> Cmd msg
 downloadResults filename state =
     case state.showpost of
@@ -197,6 +220,7 @@ displayRangeText totalItems page =
         ++ " items."
 
 
+{-| Render the shared pager used by browse results and cluster members. -}
 viewPager :
     { state : State
     , totalItems : Int

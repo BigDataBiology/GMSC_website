@@ -1,10 +1,17 @@
 module Utils.Sequences exposing (aminoAcidGroupClass, viewAminoAcidSequence)
 
+{-| Shared amino-acid sequence rendering helpers.
+
+Both the sequence page and the cluster page use the same residue coloring and
+legend, so the formatting lives here instead of being duplicated in each page.
+-}
+
 import Char
 import Html exposing (Html, div, p, span, text)
 import Html.Attributes as HtmlAttr
 
 
+{-| Render an amino-acid sequence with residue-group colors and a legend. -}
 viewAminoAcidSequence : String -> Html msg
 viewAminoAcidSequence sequence =
     div [ HtmlAttr.class "cluster-sequence-view" ]
@@ -43,6 +50,7 @@ aminoAcidLegend =
     ]
 
 
+{-| Map an amino-acid residue to the CSS class for its chemical group. -}
 aminoAcidGroupClass : Char -> String
 aminoAcidGroupClass residue =
     case Char.toUpper residue of
