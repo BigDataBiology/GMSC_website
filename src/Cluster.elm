@@ -50,6 +50,13 @@ metaPString : Float -> String
 metaPString n =
     (if n > 0.5 then "✔ Passed " else "✗ Not passed") ++ "(coverage of smORF on proteomics: " ++ (String.fromFloat (n * 100.0) |> String.left 5) ++ "%)"
 
+qualityBadgeClass : Quality -> String
+qualityBadgeClass q =
+    if qualityString q == "High quality" then
+        "cluster-quality-badge is-high"
+    else
+        "cluster-quality-badge is-standard"
+
 type alias Quality = 
     { antifam: Bool
     , metap: Float
@@ -164,7 +171,7 @@ update msg model =
                 (model,Cmd.none)
         
         ShowQuality -> 
-            ( {model | showQualityDetails = True}, Cmd.none )
+            ( {model | showQualityDetails = not model.showQualityDetails}, Cmd.none )
 
         MembersMsg m -> 
             let
@@ -177,118 +184,107 @@ update msg model =
 
 viewModel : Model -> Html Msg
 viewModel model =
-    case (model.clusterpost,model.memberpost.showpost) of
-        (Loading,_) ->
+    case model.clusterpost of
+        Loading ->
             div []
                 [ text "Loading..."]
-        (LoadError e,_) ->
+        LoadError e ->
             div []
                 [ text "Error "
                 , text e
                 ]
-        (Loaded v, Members.SLoading) ->
-            if model.ask == True then
-                div []
-                [ h1 [] [text v.seqid]
-                , viewCluster v model.showQualityDetails model.popoverState1
-                , title
-                , Html.hr [] []
-                , Members.viewModel model.memberpost
-                    |> Html.map MembersMsg]
-            else
-                div [] 
-                    [ h1 [] [text v.seqid]
-                    , viewCluster v model.showQualityDetails model.popoverState1
-                    , title
+        Loaded v ->
+            viewClusterPage model v
+
+viewClusterPage : Model -> Cluster -> Html Msg
+viewClusterPage model v =
+    div [ HtmlAttr.class "cluster-page" ]
+        [ h1 [] [ text v.seqid ]
+        , p [ HtmlAttr.class "cluster-subtitle" ]
+            [ text "Summary of this 90AA cluster, including consensus sequences, ecological annotation, quality evidence, and linked 100AA members." ]
+        , div [ HtmlAttr.class "cluster-summary-grid" ]
+            [ viewCard "Consensus sequences"
+                [ viewField "Consensus protein sequence" "cluster-sequence" v.aa
+                , viewField "Consensus nucleotide sequence" "cluster-sequence" v.nuc
+                ]
+            , viewCard "Annotations"
+                [ viewField "Taxonomic assignment" "" v.tax
+                , viewField "Habitat" "" v.habitat
+                ]
+            , viewQualityCard v model.showQualityDetails model.popoverState1
+            ]
+
+        , viewMembersSection model
+        ]
+
+viewCard : String -> List (Html Msg) -> Html Msg
+viewCard heading children =
+    div [ HtmlAttr.class "cluster-card" ]
+        (h4 [ HtmlAttr.class "cluster-card-title" ] [ text heading ] :: children)
+
+viewField : String -> String -> String -> Html Msg
+viewField label extraClass value =
+    let
+        valueClasses =
+            String.join " " <| List.filter (\c -> c /= "") [ "cluster-value", extraClass ]
+    in
+    div [ HtmlAttr.class "cluster-field" ]
+        [ p [ HtmlAttr.class "cluster-label" ] [ text label ]
+        , p [ HtmlAttr.class valueClasses ] [ text value ]
+        ]
+
+viewQualityCard : Cluster -> Bool -> Popover.State -> Html Msg
+viewQualityCard v showDetails pop =
+    div [ HtmlAttr.class "cluster-card cluster-card-wide" ]
+        [ h4 [ HtmlAttr.class "cluster-card-title cluster-card-title-inline" ]
+            [ text "Quality overview"
+            , Popover.config
+                (Button.button
+                    [ Button.small
+                    , Button.outlineInfo
+                    , Button.attrs <| Popover.onHover pop PopoverMsg1
                     ]
-        (Loaded v, Members.MultiResults r) ->
-            div [] 
-                [ h1 [] [text v.seqid]
-                , viewCluster v model.showQualityDetails model.popoverState1
-                , title
-                , Html.hr [] []
-                , Members.viewModel model.memberpost
-                    |> Html.map MembersMsg]
-        (_,_) ->
+                    [ span [ HtmlAttr.class "fa fa-question-circle" ] [] ]
+                )
+                |> Popover.right
+                |> Popover.content []
+                    [ text "High quality is defined as: Pass all in silico quality tests (Not in Antifam database, Pass the terminal checking, P-value of RNAcode < 0.05) and contained at least one item of experimental evidence (Align to at least 2 metatranscriptomic samples, alignment to at least 2 Riboseq samples, or the coverage of metaproteomic peptides on small protein sequences >0.5)" ]
+                |> Popover.view pop
+            ]
+        , div [ HtmlAttr.class (qualityBadgeClass v.quality) ] [ text (qualityString v.quality) ]
+        , p [ HtmlAttr.class "cluster-quality-summary" ]
+            [ text "Review the detailed quality checks below to understand the evidence supporting this cluster." ]
+        , if showDetails then
             div []
-                [ text "Loading..."]
-                  
+                [ viewQualityDetails v
+                , div [ HtmlAttr.class "cluster-actions" ]
+                    [ Button.button [ Button.outlineInfo, Button.onClick ShowQuality ] [ text "Hide detailed quality information" ] ]
+                ]
+          else
+            div [ HtmlAttr.class "cluster-actions" ]
+                [ Button.button [ Button.info, Button.onClick ShowQuality ] [ text "Show detailed quality information" ] ]
+        ]
 
--- main text
-title : Html Msg
-title = div [] 
-            [ h4 [HtmlAttr.id "cluster"] [ text  "This 90AA cluster contains the following 100AA smORFs:" ]
-            , div [HtmlAttr.class "browse"] [ Button.button [ Button.info, Button.onClick (Showmember) ] [ text "Show" ] ]
-            ]
-
-viewCluster : Cluster -> Bool -> Popover.State -> Html Msg
-viewCluster v ifq pop = 
-   Table.table 
-        { options = [ Table.striped, Table.small,Table.hover]
-        , thead =  Table.simpleThead []
-        , tbody = Table.tbody []
-            [ Table.tr []
-                [ Table.td [] [p [HtmlAttr.class "table-title"] [text "Consensus protein sequence"]  ]
-                , Table.td [] [p [HtmlAttr.class "table-detail"] [text v.aa] ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ p [HtmlAttr.class "table-title"] [text "Consensus nucleotide sequence"] ]
-                , Table.td [] [ p [HtmlAttr.class "table-detail"] [text v.nuc] ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ p [HtmlAttr.class "table-title"] [text "Taxonomic assignment"] ]
-                , Table.td [] [ p [HtmlAttr.class "table-detail"] [text v.tax] ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ p [HtmlAttr.class "table-title"] [text "Habitat"]  ]
-                , Table.td [] [ p [HtmlAttr.class "table-detail"] [text v.habitat]  ]
-                ]
-            {-, Table.tr []
-                [ Table.td [] [ p [id "title"] [text "Conserved domain"]  ]
-                , Table.td [] [ p [id "detail"] [text "-"]  ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ p [id "title"] [text "Cellular localization"]  ]
-                , Table.td [] [ p [id "detail"] [text "-"]  ]
-                ]
-            , Table.tr []
-                [ Table.td [] [ p [id "title"] [text "Number of 100AA smORFs"] ]
-                , Table.td [] [ p [id "detail"] [text "-"] ]
-                ]-}
-            , Table.tr []
-                [ Table.td [] [ p [HtmlAttr.class "table-title"] [ text "Quality  "
-                                               , Popover.config
-                                                 ( Button.button
-                                                   [ Button.small
-                                                   , Button.outlineInfo
-                                                   , Button.attrs <|
-                                                       Popover.onHover pop PopoverMsg1
-                                                   ]
-                                                   [ span [ HtmlAttr.class "fa fa-question-circle" ] [] ]
-                                                 )
-                                                 |> Popover.right
-                                                 |> Popover.content []
-                                                      [ text "High quality is defined as: Pass all in silico quality tests (Not in Antifam database, Pass the terminal checking, P-value of RNAcode < 0.05) and contained at least one item of experimental evidence (Align to at least 2 metatranscriptomic samples, alignment to at least 2 Riboseq samples, or the coverage of metaproteomic peptides on small protein sequences >0.5)" ]
-                                                 |> Popover.view pop
-                                               ]   
-                              ]
-                , Table.td [] [ p [HtmlAttr.class "table-detail"] [text (qualityString v.quality)]
-                              , if ifq then
-                                  viewQualityDetails v
-                                else
-                                  div [HtmlAttr.class "browse"] [ Button.button [ Button.info, Button.onClick ShowQuality ] [ text "Show detailed quality information" ] ]
-                              ]
-                ]
-            ]
-        }
+viewMembersSection : Model -> Html Msg
+viewMembersSection model =
+    div [ HtmlAttr.class "cluster-members-section" ]
+        [ h4 [ HtmlAttr.class "cluster-section-title" ] [ text "Cluster members" ]
+        , p [ HtmlAttr.class "cluster-section-copy" ] [ text "Load the 100AA smORFs assigned to this 90AA cluster to inspect their sequences, habitats, and taxonomy." ]
+        , if model.ask then
+            Members.viewModel model.memberpost
+                |> Html.map MembersMsg
+          else
+            div [ HtmlAttr.class "cluster-actions" ]
+                [ Button.button [ Button.info, Button.onClick Showmember ] [ text "Load cluster members" ] ]
+        ]
 
 viewQualityDetails : Cluster -> Html Msg
 viewQualityDetails v =  
-  div []
-      [ p [HtmlAttr.class "detail"] [text ("Antifam: " ++ (passOrFail v.quality.antifam))]
-      , p [HtmlAttr.class "detail"] [text ("Terminal checking: " ++ (passOrFail v.quality.terminal))]
-      , p [HtmlAttr.class "detail"] [text ("RNAcode: " ++ (rnaCodeString v.quality.rnacode))]
-      , p [HtmlAttr.class "detail"] [text ("metaTranscriptome: " ++ (metaTRString v.quality.metat))]
-      , p [HtmlAttr.class "detail"] [text ("Riboseq: " ++ (metaTRString v.quality.riboseq))]
-      , p [HtmlAttr.class "detail"] [text ("metaProteome: " ++ (metaPString v.quality.metap))]
+  div [ HtmlAttr.class "cluster-quality-grid" ]
+      [ viewField "Antifam" "" (passOrFail v.quality.antifam)
+      , viewField "Terminal checking" "" (passOrFail v.quality.terminal)
+      , viewField "RNAcode" "" (rnaCodeString v.quality.rnacode)
+      , viewField "metaTranscriptome" "" (metaTRString v.quality.metat)
+      , viewField "Riboseq" "" (metaTRString v.quality.riboseq)
+      , viewField "metaProteome" "" (metaPString v.quality.metap)
       ]

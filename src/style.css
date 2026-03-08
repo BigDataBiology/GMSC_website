@@ -262,6 +262,121 @@ div#cluster button{
     margin-left: 0.5rem;
 }
 
+.cluster-page {
+    width: min(var(--content-wide), calc(100% - (2 * var(--content-padding))));
+    margin: 0 auto 2rem;
+}
+
+.cluster-subtitle,
+.cluster-section-copy,
+.cluster-quality-summary {
+    width: 100%;
+    margin: 0 0 1.25rem;
+    color: #4c6670;
+}
+
+.cluster-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.cluster-card {
+    background-color: #ffffff;
+    border: 1px solid #d7e4e9;
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 10px 24px rgba(12, 70, 91, 0.06);
+}
+
+.cluster-card-wide {
+    grid-column: 1 / -1;
+}
+
+.cluster-card-title,
+.cluster-section-title {
+    width: 100%;
+    margin: 0 0 1rem;
+    text-align: left;
+}
+
+.cluster-card-title-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cluster-field {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.cluster-field:last-child {
+    margin-bottom: 0;
+}
+
+.cluster-label,
+.cluster-value {
+    width: 100%;
+    margin: 0;
+}
+
+.cluster-label {
+    margin-bottom: 0.35rem;
+    color: #4f6f79;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.cluster-value {
+    color: #24363c;
+    word-break: break-word;
+}
+
+.cluster-sequence {
+    font-family: "Courier New", monospace;
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+.cluster-quality-badge {
+    display: inline-block;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.cluster-quality-badge.is-high {
+    background-color: #e5f6ea;
+    color: #187a3d;
+}
+
+.cluster-quality-badge.is-standard {
+    background-color: #eef3f5;
+    color: #49606b;
+}
+
+.cluster-quality-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.9rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.cluster-members-section {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.cluster-actions {
+    width: 100%;
+    margin: 0;
+}
+
 /* browser page */
 .browse-label{
   color:#158BB8;
@@ -432,6 +547,11 @@ div.buttonselect {
     div.dropdown,
     div.buttonselect {
         width: calc(100% - (2 * var(--content-padding)));
+    }
+
+    .cluster-summary-grid,
+    .cluster-quality-grid {
+        grid-template-columns: 1fr;
     }
 
     div.fig img,
