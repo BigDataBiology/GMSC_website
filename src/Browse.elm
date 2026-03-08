@@ -18,7 +18,7 @@ import Selectitem
 
 
 trueFromPass : String -> String
-trueFromPass value = 
+trueFromPass value =
   if value == "Pass"
     then "True"
   else if value == ""
@@ -70,11 +70,11 @@ rnaCode val =
         ""
 
 metaP : String -> String
-metaP val = 
-    String.fromFloat ((Maybe.withDefault 0 (String.toFloat val))/100)   
- 
-type OperationType = All 
-                    | HQ 
+metaP val =
+    String.fromFloat ((Maybe.withDefault 0 (String.toFloat val))/100)
+
+type OperationType = All
+                    | HQ
                     | Advanced
 
 type alias SelectModel =
@@ -98,7 +98,7 @@ type alias Model =
     , optype : OperationType
     }
 
-type Msg 
+type Msg
     = Search
     | FilterMsg Filter.Msg
     | HabitatSearchMsg (Selectshared.Msg Selectitem.Habitat)
@@ -119,14 +119,14 @@ initialModel =
     let
         (sm, cmd) = Filter.initialState "" "" "" "" "" "" "" "" ""
     in
-        ({ selectpost = { habitatSearch = Selectshared.initialModel 
+        ({ selectpost = { habitatSearch = Selectshared.initialModel
                                { id = "exampleMulti"
                                , available = Selectitem.habitats
                                , itemToLabel = Selectitem.habitattoLabel
                                , selected = [ ]
                                , selectConfig = selectConfigHabitatSearch
                                }
-                        , taxonomySearch = Selectshared.initialModel 
+                        , taxonomySearch = Selectshared.initialModel
                                { id = "exampleEmptySearch"
                                , available = Selectitem.taxonomy
                                , itemToLabel = .label
@@ -140,7 +140,7 @@ initialModel =
                                , selected = [ ]
                                , selectConfig = selectConfigAntifamSearch
                                }
-                        , terminalSearch = Selectshared.initialModel 
+                        , terminalSearch = Selectshared.initialModel
                                { id = "exampleEmptySearch"
                                , available = Selectitem.terminal
                                , itemToLabel = .label
@@ -166,14 +166,14 @@ initialModel =
 update : Msg -> Model -> ( Model, Cmd Msg)
 update msg model =
     let
-        ifQuery f = 
+        ifQuery f =
                 let
                     (qmpost, c) = f model.selectpost
                 in ({model| selectpost = qmpost}, c)
     in case msg of
         NoOp ->
             ( model, Cmd.none )
-        
+
         PopoverMsg1 state ->
             ( { model | popoverState1 = state }, Cmd.none )
 
@@ -223,13 +223,13 @@ update msg model =
             ( { model | rnacodecontent = p }, Cmd.none )
 
         SetmetaT number ->
-            ( { model | metatcontent = number }, Cmd.none )  
+            ( { model | metatcontent = number }, Cmd.none )
 
         SetRiboseq number ->
-            ( { model | riboseqcontent = number }, Cmd.none )  
+            ( { model | riboseqcontent = number }, Cmd.none )
 
         SetmetaP cov ->
-            ( { model | metapcontent = cov}, Cmd.none )      
+            ( { model | metapcontent = cov}, Cmd.none )
 
         Search ->
             if  habitatItem model == "" &&
@@ -241,39 +241,39 @@ update msg model =
                 model.riboseqcontent == "" &&
                 model.metapcontent == "" &&
                 model.hq == "" then
-                (model, Cmd.none) 
+                (model, Cmd.none)
             else
                 let
-                    (sm, cmd) = Filter.initialState 
-                                    (habitatItem model) 
-                                    (taxItem model) 
-                                    (antifamItem model) 
-                                    (terminalItem model) 
+                    (sm, cmd) = Filter.initialState
+                                    (habitatItem model)
+                                    (taxItem model)
+                                    (antifamItem model)
+                                    (terminalItem model)
                                     (rnaCode model.rnacodecontent)
-                                    model.metatcontent 
-                                    model.riboseqcontent 
+                                    model.metatcontent
+                                    model.riboseqcontent
                                     (metaP model.metapcontent)
                                     model.hq
                 in ({ model| filterpost = sm, ask=True }, Cmd.map FilterMsg cmd)
 
-        FilterMsg m -> 
+        FilterMsg m ->
             let
                 (nqm, cmd) = Filter.update m model.filterpost
             in
                 ({ model| filterpost = nqm }, Cmd.map FilterMsg cmd)
 
         SelectOp p ->
-            if model.optype == All && p == HQ 
+            if model.optype == All && p == HQ
                 then ( { model | optype = HQ , hq = "True", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = ""}, Cmd.none )
-            else if model.optype == All && p == Advanced 
+            else if model.optype == All && p == Advanced
                 then ( { model | optype = Advanced , hq = "False", rnacodecontent = "8", metatcontent = "2", riboseqcontent = "2", metapcontent = "50" }, Cmd.none )
-            else if model.optype == HQ && p == All 
+            else if model.optype == HQ && p == All
                 then ( { model | optype = All, hq = "False", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
-            else if model.optype == HQ && p == Advanced 
+            else if model.optype == HQ && p == Advanced
                 then ( { model | optype = Advanced, hq = "False", rnacodecontent = "8", metatcontent = "2", riboseqcontent = "2", metapcontent = "50" }, Cmd.none )
-            else if model.optype == Advanced && p == All 
+            else if model.optype == Advanced && p == All
                 then ( { model | optype = All, hq = "False", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
-            else if model.optype == Advanced && p == HQ 
+            else if model.optype == Advanced && p == HQ
                 then ( { model | optype = HQ, hq = "True", rnacodecontent = "", metatcontent = "", riboseqcontent = "", metapcontent = "" }, Cmd.none )
             else
                 ( { model | optype = p }, Cmd.none )
@@ -287,18 +287,18 @@ viewModel model =
     case model.filterpost.showpost of
     Filter.SLoading ->
         if model.ask then
-            div [] 
+            div []
                 [ viewSearch model
                 , Html.hr [] []
                 , Filter.viewModel model.filterpost
                     |> Html.map FilterMsg
                 ]
         else
-            div [] 
+            div []
                 [ viewSearch model
                 ]
     Filter.MultiResults r ->
-        div [] 
+        div []
             [ viewSearch model
             , Html.hr [] []
             , Filter.viewModel model.filterpost
@@ -310,8 +310,8 @@ viewModel model =
 
 viewSearch: Model -> Html Msg
 viewSearch model = div []
-        [ h5 [] [ text "Browse by habitats and taxonomy "] 
-        , div [] [ p [] [ label [HtmlAttr.class "browse-label"] [ text "Browse by habitats " 
+        [ h5 [] [ text "Browse by habitats and taxonomy "]
+        , div [] [ p [] [ label [HtmlAttr.class "browse-label"] [ text "Browse by habitats "
                                               , Popover.config
                                                ( Button.button
                                                    [ Button.small
@@ -327,13 +327,13 @@ viewSearch model = div []
                                                |> Popover.content []
                                                       [ text "Habitats with the suffix 'associated' represent a wider range of environments that cannot be traced further to more specific habitats. For example, 'human associated' represents human related habitats other than those listed in 'gut', 'mouth', etc." ]
                                                |> Popover.view model.popoverState2] ] ]
-        , div [] 
+        , div []
             [ Selectshared.view
               model.selectpost.habitatSearch
-              |> Html.map HabitatSearchMsg 
+              |> Html.map HabitatSearchMsg
             ]
         , div [] [ p [] [ label [HtmlAttr.class "browse-label"] [ text "Browse by taxonomy" ] ] ]
-        , div [] 
+        , div []
             [ Selectshared.view
               model.selectpost.taxonomySearch
               |> Html.map TaxonomySearchMsg
@@ -403,11 +403,11 @@ selectConfigTerminalSearch =
         |> Selects.withPrompt "Pass / Fail"
 
 viewHq : Model -> Html Msg
-viewHq model =  
+viewHq model =
   let
     buttonStyle who active =
         [ if who == active then Button.info else Button.outlineInfo, Button.onClick (SelectOp who) ]
-  in div [HtmlAttr.class "buttonselect"] 
+  in div [HtmlAttr.class "buttonselect"]
     [ Form.form []
         [ Form.row []
             [ Form.col [ Col.sm10 ]
@@ -419,14 +419,14 @@ viewHq model =
                 ]
             ]
         ]
-    ]              
+    ]
 
 viewSpecific : Model -> Html Msg
-viewSpecific model =  
+viewSpecific model =
     div []
         [ p [] [ em [] [text "Note that using quality filters can be slow" ]]
         , div [] [ p [] [ label [ HtmlAttr.class "quality-label" ] [ text "Antifam filtering" ] ] ]
-        , div [ HtmlAttr.class "dropdown" ] 
+        , div [ HtmlAttr.class "dropdown" ]
             [ Selectshared.view
               model.selectpost.antifamSearch
               |> Html.map AntifamSearchMsg
