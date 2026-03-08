@@ -345,11 +345,13 @@ div#cluster button{
     margin-left: 0.5rem;
 }
 
+.sequence-page,
 .cluster-page {
     width: min(var(--content-wide), calc(100% - (2 * var(--content-padding))));
     margin: 0 auto 2rem;
 }
 
+.sequence-subtitle,
 .cluster-subtitle,
 .cluster-section-copy,
 .cluster-quality-summary {
@@ -358,6 +360,7 @@ div#cluster button{
     color: #4c6670;
 }
 
+.sequence-summary-grid,
 .cluster-summary-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -730,6 +733,7 @@ div.buttonselect {
         width: calc(100% - (2 * var(--content-padding)));
     }
 
+    .sequence-summary-grid,
     .cluster-summary-grid,
     .cluster-quality-grid {
         grid-template-columns: 1fr;
