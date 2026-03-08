@@ -274,8 +274,8 @@ viewResults r m times model = case r of
                                 [ Html.p [HtmlAttr.style "float" "left"] [ Html.strong [] [Html.text "Note: The cluster is too large. Not displaying the distribution of all sequences"] ] ]
                               else []
                             )
-                        , div [HtmlAttr.id "position"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
-                        , div [HtmlAttr.id "member"] 
+                        , div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download members" ]]
+                        , div [HtmlAttr.class "results-wrap"] 
                           [ Table.table
                             { options = [ Table.striped, Table.hover ]
                             , thead =  Table.simpleThead
@@ -288,11 +288,11 @@ viewResults r m times model = case r of
                             , tbody = Table.tbody []
                                     ( List.map (\e ->
                                                     Table.tr []
-                                                    [  Table.td [] [ p [HtmlAttr.id "identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
-                                                    ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.aa ] ]
-                                                    ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.nuc ] ]
-                                                    ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.habitat ] ]
-                                                    ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.tax ] ]
+                                                    [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/sequence/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                                    ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
+                                                    ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
+                                                    ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
+                                                    ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.tax ] ]
                                                     ]
                                                ) ok
                                     )

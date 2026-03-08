@@ -256,12 +256,12 @@ viewResults r b times model = case r of
             APIResultOK bok ->
                 div []
                     [ if List.length bok.results /= 0 then
-                        div [HtmlAttr.id "position"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download results" ] ]
+                        div [HtmlAttr.class "action-row"] [Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download results" ] ]
                       else div [] [text ""]
                     , if List.isEmpty ok then
                             text "No small proteins in the selected habitats and/or taxonomy. Please try another selection."
                       else div []
-                        [ div [HtmlAttr.id "member"]
+                        [ div [HtmlAttr.class "results-wrap"]
                             [ Table.table
                                 { options = [ Table.striped, Table.hover ]
                                 , thead =  Table.simpleThead
@@ -274,11 +274,11 @@ viewResults r b times model = case r of
                                 , tbody = Table.tbody []
                                         (List.map (\e ->
                                                         Table.tr []
-                                                        [  Table.td [] [ p [HtmlAttr.id "identifier"] [Html.a [HtmlAttr.href ("/cluster/" ++ e.seqid)] [Html.text e.seqid] ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.aa ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.nuc ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.habitat ] ]
-                                                        ,  Table.td [] [ p [HtmlAttr.id "detail"] [text e.tax ] ]
+                                                        [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [Html.a [HtmlAttr.href ("/cluster/" ++ e.seqid)] [Html.text e.seqid] ] ]
+                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.aa ] ]
+                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.nuc ] ]
+                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.habitat ] ]
+                                                        ,  Table.td [] [ p [HtmlAttr.class "table-detail"] [text e.tax ] ]
                                                         ]
                                                 ) ok
                                         )

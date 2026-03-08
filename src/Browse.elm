@@ -317,7 +317,7 @@ viewModel model =
 viewSearch: Model -> Html Msg
 viewSearch model = div []
         [ h5 [] [ text "Browse by habitats and taxonomy "] 
-        , div [] [ p [] [ label [HtmlAttr.id "browse"] [ text "Browse by habitats " 
+        , div [] [ p [] [ label [HtmlAttr.class "browse-label"] [ text "Browse by habitats " 
                                               , Popover.config
                                                ( Button.button
                                                    [ Button.small
@@ -338,7 +338,7 @@ viewSearch model = div []
               model.selectpost.habitatSearch
               |> Html.map HabitatSearchMsg 
             ]
-        , div [] [ p [] [ label [HtmlAttr.id "browse"] [ text "Browse by taxonomy" ] ] ]
+        , div [] [ p [] [ label [HtmlAttr.class "browse-label"] [ text "Browse by taxonomy" ] ] ]
         , div [] 
             [ Selectshared.view
               model.selectpost.taxonomySearch
@@ -431,13 +431,13 @@ viewSpecific : Model -> Html Msg
 viewSpecific model =  
     div []
         [ p [] [ em [] [text "Note that using quality filters can be slow" ]]
-        , div [] [ p [] [ label [ HtmlAttr.id "quality" ] [ text "Antifam filtering" ] ] ]
+        , div [] [ p [] [ label [ HtmlAttr.class "quality-label" ] [ text "Antifam filtering" ] ] ]
         , div [ HtmlAttr.class "dropdown" ] 
             [ Selectshared.view
               model.selectpost.antifamSearch
               |> Html.map AntifamSearchMsg
             ]
-        , div [] [ p [] [ label [ HtmlAttr.id "quality" ] [ text "Terminal checking" ] ] ]
+        , div [] [ p [] [ label [ HtmlAttr.class "quality-label" ] [ text "Terminal checking" ] ] ]
         , div [ HtmlAttr.class "dropdown" ]
             [ Selectshared.view
               model.selectpost.terminalSearch
@@ -445,7 +445,7 @@ viewSpecific model =
             ]
         , div [ HtmlAttr.class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ HtmlAttr.id "quality" ] [ text "P-value for RNAcode threshold (default: 0.05)" ]
+                        [ Form.label [ HtmlAttr.class "quality-label" ] [ text "P-value for RNAcode threshold (default: 0.05)" ]
                         , Form.help [] [ text "" ]
                         , input
                             [ HtmlAttr.type_ "range"
@@ -461,7 +461,7 @@ viewSpecific model =
                   ]
         , div [ HtmlAttr.class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [HtmlAttr.id "quality"] [ text "Minimum number of metatranscriptome hits (default: 2)" ]
+                        [ Form.label [HtmlAttr.class "quality-label"] [ text "Minimum number of metatranscriptome hits (default: 2)" ]
                         , Form.help [] [ text "" ]
                         , input
                             [ HtmlAttr.type_ "range"
@@ -477,7 +477,7 @@ viewSpecific model =
                   ]
         , div [ HtmlAttr.class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ HtmlAttr.id "quality" ] [ text "Minimum number of Riboseq hits (default: 2)" ]
+                        [ Form.label [ HtmlAttr.class "quality-label" ] [ text "Minimum number of Riboseq hits (default: 2)" ]
                         , Form.help [] [ text "" ]
                         , input
                             [ HtmlAttr.type_ "range"
@@ -493,7 +493,7 @@ viewSpecific model =
                   ]
         , div [ HtmlAttr.class "browse" ] [ Form.form []
                     [ Form.group []
-                        [ Form.label [ HtmlAttr.id "quality" ] [ text "Minimum smORF coverage in metaproteomics (default: 50%)" ]
+                        [ Form.label [ HtmlAttr.class "quality-label" ] [ text "Minimum smORF coverage in metaproteomics (default: 50%)" ]
                         , Form.help [] [ text "" ]
                         , input
                             [ HtmlAttr.type_ "range"

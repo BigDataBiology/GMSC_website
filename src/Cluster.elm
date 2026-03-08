@@ -228,20 +228,20 @@ viewCluster v ifq pop =
         , thead =  Table.simpleThead []
         , tbody = Table.tbody []
             [ Table.tr []
-                [ Table.td [] [p [HtmlAttr.id "title"] [text "Consensus protein sequence"]  ]
-                , Table.td [] [p [HtmlAttr.id "detail"] [text v.aa] ]
+                [ Table.td [] [p [HtmlAttr.class "table-title"] [text "Consensus protein sequence"]  ]
+                , Table.td [] [p [HtmlAttr.class "table-detail"] [text v.aa] ]
                 ]
             , Table.tr []
-                [ Table.td [] [ p [HtmlAttr.id "title"] [text "Consensus nucleotide sequence"] ]
-                , Table.td [] [ p [HtmlAttr.id "detail"] [text v.nuc] ]
+                [ Table.td [] [ p [HtmlAttr.class "table-title"] [text "Consensus nucleotide sequence"] ]
+                , Table.td [] [ p [HtmlAttr.class "table-detail"] [text v.nuc] ]
                 ]
             , Table.tr []
-                [ Table.td [] [ p [HtmlAttr.id "title"] [text "Taxonomic assignment"] ]
-                , Table.td [] [ p [HtmlAttr.id "detail"] [text v.tax] ]
+                [ Table.td [] [ p [HtmlAttr.class "table-title"] [text "Taxonomic assignment"] ]
+                , Table.td [] [ p [HtmlAttr.class "table-detail"] [text v.tax] ]
                 ]
             , Table.tr []
-                [ Table.td [] [ p [HtmlAttr.id "title"] [text "Habitat"]  ]
-                , Table.td [] [ p [HtmlAttr.id "detail"] [text v.habitat]  ]
+                [ Table.td [] [ p [HtmlAttr.class "table-title"] [text "Habitat"]  ]
+                , Table.td [] [ p [HtmlAttr.class "table-detail"] [text v.habitat]  ]
                 ]
             {-, Table.tr []
                 [ Table.td [] [ p [id "title"] [text "Conserved domain"]  ]
@@ -256,7 +256,7 @@ viewCluster v ifq pop =
                 , Table.td [] [ p [id "detail"] [text "-"] ]
                 ]-}
             , Table.tr []
-                [ Table.td [] [ p [HtmlAttr.id "title"] [ text "Quality  "
+                [ Table.td [] [ p [HtmlAttr.class "table-title"] [ text "Quality  "
                                                , Popover.config
                                                  ( Button.button
                                                    [ Button.small
@@ -272,7 +272,7 @@ viewCluster v ifq pop =
                                                  |> Popover.view pop
                                                ]   
                               ]
-                , Table.td [] [ p [HtmlAttr.id "detail"] [text (qualityString v.quality)]
+                , Table.td [] [ p [HtmlAttr.class "table-detail"] [text (qualityString v.quality)]
                               , if ifq then
                                   viewQualityDetails v
                                 else

@@ -217,7 +217,7 @@ td p#mapper{
 }
 /*Cluster and Sequence page*/
 /*cluster and sequence page table style*/
-td p#title{
+td p.table-title{
     color:#2d2c2c;
     font-weight:bold;
     font-family:arial;
@@ -225,14 +225,14 @@ td p#title{
     position:relative;
     left:5px;
 }
-td p#identifier{
+td p.table-identifier{
   color:#2d2c2c;
   font-family:arial;
   max-width: 1000px;
   position:relative;
   left:5px;
 }
-td p#detail{
+td p.table-detail{
     color:#2d2c2c;
     font-family:arial;
     max-width: 300px;
@@ -241,18 +241,18 @@ td p#detail{
     word-wrap: break-word;
     word-break: normal;
 }
-div#member
+.results-wrap
 { max-width: 1350px;
   width: 100%;
   overflow: scroll;
   position:relative;
   left:35px;
 }
-div#member table
+.results-wrap table
 {   position:relative;
     left:0px;
 }
-div#position button
+.action-row button
 { position:relative;
   left:35px;  
   float: left
@@ -270,11 +270,11 @@ div#cluster button{
 }
 
 /* browser page */
-label#browse{
+.browse-label{
   color:#158BB8;
   font-weight: bold;
 }
-label#quality {
+.quality-label {
   color:#158BB8;
 }
 div.browse {

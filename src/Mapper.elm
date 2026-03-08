@@ -209,8 +209,8 @@ viewSearch s  =
                 , h3 [] [ text "Annotation of query sequences" ]
                 , if List.length (Dict.toList r) /=0 then
                     div []
-                    [ div [HtmlAttr.id "position"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotations" ] ]
-                    , div [HtmlAttr.id "member"]
+                    [ div [HtmlAttr.class "action-row"] [ Button.button [ Button.info, Button.onClick DownloadResults] [ Html.text "Download annotations" ] ]
+                    , div [HtmlAttr.class "results-wrap"]
                       [ Table.table
                         { options = [ Table.striped, Table.hover ]
                         , thead =  Table.simpleThead
@@ -224,22 +224,22 @@ viewSearch s  =
                         ( Dict.toList r
                             |> List.map (\(k,v) ->
                                 Table.tr []
-                                [ Table.td [] [ p [HtmlAttr.id "detail"] [ text k ] ]
-                                , Table.td [] [ p [HtmlAttr.id "detail"] [ text v.aa ] ]
-                                , Table.td [] [ p [HtmlAttr.id "detail"] [ text v.habitat ] ]
-                                , Table.td [] [ p [HtmlAttr.id "detail"] [ text v.tax ] ]
+                                [ Table.td [] [ p [HtmlAttr.class "table-detail"] [ text k ] ]
+                                , Table.td [] [ p [HtmlAttr.class "table-detail"] [ text v.aa ] ]
+                                , Table.td [] [ p [HtmlAttr.class "table-detail"] [ text v.habitat ] ]
+                                , Table.td [] [ p [HtmlAttr.class "table-detail"] [ text v.tax ] ]
                                 , if v.quality == "high quality"  then
-                                    Table.td [] [ p [HtmlAttr.id "detail"] [ text "pass all quality tests & show experimental evidence" ] ]
+                                    Table.td [] [ p [HtmlAttr.class "table-detail"] [ text "pass all quality tests & show experimental evidence" ] ]
                                 else 
-                                    Table.td [] [ p [HtmlAttr.id "detail"] [ text "did not pass all quality tests or did not show experimental evidence" ] ]
+                                    Table.td [] [ p [HtmlAttr.class "table-detail"] [ text "did not pass all quality tests or did not show experimental evidence" ] ]
                                 ]
                                 )
                         )                  
                         }
                       ]
                     , h3 [] [ text "Hits in GMSC" ]
-                    , div [HtmlAttr.id "position"] [ Button.button [ Button.info, Button.onClick DownloadHits, Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "Download hits" ] ]
-                    , div [HtmlAttr.id "member"]
+                    , div [HtmlAttr.class "action-row"] [ Button.button [ Button.info, Button.onClick DownloadHits, Button.attrs [ HtmlAttr.class "float-left"]] [ Html.text "Download hits" ] ]
+                    , div [HtmlAttr.class "results-wrap"]
                       [ Table.table
                         { options = [ Table.striped, Table.hover ]
                         , thead =  Table.simpleThead
@@ -252,17 +252,17 @@ viewSearch s  =
                         ( Dict.toList r
                             |> List.map (\(k,v) ->
                                 Table.tr []
-                                [  Table.td [] [ p [HtmlAttr.id "identifier"] [text k] ]
+                                [  Table.td [] [ p [HtmlAttr.class "table-identifier"] [text k] ]
                                 ,  Table.td [] (v.hits 
-                                                |> List.map (\hit -> p [HtmlAttr.id "detail"] [ Html.a [HtmlAttr.href ("/cluster/" ++ hit.id)] [ text hit.id ] ] 
+                                                |> List.map (\hit -> p [HtmlAttr.class "table-detail"] [ Html.a [HtmlAttr.href ("/cluster/" ++ hit.id)] [ text hit.id ] ] 
                                                             )
                                                )
                                 ,  Table.td [] (v.hits 
-                                                |> List.map (\hit -> p [HtmlAttr.id "detail"] [ text (String.fromFloat hit.e) ] 
+                                                |> List.map (\hit -> p [HtmlAttr.class "table-detail"] [ text (String.fromFloat hit.e) ] 
                                                             )
                                                )
                                 ,  Table.td [] (v.hits 
-                                                |> List.map (\hit -> p [HtmlAttr.id "detail"] [ text (String.fromFloat hit.identity) ] 
+                                                |> List.map (\hit -> p [HtmlAttr.class "table-detail"] [ text (String.fromFloat hit.identity) ] 
                                                             )
                                                )
                                 ]

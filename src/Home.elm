@@ -160,7 +160,7 @@ viewSearch model =
             , Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ Form.label [HtmlAttr.id "browse"] [ text "Search by identifier" ]
+                        [ Form.label [HtmlAttr.class "browse-label"] [ text "Search by identifier" ]
                         , Input.text
                             [ Input.value model.idcontent
                             , Input.attrs
@@ -187,7 +187,7 @@ viewSearch model =
             [ Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ label [ HtmlAttr.id "browse"] [ text "Enter an amino acid / nucleotide sequence in FASTA format"]
+                        [ label [ HtmlAttr.class "browse-label"] [ text "Enter an amino acid / nucleotide sequence in FASTA format"]
                         , Textarea.textarea
                             [ Textarea.id "myarea"
                             , Textarea.value model.seqcontent
@@ -210,7 +210,7 @@ viewSearch model =
             [ Form.row []
                 [ Form.col [ Col.sm10 ]
                     [ Form.group []
-                        [ Form.label [HtmlAttr.id "browse"] [ text "Look up a sequence search result" ]
+                        [ Form.label [HtmlAttr.class "browse-label"] [ text "Look up a sequence search result" ]
                         , Input.text
                             [ Input.value model.lookupIDContent
                             , Input.attrs
